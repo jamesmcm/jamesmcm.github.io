@@ -8,7 +8,7 @@ subtitle: Languages, Statistics and other things
 subtitlesp: Los idiomas, la estadística y otras cosas
 author: James McMurray
 simple_search: https://www.google.com/search
-description:
+description: A blog about lagnuages, statistics and other things, in English and Spanish.
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
 # You can customize the format as defined in
@@ -48,7 +48,7 @@ recent_posts: 5       # Posts in the sidebar Recent Posts section
 excerpt_link: "Read on &rarr;"  # "Continue reading" link text at the bottom of excerpted articles
 excerpt_separator: "<!--more-->"
 
-titlecase: true       # Converts page and post titles to titlecase
+titlecase: false       # Converts page and post titles to titlecase
 
 # list each of the sidebar modules you want to include, in the order you want them to appear.
 # To add custom asides, create files in /source/_includes/custom/asides/ and add them to the list like 'custom/asides/custom_aside_name.html'
@@ -96,6 +96,7 @@ disqus_short_name:
 disqus_show_comment_count: false
 
 # Google Analytics
+# EDITED IN BY DEFAULT WITH NEW SCRIPT
 google_analytics_tracking_id:
 
 # Facebook Like

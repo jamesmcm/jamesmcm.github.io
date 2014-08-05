@@ -7,7 +7,7 @@ layout: default
   {% if page.title %}
   <header>
            <h1 class="entry-title"> <div display='inline' class="titleEnglish"> {{ page.titleen }} </div><div class='titleSpanish' style='display: none'>{{ page.titlesp }}</div></h1>
-      <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>  
+      <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>  
            
     {% if page.date %}<p class="meta">{% include post/date.html %}{{ time }}</p>{% endif %}
   </header>
