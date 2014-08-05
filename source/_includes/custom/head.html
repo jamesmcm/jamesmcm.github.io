@@ -45,21 +45,48 @@ l6=document.getElementsByClassName("esbutton");
 var arrayLength = l.length;
 for (var i = 0; i < arrayLength; i++) {
 if (lang=="sp"){
+
+if (typeof l[i] !== 'undefined') {
 l[i].style.display="none";
+}
+if (typeof l2[i] !== 'undefined') {                   
 l2[i].style.display="inline";
+}                       
+if (typeof l3[i] !== 'undefined') {
 l3[i].style.display="none";
+}
+if (typeof l4[i] !== 'undefined') {
 l4[i].style.display="inline";
+}                               
+if (typeof l5[i] !== 'undefined') {
 l5[i].disabled=false;
+}
+if (typeof l6[i] !== 'undefined') {                   
 l6[i].disabled=true;
+}
+                               
 document.getElementById("hsubtitleEnglish").style.display="none";
 document.getElementById("hsubtitleSpanish").style.display="inline";
+
 } else if (lang=="en"){
+if (typeof l[i] !== 'undefined') {               
 l[i].style.display="inline";
+}                   
+if (typeof l2[i] !== 'undefined') {                   
 l2[i].style.display="none";
+}
+if (typeof l3[i] !== 'undefined') {               
 l3[i].style.display="inline";
+}
+if (typeof l4[i] !== 'undefined') {               
 l4[i].style.display="none";
+}
+if (typeof l5[i] !== 'undefined') {               
 l5[i].disabled=true;
-l6[i].disabled=false;                   
+}
+if (typeof l6[i] !== 'undefined') {               
+l6[i].disabled=false;
+}                   
 document.getElementById("hsubtitleEnglish").style.display="inline";
 document.getElementById("hsubtitleSpanish").style.display="none";
 }
