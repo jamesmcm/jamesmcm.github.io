@@ -1,0 +1,21 @@
+---
+layout: post
+titlesp: "Título español"
+titleen: "Title in English"
+title: "basic1"
+date: 2014-07-28 21:48:40 +0200
+comments: false
+categories: [General]
+meta: false
+---
+
+<div class="English" >
+    <p>This is a paragraph.</p>
+    <p>This is a paragraph.</p>
+    <p>This is a paragraph.</p>
+    <p>This is a paragraph.</p>
+
+</div> 
+<div class="Spanish" style="display: none">
+    <p>Esto es un párrafo.</p>
+</div> 

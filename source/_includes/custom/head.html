@@ -1,0 +1,112 @@
+<!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+
+      <script>
+
+$(window).ready(changeAllPosts(getLang()));       
+       //window.onload=changeAllPosts(getLang());
+
+function changeLang(lang){
+setLang(lang);
+changeAllPosts(lang);
+}
+       
+function setLang(lang){
+    var exdays=30;
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toGMTString();
+    document.cookie = "lang=" + lang + "; " + expires + "; path=/";
+}
+       
+function getLang() {
+    var name = "lang" + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "en";
+}
+
+
+function changeAllPosts(lang){
+//TODO: Change subtitle too
+console.log(lang);
+l=document.getElementsByClassName("titleEnglish");
+l2=document.getElementsByClassName("titleSpanish");
+l3=document.getElementsByClassName("English");           
+l4=document.getElementsByClassName("Spanish");
+l5=document.getElementsByClassName("enbutton");
+l6=document.getElementsByClassName("esbutton");
+var arrayLength = l.length;
+for (var i = 0; i < arrayLength; i++) {
+if (lang=="sp"){
+l[i].style.display="none";
+l2[i].style.display="inline";
+l3[i].style.display="none";
+l4[i].style.display="inline";
+l5[i].disabled=false;
+l6[i].disabled=true;
+document.getElementById("hsubtitleEnglish").style.display="none";
+document.getElementById("hsubtitleSpanish").style.display="inline";
+} else if (lang=="en"){
+l[i].style.display="inline";
+l2[i].style.display="none";
+l3[i].style.display="inline";
+l4[i].style.display="none";
+l5[i].disabled=true;
+l6[i].disabled=false;                   
+document.getElementById("hsubtitleEnglish").style.display="inline";
+document.getElementById("hsubtitleSpanish").style.display="none";
+}
+
+
+} 
+}
+       
+function showSpanish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="none";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="inline";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="inline";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="none";
+
+
+     btn.parentNode.getElementsByClassName("enbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+</script>
+
+
+<script>
+function showEnglish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="inline";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="none";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="none";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="inline";
+
+
+     btn.parentNode.getElementsByClassName("esbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+
+
+</script>
+
