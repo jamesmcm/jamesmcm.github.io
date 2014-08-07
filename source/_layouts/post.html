@@ -17,10 +17,22 @@ single: true
     {% endunless %}
     <p class="meta">
       {% if page.previous.url %}
-        <a class="basic-alignment left" href="{{page.previous.url}}" title="Previous Post: {{page.previous.title}}">&laquo; {{page.previous.title}}</a>
+      <div class="English">
+        <a class="basic-alignment left" href="{{page.previous.url}}" title="Previous Post: {{page.previous.titleen}}">&laquo; {{page.previous.titleen}}</a>
+</div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment left" href="{{page.previous.url}}" title="Previous Post: {{page.previous.titlesp}}">&laquo; {{page.previous.titlesp}}</a>
+</div>
       {% endif %}
       {% if page.next.url %}
-        <a class="basic-alignment right" href="{{page.next.url}}" title="Next Post: {{page.next.title}}">{{page.next.title}} &raquo;</a>
+      <div class="English">
+        <a class="basic-alignment right" href="{{page.next.url}}" title="Next Post: {{page.next.titleen}}">{{page.next.titleen}} &raquo;</a>
+      </div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment right" href="{{page.next.url}}" title="Next Post: {{page.next.titlesp}}">{{page.next.titlesp}} &raquo;</a>
+      </div>
+
+
       {% endif %}
     </p>
   </footer>
