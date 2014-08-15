@@ -4,8 +4,8 @@ title: "first"
 titleen: "First Post"
 titlesp: "Primer Enviado"
 date: 2014-08-04 14:13:10 +0200
-comments: false
-categories: [General]
+comments: true
+categories: [General, Statistics, Languages]
 meta: false
 ---
 

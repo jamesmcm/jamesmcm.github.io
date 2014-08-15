@@ -3,7 +3,6 @@ layout: page
 title: "About"
 titleen: "About"
 titlesp: "Sobre este blog"
-date: 2014-08-03 14:35
 comments: false
 sharing: true
 footer: true

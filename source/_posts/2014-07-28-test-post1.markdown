@@ -4,7 +4,7 @@ titlesp: "Título español"
 titleen: "Title in English"
 title: "basic1"
 date: 2014-07-28 21:48:40 +0200
-comments: false
+comments: true
 categories: [General]
 meta: false
 ---

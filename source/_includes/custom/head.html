@@ -5,10 +5,24 @@
 
       <script>
 
-$(window).ready(changeAllPosts(getLang()));       
+//$(window).ready(changeAllPosts(getLang()));       
        //window.onload=changeAllPosts(getLang());
 
+function pageLoad() {
+           if (window.location.hash){
+             var hash = window.location.hash.substring(1);
+               if (hash=="sp" || hash=="en"){
+               changeLang(hash);
+                   }
+           } else {
+               changeAllPosts(getLang());
+
+           }
+}
+       
 function changeLang(lang){
+window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
+//window.location.href=
 setLang(lang);
 changeAllPosts(lang);
 }
@@ -42,7 +56,7 @@ l3=document.getElementsByClassName("English");
 l4=document.getElementsByClassName("Spanish");
 l5=document.getElementsByClassName("enbutton");
 l6=document.getElementsByClassName("esbutton");
-var arrayLength = l.length;
+var arrayLength = Math.max(l.length,l3.length);
 for (var i = 0; i < arrayLength; i++) {
 if (lang=="sp"){
 
@@ -134,6 +148,6 @@ var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English")
 
 }
 
-
+$(window).load(changeAllPosts(getLang()));
 </script>
 
