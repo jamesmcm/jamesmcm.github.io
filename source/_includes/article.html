@@ -2,13 +2,16 @@
   <header>
     {% if index %}
       <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="{{ root_url }}{{ post.url }}#en">{{ post.titleen }} </a> </div><div class='titleSpanish' style='display: none'><a href="{{ root_url }}{{ post.url }}#sp">{{ post.titlesp }}</a></div></h1>
+            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+
     {% else %}
 
       <h1 display="inline-block" class="entry-title">{% if site.titlecase %} <div display='inline' class="titleEnglish"> {{ page.titleen }}</div><div class='titleSpanish' style='display: none'> {{ page.titlesp }} </div>{% else %} <div display='inline' class='titleEnglish'> {{ page.titleen }}</div><div class='titleSpanish' style='display: none'> {{ page.titlesp }} </div>{% endif %}</h1>
+            <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>      
+
 
 
     {% endif %}
-      <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
     {% unless page.meta == false %}
       <p class="meta">
         {% include post/date.html %}{{ time }}
@@ -25,7 +28,7 @@
   {% capture excerpted %}{{ content | has_excerpt }}{% endcapture %}
   {% if excerpted == 'true' %}
     <footer>
-      <a rel="full-article" href="{{ root_url }}{{ post.url }}">{{ site.excerpt_link }}</a>
+        <div class="English"><a rel="full-article" href="{{ root_url }}{{ post.url }}#en">{{ site.excerpt_link }}</a></div> <div class="Spanish" style='display: none'><a rel="full-article" href="{{ root_url }}{{ post.url }}#sp">{{ site.excerpt_link }}</a></div>
     </footer>
   {% endif %}
 {% else %}

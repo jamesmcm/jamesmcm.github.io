@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #custom filters for Octopress
 require './plugins/backtick_code_block'
 require 'jekyll-page-hooks'
@@ -43,7 +44,11 @@ module OctopressLiquidFilters
   # Used on the blog index to split posts on the <!--more--> marker
   def excerpt(input)
     if input.index(/<!--\s*more\s*-->/i)
-      input.split(/<!--\s*more\s*-->/i)[0]
+      temp=input.split(/<!--\s*more\s*-->/i)[0]
+      temp2=input.split(/<!--\s*end\s*-->/i)[1]
+      temp2=temp2.split(/<!--\s*more\s*-->/i)[0]
+      input = temp + "</div>" + temp2 + "</div>"
+      input
     else
       input
     end

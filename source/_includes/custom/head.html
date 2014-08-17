@@ -22,7 +22,12 @@ function pageLoad() {
        
 function changeLang(lang){
 window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
-//window.location.href=
+if (window["title"+lang]){
+document.title=window["title"+lang];
+           }
+console.log("title"+lang);
+console.log(window["title"+lang]);           
+           
 setLang(lang);
 changeAllPosts(lang);
 }
