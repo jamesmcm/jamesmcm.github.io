@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-offline: false
+offline: true
 url: http://jamesmcm.github.io
 title: Statistically Insignificant
 subtitle: Languages, Statistics and other things

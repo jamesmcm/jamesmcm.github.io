@@ -5,6 +5,7 @@ single: true
 
 <div>
 <article class="hentry" role="article">
+        {% include custom/asides/inbetad.html %}
   {% include article.html %}
   <footer>
     <p class="meta">
@@ -37,6 +38,9 @@ single: true
       {% endif %}
     </p>
   </footer>
+    {% include custom/asides/beforecoms.html %}
+
+  
 </article>
 {% if site.disqus_short_name and page.comments == true %}
   <section>
