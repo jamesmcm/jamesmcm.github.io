@@ -30,10 +30,11 @@
     <footer>
         <div class="English"><a rel="full-article" href="{{ root_url }}{{ post.url }}#en">{{ site.excerpt_link }}</a></div> <div class="Spanish" style='display: none'><a rel="full-article" href="{{ root_url }}{{ post.url }}#sp">{{ site.excerpt_link }}</a></div>
     </footer>
-    {% include custom/asides/inbetad.html %}
+
+
   {% endif %}
 {% else %}
-<div class="entry-content">{{ content }}
+    <div class="entry-content">{{ content }}
 </div>
 
 
