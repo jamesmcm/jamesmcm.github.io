@@ -259,6 +259,7 @@ end
 
 desc "deploy public directory to github pages"
 multitask :push do
+  Rake::Task[:generatesafe].execute
   puts "## Deploying branch to Github Pages "
   puts "## Pulling any updates from Github Pages "
   cd "#{deploy_dir}" do 
