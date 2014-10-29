@@ -140,7 +140,7 @@ $$\sigma_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t \left (X_i - \mu_2^{t+1
 <br>
 <p>Slide the slider to change the iteration number (shown in the title).</p>
 
-<p>The code is available in an <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM2dGMMfinal.ipynb>"IPython notebook here</a>.</p>
+<p>The code is available in an <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM2dGMMfinal.ipynb">IPython notebook here</a>.</p>
 
 <h2>Conclusion</h2>
 
