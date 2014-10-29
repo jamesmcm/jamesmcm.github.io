@@ -43,7 +43,6 @@ meta: false
     <dt><b><a href="https://www.youtube.com/channel/UC2-lKlnIdzq6-e-zwU34YJw">Professor Jason Spanish</a></b></dt>
     <dd>These videos are excellent for covering grammatical concepts in detail, I'd definitely recommend them if you want a more thorough educational approach.</dd><br>
     </dl>
-            {% include custom/asides/inpostads.html %}
 
     <h2>Podcasts</h2>
     <dl>
@@ -80,7 +79,7 @@ meta: false
     <dt><b><a href="https://www.miriadax.net/">MiríadaX</a></b></dt>
     <dd>MiríadaX is like a Spanish version of Coursera, and so has many courses in Spanish. However, note that you must pay after completing the course in order to receive a certificate (but can complete the course for free). I completed <a href="https://www.miriadax.net/web/espanol-salamanca-a2">this course in A2 Spanish</a>. Most of the courses are from Spain, and so in Spanish from Spain.</dd><br>
     </dl>
-                {% include custom/asides/inpostads.html %}
+
     <h2>Reading</h2>
     <dl>
     <dt><b><a href="http://www.monde-diplomatique.es/">Le Monde Diplomatique en Español</a></b></dt>
@@ -124,7 +123,7 @@ meta: false
     <dd>italki is a platform for people to offer language lessons via the internet. It is usually quite cheap, but I'm not sure it's really worth the effort since you could just find native speakers on Interpals.</dd><br>
     <dt><b><a href="http://www.busuu.com/enc/">Busuu</a></b></dt>
     <dd>If you are interested in a similar alternative to Duolingo, Busuu also offers similar resources for Spanish, unfortunately one must pay to use the majority of the services - but it also provides checks of writing and voice recording, as well as specific grammar lessons. I personally didn't think it offered sufficiently more than Duolingo.</dd><br>
-            {% include custom/asides/inpostads.html %}
+
     <h2>Conclusion</h2>
     <p>In conclusion, I recommend the following plan of action:</p>
     <h3>Beginner:</h3>
@@ -190,7 +189,7 @@ meta: false
     <dt><b><a href="https://www.youtube.com/channel/UC2-lKlnIdzq6-e-zwU34YJw">Professor Jason Spanish</a></b></dt>
         <dd>Estos vídeos son excelentes para aprender los conceptos gramáticos. Los recomiendo mucho si quieres un enfoque más profundo.</dd><br>
     </dl>
-            {% include custom/asides/inpostads.html %}
+
     <h2>Podcasts</h2>
     <dl>
     <dt><b><a href="http://www.newsinslowspanish.com/">News In Slow Spanish</a> (y la <a href="http://www.newsinslowspanish.com/latino/?force_switch">versión latina</a>)</b></dt>
@@ -225,7 +224,7 @@ meta: false
     <dt><b><a href="https://www.miriadax.net/">MiríadaX</a></b></dt>
         <dd>MiríadaX es parecido a Coursera, pero en español, y tiene muchos cursos en español. Sin embargo, nota que tienes que pagar después de completar un curso para recibir el certificado (pero puedes hacer el curso sin pagar). Completé <a href="https://www.miriadax.net/web/espanol-salamanca-a2">este curso sobre el español de nivel A2</a>. La mayoría de los cursos son de España, y por eso, enseña el español de España.</dd><br>
     </dl>
-                {% include custom/asides/inpostads.html %}
+
     <h2>Para leer</h2>
     <dl>
     <dt><b><a href="http://www.monde-diplomatique.es/">Le Monde Diplomatique en Español</a></b></dt>
@@ -269,7 +268,7 @@ meta: false
     <dd>italki es un programa en que gente puede ofrecer lecciones de lenguajes por el internet. Usualmente es barato, pero no estoy seguro que valga la pena, considerando que puedes encontrar hablantes nativos en Interpals por ejemplo.</dd><br>
     <dt><b><a href="http://www.busuu.com/enc/">Busuu</a></b></dt>
     <dd>Si quieres una alternativa a Duolingo, Busuu también ofrece recursos parecidos. Pero, desafortunadamente uno tiene que pagar para acceder a la mayoría de los recursos. Ofrece controles de escritura y pronunciación, y lecciones de gramática también. Para mi, no creo que ofrece suficiente más que Duolingo para valer la cuesta.</dd><br>
-            {% include custom/asides/inpostads.html %}
+
     <h2>Conclusión</h2>
     <p>En conclusión, recomiendo el plan siguiente:</p>    
     <h3>Para principiantes:</h3>
