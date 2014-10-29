@@ -32,7 +32,7 @@ meta: false
                 <dd>This website also has some excellent pages on grammar. See the links on "Beginning Spanish Grammar", "Intermediate Spanish Grammar" and "Advancd Spanish Grammar".</dd><br>
                 <dt><b><a href="http://www.veintemundos.com/en/">Veinte Mundos</a></b></dt>
                     <dd>This website has good articles targeted different reading levels, and good accompanying resources to help.</dd><br>
-    </dl>        
+    </dl>
 
     <h2>YouTube videos</h2>
     <dl>

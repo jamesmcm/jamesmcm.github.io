@@ -17,7 +17,11 @@ footer: true
     
     <p>I hope it will be useful to some others too!</p>
 
-
+<a href="http://de.linkedin.com/pub/james-mcmurray/15/5b6/851">
+      
+          <img src="https://static.licdn.com/scds/common/u/img/webpromo/btn_viewmy_160x33.png" width="160" height="33" border="0" alt="View James McMurray's profile on LinkedIn">
+        
+    </a>
 
 </div> 
 <div class="Spanish" style="display: none">
@@ -26,6 +30,13 @@ footer: true
 <p>Actualmente estoy haciendo un doctorado en Tubinga, Alemania sobre "Machine Learning for Personalised Medicine" (Aprendizaje automático para la medicina personal). Me interesan mucho los modeles que combinan los datos de genotipo y fenotipo (como la expresión génica, o la metilación de los genes), junto con la aplicación de los métodos de la inferencia causal para justificar conclusiónes causales de los datos observacionales, cuando sea posible.</p>
 <p>También tengo la intención de enviar resumenes de mis presentaciones y trabajo aquí, como parte de la publicidad que es recomendado en la programa de doctorado.</p>
 <p>Espero que sea útil para otras personas también!</p>
+    <p>I hope it will be useful to some others too!</p>
+
+<a href="http://de.linkedin.com/pub/james-mcmurray/15/5b6/851/es">
+      
+          <img src="https://static.licdn.com/scds/common/u/img/webpromo/btn_viewmy_160x33.png" width="160" height="33" border="0" alt="View James McMurray's profile on LinkedIn">
+        
+    </a>
 
 
 </div> 

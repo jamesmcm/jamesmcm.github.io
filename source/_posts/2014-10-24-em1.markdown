@@ -129,7 +129,7 @@ $$\sigma_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t \left (X_i - \mu_2^{t+1
 <br>
 <p>Slide the slider to change the iteration number (shown in the title).</p>
 
-<p>The code is available in an IPython notebook here %TODO%</p>
+<p>The full code is available in <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM1Dfinal.ipynb">an IPython notebook here</a>.</p>
 
 <h2>Extension</h2>
 <p>This example  can also be extended to larger numbers of dimensions (though using a Gaussian Mixture Model directly in a high dimensional space is unadvisable), and to any number of Gaussians. In this case the variances become covariance matrices and linear algebra is necessary, but the changes are straightforward.</p>
@@ -140,7 +140,7 @@ $$\sigma_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t \left (X_i - \mu_2^{t+1
 <br>
 <p>Slide the slider to change the iteration number (shown in the title).</p>
 
-<p>The code is available in an IPython notebook here %TODO%</p>
+<p>The code is available in an <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM2dGMMfinal.ipynb>"IPython notebook here</a>.</p>
 
 <h2>Conclusion</h2>
 
