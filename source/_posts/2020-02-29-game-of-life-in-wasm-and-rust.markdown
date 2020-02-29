@@ -18,7 +18,7 @@ categories:
       // will "boot" the module and make it ready to use. Currently browsers
       // don't support natively imported WebAssembly as an ES module, but
       // eventually the manual initialization won't be required!
-      import init, { run } from '/pkg/wasm_game_of_life_jamesmcm.js';
+      import init, { run } from '/assets/pkg/wasm_game_of_life_jamesmcm.js';
 
             async function runit() {
         // First up we need to actually load the wasm file, so we use the
