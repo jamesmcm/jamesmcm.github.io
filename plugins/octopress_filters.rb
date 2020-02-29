@@ -1,39 +1,42 @@
-# -*- coding: utf-8 -*-
 #custom filters for Octopress
 require './plugins/backtick_code_block'
-require 'jekyll-page-hooks'
+require 'octopress-hooks'
 require 'jekyll-sitemap'
-require 'jekyll-date-format'
+require 'octopress-date-format'
 require './plugins/raw'
-require 'rubypants'
 
 module OctopressFilters
-  include BacktickCodeBlock
-  include TemplateWrapper
-  def pre_filter(input)
-    input = render_code_block(input)
-    input.gsub /(<figure.+?>.+?<\/figure>)/m do
-      safe_wrap($1)
+  def self.pre_filter(page)
+    if page.ext.match('html|textile|markdown|md|haml|slim|xml')
+      input = BacktickCodeBlock::render_code_block(page.content)
+      page.content = input.gsub /(<figure.+?>.+?<\/figure>)/m do
+        TemplateWrapper::safe_wrap($1)
+      end
     end
   end
-  def post_filter(input)
-    input = unwrap(input)
-    RubyPants.new(input).to_html
+  def self.post_filter(page)
+    if page.ext.match('html|textile|markdown|md|haml|slim|xml')
+      page.output = TemplateWrapper::unwrap(page.output)
+    end
   end
-end
 
-module Jekyll
-  class ContentFilters < PageHooks
-    include OctopressFilters
-    def pre_render(post)
-      if post.ext.match('html|textile|markdown|md|haml|slim|xml')
-        post.content = pre_filter(post.content)
-      end
+  class PageFilters < Octopress::Hooks::Page
+    def pre_render(page)
+      OctopressFilters::pre_filter(page)
     end
+
+    def post_render(page)
+      OctopressFilters::post_filter(page)
+    end
+  end
+
+  class PostFilters < Octopress::Hooks::Post
+    def pre_render(post)
+      OctopressFilters::pre_filter(post)
+    end
+
     def post_render(post)
-      if post.ext.match('html|textile|markdown|md|haml|slim|xml')
-        post.content = post_filter(post.content)
-      end
+      OctopressFilters::post_filter(post)
     end
   end
 end
@@ -44,11 +47,7 @@ module OctopressLiquidFilters
   # Used on the blog index to split posts on the <!--more--> marker
   def excerpt(input)
     if input.index(/<!--\s*more\s*-->/i)
-      temp=input.split(/<!--\s*more\s*-->/i)[0]
-      temp2=input.split(/<!--\s*end\s*-->/i)[1]
-      temp2=temp2.split(/<!--\s*more\s*-->/i)[0]
-      input = temp + "</div>" + temp2 + "</div>"
-      input
+      input.split(/<!--\s*more\s*-->/i)[0]
     else
       input
     end
@@ -83,7 +82,7 @@ module OctopressLiquidFilters
   # Replaces relative urls with full urls
   def expand_urls(input, url='')
     url ||= '/'
-    input.gsub /(\s+(href|src)\s*=\s*["|']{1})(\/[^\/>]{1}[^\"'>]*)/ do
+    input.gsub /(\s+(href|src|poster)\s*=\s*["|']{1})(\/[^\/>]{1}[^\"'>]*)/ do
       $1+url+$3
     end
   end
