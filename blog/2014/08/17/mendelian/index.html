@@ -3,6 +3,8 @@
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
 <!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
 <head>
   <meta charset="utf-8">
   <!--TODO: JS to select title goes here -->
@@ -10,7 +12,7 @@
   <meta name="author" content="James McMurray">
 
   
-  <meta name="description" content="Introduction to Mendelian Randomization Introducción a aleatorización mendeliana English Spanish Introduction Mendelian Randomization is an approach &hellip;">
+  <meta name="description" content="Introduction to Mendelian Randomization Introducción a aleatorización mendeliana Introduction Mendelian Randomization is an approach to test for a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -261,7 +263,7 @@ ga('send', 'pageview');
     
 
       <h1 display="inline-block" class="entry-title"> <div display='inline' class='titleEnglish'> Introduction to Mendelian Randomization</div><div class='titleSpanish' style='display: none'> Introducción a aleatorización mendeliana </div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>      
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>    -->
 
 
 
@@ -281,7 +283,7 @@ ga('send', 'pageview');
 <p>Here is the Directed Acyclic Graph (<b>DAG</b>) for the basic set-up. Here <b>G</b> is the observed genotype (i.e. the presence of a SNP), <b>X</b> is an environmental exposure, <b>U</b> is a (possible) unobserved confounder and <b>Y</b> is the phenotype (i.e. disease status). This will be explained in detail later.</p>
 
 
-<img src="/images/simpmr.png" height="200">
+<img src="/images/simpmr.png" height="200" />
 
 <h2>Motivation</h2>
 
@@ -289,11 +291,11 @@ ga('send', 'pageview');
 
 <h2>Instrumental Variables (IVs) </h2>
 
-<p>In the previous <b>DAG</b>, <b>G</b> is the <b>instrumental variable</b> (or instrument), because it affects <b>Y</b> only through <b>X</b> (that is, exclusively, no other path may exist). Therefore, under certain <b>assumptions</b> (to be explained later), if <b>G</b> is correlated with <b>Y</b> then we can infer the edge <b>X -> Y </b> (note that <b>X</b> must be correlated with <b>G</b>).</p>
+<p>In the previous <b>DAG</b>, <b>G</b> is the <b>instrumental variable</b> (or instrument), because it affects <b>Y</b> only through <b>X</b> (that is, exclusively, no other path may exist). Therefore, under certain <b>assumptions</b> (to be explained later), if <b>G</b> is correlated with <b>Y</b> then we can infer the edge <b>X -&gt; Y </b> (note that <b>X</b> must be correlated with <b>G</b>).</p>
 
 <p>Now we will consider an example application of instrumental variables, for a hypothetical investigation of the effect of smoking on lung cancer.</p>
 
-<img src="/images/smoking.png" height="200">
+<img src="/images/smoking.png" height="200" />
 
 <p>If the <b>assumptions</b> of the instrumental variable method are met, then if we observe that an increase in tax leads to a reduction in lung cancer, then one can infer that smoking is a "cause" of lung cancer (though perhaps indirectly, i.e. it's not smoking directly that causes cancer but the build-up of tar in the lungs, etc.).</p>
 
@@ -301,24 +303,24 @@ ga('send', 'pageview');
 <h2>Assumptions of the Instrumental Variables method</h2>
 <p>Assumptions are necessary in all areas of statistics, however it is important to know what assumptions we are making and whether they hold true.</p>
 
-<h3>Z -> X must exist</h3>
+<h3>Z -&gt; X must exist</h3>
 
-<p> We must know <b>a priori</b> that the causal direction is <b>Z -> X</b> and not <b>X -> Z</b>. This is what makes the causal structure unique and <b>identifiable</b>. Note this does not mean that <b>Z</b> has to be the "true" cause of <b>X</b>. For example, if <b>Z</b> is a SNP, we can choose a SNP in linkage disequilibrium with <b>Z</b>, so long as it is independent of all of the other variables, but still correlated with <b>X</b>. Note the more correlated that <b>Z</b> is with <b>X</b>, the better the power will be (i.e. less data required for significant results), if it is not correlated, it cannot be used as an instrumental variable.</p>
+<p> We must know <b>a priori</b> that the causal direction is <b>Z -&gt; X</b> and not <b>X -&gt; Z</b>. This is what makes the causal structure unique and <b>identifiable</b>. Note this does not mean that <b>Z</b> has to be the "true" cause of <b>X</b>. For example, if <b>Z</b> is a SNP, we can choose a SNP in linkage disequilibrium with <b>Z</b>, so long as it is independent of all of the other variables, but still correlated with <b>X</b>. Note the more correlated that <b>Z</b> is with <b>X</b>, the better the power will be (i.e. less data required for significant results), if it is not correlated, it cannot be used as an instrumental variable.</p>
 
-<img src="/images/snpld.png" height="200">
+<img src="/images/snpld.png" height="200" />
 
 <h3>Z must be independent of U </h3>
 
 <p> No factor can affect both the instrument and the effects. For example, there cannot be a factor that causes both higher tobacco taxes and less cancer (e.g. if we were comparing rates in different cancers between countries, national health awareness could be such a factor).</p>
 
-<img src="/images/noug.png" height="200">
+<img src="/images/noug.png" height="200" />
 
 
-<h3>No Z -> Y</h3>
+<h3>No Z -&gt; Y</h3>
 
 <p><b>Z</b> cannot directly affect <b>Y</b> (or indirectly, except through <b>X</b>). I.e. there cannot exist any other mechanisms through which <b>Z</b> affects <b>Y</b> (i.e. high tobacco tax increases substance abuse, leading to higher rates of cancer).</p>
 
-<img src="/images/nozy.png" height="200">
+<img src="/images/nozy.png" height="200" />
 
 <h3>Faithfulness</h3>
 
@@ -332,7 +334,7 @@ ga('send', 'pageview');
 
 <p>This DAG summarizes the necessary assumptions for the use of instrumental variables:</p>
 
-<img src="/images/fulldagass.png" height="200">
+<img src="/images/fulldagass.png" height="200" />
 
 <h2>Mendelian Randomization</h2>
 
@@ -384,30 +386,25 @@ ga('send', 'pageview');
 <h3>The real DAG?</h3>
 Considering the above points, perhaps the true underlying DAG looks more like this:
 
-<img src="/images/fulldagbio.png" height="200">
+<img src="/images/fulldagbio.png" height="200" />
 
 <h2>Conclusion</h2>
 <p><b>Instrumental variables</b> are a method to infer causal relations from <b>observational data</b>, given certain <b>assumptions</b>.This method is applied in Genetic Epidemiology with <b>Mendelian Randomisation</b>.</p>
 <p>This approach has had some success, but the underlying biology still poses some problems with regards to the necessary assumptions. This leaves us with the following questions:
 <ul>
-<li> Can we improve the <b>robustness</b> of the inference with more measurements of intermediate phenotypes? (such as gene methylation, RNAseq, proteomics measurements, etc.)?<br>
+<li> Can we improve the <b>robustness</b> of the inference with more measurements of intermediate phenotypes? (such as gene methylation, RNAseq, proteomics measurements, etc.)?<br />
 
 Some work has been done on this under the name of  multi-step Mendelian Randomisation. </li>
-<br>
+<br />
 
 <li>Can we improve identification of appropriate <b>instruments</b>? (e.g. as whole genome sequencing makes it easier to identify population stratification)</li>
 
 </ul>
 
 </p>
-</div>
-
-
-
+&lt;/div&gt;
 
 <!--end-->
-
-
 <div class="Spanish">
 <h2> Introducción </h2>
 
@@ -418,19 +415,19 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 <!--more-->
 <p>Aquí hay el grafo acíclico dirigido (<b>DAG</b> en inglés) de la idea fundamental. <b>G</b> es el genotipo observado (o sea, la presencia de un SNP), <b>X</b> es una exposición ambiente, <b>U</b> es un (posible) factor de confusión escondido y <b>Y</b> es el fenotipo (o sea, el estado de la enfermedad). Se explica esto en detalle más adelante. </p>
 
-<img src="/images/simpmr.png" height="200">
+<img src="/images/simpmr.png" height="200" />
 
 <h2> Motivación </h2>
 
 <p>La aleatorización mendeliana es una técnica útil porque permita la inferencia causal de <b>datos observacionales</b>. <b>Pruebas controladas aleatorias</b> son el patrón para hacer la inferencia causal, pero no siempre está posible o etíca hacerlas. Por ejemplo, no podemos asignar aleatoriamente una vida de fumar (o no fumar) a personas. Este problema significa que necesitamos usar los datos observacionales (que podemos colectar), sin embargo, hacer esto requiere muchas <b>suposiciones</b>.</p>
 
 <h2>Variables Instrumentales (IVs) </h2>
-<p>En el <b>DAG</b> anterior, <b>G</b> es la variable instrumental (o sea, el instrumento), porque afecta <b>Y</b> sólo por su influencia en <b>X</b> (o sea, exclusivamente - nada otros caminos existen). Por lo tanto, bajo <b>suposiciones</b> específicas  (que voy a ser explicadas más adelante), si <b>G</b> está en correlación con <b>Y</b>, podemos inferir que la arista <b>X -> Y</b> debe existir (nota que <b>X</b> debe estar en correlación con <b>G</b> para ser usado como variable instrumental.)</p>
+<p>En el <b>DAG</b> anterior, <b>G</b> es la variable instrumental (o sea, el instrumento), porque afecta <b>Y</b> sólo por su influencia en <b>X</b> (o sea, exclusivamente - nada otros caminos existen). Por lo tanto, bajo <b>suposiciones</b> específicas  (que voy a ser explicadas más adelante), si <b>G</b> está en correlación con <b>Y</b>, podemos inferir que la arista <b>X -&gt; Y</b> debe existir (nota que <b>X</b> debe estar en correlación con <b>G</b> para ser usado como variable instrumental.)</p>
 
 <p>Ahora consideramos un ejemplo de la aplicación de las variables instrumentales, en una investigación hipotética de la relación entre el fumar y el cancer de pulmón.</p>
 
 
-<img src="/images/smoking.png" height="200">
+<img src="/images/smoking.png" height="200" />
 
 <p>Asumiendo que las <b>suposiciones</b> del método son correctas, si observamos que an aumento del impuesto causa una reducción en la frecuencia de cáncer de pulmón, podríamos inferir que fumar es una "causa" de cáncer de pulmón (pero quizá indirectamente, o sea, no sería fumar que causa el cáncer directamente sino la acumulación del alquitrán en los pulmones, etc.)</p>
 
@@ -439,23 +436,23 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 
 <p>Suposiciones son necesarias en todos las partes de la estadística, sin embargo, es muy importante saber cuáles suposiciones necesitamos y si son correctas.</p>
 
-<h3> Z -> X debe existir</h3>
-<p>Debemos saber <b>a priori</b> que la dirección causal es <b>Z -> X</b> y no <b>X -> Z</b>. Es por eso que podemos identificar la estructura causal <b>únicamente</b>.Nota que eso no significa que <b>Z</b> debe ser la causa "verdadera" de <b>X</b>. Por ejemplo, si <b>Z</b> es un SNP (Polimorfismo de nucleótido simple - o sea, una mutación en una sola base), podemos también elegir un SNP que está en desequilibrio de ligamiento (o sea, son heredados juntos) con <b>Z</b>, con tal de que sea independiente de todas las otras variables, pero todavía esté en correlación con <b>X</b>. Nota que cuánto más que <b>Z</b> está en correlación con <b>X</b>, mejor será el poder estadístico (o sea, necesitaríamos menos datos para resultados significados), y si <b>Z</b>b> no está en correlación con <b>X</b>, no se puede ser usado como una variable instrumental.</p>
+<h3> Z -&gt; X debe existir</h3>
+<p>Debemos saber <b>a priori</b> que la dirección causal es <b>Z -&gt; X</b> y no <b>X -&gt; Z</b>. Es por eso que podemos identificar la estructura causal <b>únicamente</b>.Nota que eso no significa que <b>Z</b> debe ser la causa "verdadera" de <b>X</b>. Por ejemplo, si <b>Z</b> es un SNP (Polimorfismo de nucleótido simple - o sea, una mutación en una sola base), podemos también elegir un SNP que está en desequilibrio de ligamiento (o sea, son heredados juntos) con <b>Z</b>, con tal de que sea independiente de todas las otras variables, pero todavía esté en correlación con <b>X</b>. Nota que cuánto más que <b>Z</b> está en correlación con <b>X</b>, mejor será el poder estadístico (o sea, necesitaríamos menos datos para resultados significados), y si <b>Z</b>b&gt; no está en correlación con <b>X</b>, no se puede ser usado como una variable instrumental.</p>
 
-<img src="/images/snpld.png" height="200">
+<img src="/images/snpld.png" height="200" />
 
 <h3>Z debe ser independiente de U</h3>
 
 <p> No se permite que nada factor afecten ambos el instrumento y los efectos. Por ejemplo, no puede ser que haya un factor que causa ambos un aumento en los impuestos de tabaco y indices bajados de cáncer (por ejemplo, si comparamos los indices de un tipo de cáncer entre países diferentes, la conciencia salud nacional puede ser un factor así).</p> 
 
-<img src="/images/noug.png" height="200">
+<img src="/images/noug.png" height="200" />
 
 
-<h3>No Z -> Y</h3>
+<h3>No Z -&gt; Y</h3>
 
 <p>No se permite que <b>Z</b> afecte <b>Y</b> directamente (o indirectamente, excepto a través de <b>X</b>). O sea, no deben existir nada más mecanismos, a través de que <b>Z</b> afecte <b>Y</b> (por ejemplo, si el aumento en el impuesto de tabaco causara un aumento en los indices del abuso de sustancias, y por eso, un aumento en los indices de cáncer).</p>
 
-<img src="/images/nozy.png" height="200">
+<img src="/images/nozy.png" height="200" />
 
 <h3>Condición de Fidelidad</h3>
 
@@ -469,7 +466,7 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 
 <p>Este DAG muestra las suposiciones necesarias para usar el método de variables instrumentales:</p>
 
-<img src="/images/fulldagass.png" height="200">
+<img src="/images/fulldagass.png" height="200" />
 
 <h2>Aleatorización mendeliana</h2>
 
@@ -521,7 +518,7 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 <h3>¿El DAG verdadero?</h3>
 <p>Considerando los puntos anteriores, tal vez el grafo real parezca así: </p>
 
-<img src="/images/fulldagbio.png" height="200">
+<img src="/images/fulldagbio.png" height="200" />
 
 <h2>Conclusión</h2>
 <p>Las <b>variables instrumentales</b> son un método para inferir relaciones causales de <b>datos observacionales</b>, bajo unas <b>suposiciones</b>. Este método es aplicado en la epidemiología genética a través de la <b>aleatorización mendeliana</b>.</p>
@@ -531,17 +528,16 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 
 <ul>
     <li>¿Podemos mejorar la <b>robustez</b> de la inferencia con más medidas de fenotipos intermedios (como la metilación genética, RNAseq, medidas de la proteomíca, etc.)?
-<br>
+<br />
 Algún trabajo ha sido hecho en este problema bajo el nombre de "multi-step Mendelian Randomization" (aleatorización mendeliana por etapas múltiples). </li>
-<br>
+<br />
     <li>¿Podemos mejorar la identificación de <b>instrumentos</b> apropriados? (por ej. la posibilidad de la secuenciación del genoma entero ha hecho más fácil identificar la estratificación genética)</li>
 </ul>
 </p>
 
 </div>
 
-
-
+</p></p></p></div>
 
 </div>
 
@@ -577,28 +573,17 @@ $(window).ready(changeAllPosts(getLang()));
 </span>
 
       <!-- 
-  
-
 <span class="byline author vcard"><span class="English">Written by <span class="fn">James McMurray</span></span><span class="Spanish" style="display: none">Escrito por <span class="fn">James McMurray</span></span></span>
  --> &#9679;
       
 
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T15:22:20+02:00" pubdate data-updated="true"></time> &#9679;
+ &#9679;
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/statistics/'>statistics</a>
+    Statistics
   
 </span>
 

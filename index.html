@@ -3,6 +3,8 @@
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
 <!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
 <head>
   <meta charset="utf-8">
   <!--TODO: JS to select title goes here -->
@@ -10,7 +12,7 @@
   <meta name="author" content="James McMurray">
 
   
-  <meta name="description" content="">
+  <meta name="description" content="In this post we will set up a very simple data ingestion process with Rust and AWS Lambda. The complete code for this example is available on GitHub &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -261,25 +263,75 @@ ga('send', 'pageview');
       
   <header>
     
-      <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2020/02/29/game-of-life-in-wasm-and-rust/#en">Game of Life in WASM and Rust </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2020/02/29/game-of-life-in-wasm-and-rust/#sp">Game of Life in WASM and Rust</a></div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+      <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">Data Ingestion with Rust and AWS Lambda </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#sp">Data Ingestion with Rust and AWS Lambda</a></div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
 
     
     
       <p class="meta">
         
 
+19 April 2020
+
+        
+           | <a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#disqus_thread"
+             data-disqus-identifier="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/">Comments</a>
+        
+      </p>
+    
+  </header>
 
 
+  <div class="entry-content"><p>In this post we will set up a very simple data ingestion process with Rust and AWS Lambda.</p>
 
+<p>The complete code for this example is <a href="https://github.com/jamesmcm/rust-lambda-test">available on GitHub here</a>.</p>
 
-
+</div>
+  
+  
+    <footer>
+        <div class="English"><a rel="full-article" href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en"><div class=English>Read on &rarr;</div><div class=Spanish>Ver más &rarr;</div></a></div> <div class="Spanish" style='display: none'><a rel="full-article" href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#sp"><div class=English>Read on &rarr;</div><div class=Spanish>Ver más &rarr;</div></a></div>
+    </footer>
 
 
   
 
+<script>
+$(window).ready(changeAllPosts(getLang()));
+</script>
 
-<time datetime="2020-02-29T18:38:23+01:00" pubdate data-updated="true"></time>
+   <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'statisticallyinsignificant'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+
+    </article>
+
+
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2020/02/29/game-of-life-in-wasm-and-rust/#en">(Test) Game of Life in WASM and Rust </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2020/02/29/game-of-life-in-wasm-and-rust/#sp">(Test) Game of Life in WASM and Rust</a></div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
+
+    
+    
+      <p class="meta">
+        
+
+29 February 2020
+
         
            | <a href="/blog/2020/02/29/game-of-life-in-wasm-and-rust/#disqus_thread"
              data-disqus-identifier="http://jamesmcm.github.io/blog/2020/02/29/game-of-life-in-wasm-and-rust/">Comments</a>
@@ -326,24 +378,15 @@ $(window).ready(changeAllPosts(getLang()));
   <header>
     
       <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2014/10/24/em1/#en">The Expectation Maximisation (EM) Algorithm </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2014/10/24/em1/#sp">Algoritmo esperanza-maximización (EM)</a></div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
 
     
     
       <p class="meta">
         
 
+24 October 2014
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-10-24T20:36:52+02:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/10/24/em1/#disqus_thread"
              data-disqus-identifier="http://jamesmcm.github.io/blog/2014/10/24/em1/">Comments</a>
@@ -353,7 +396,7 @@ $(window).ready(changeAllPosts(getLang()));
   </header>
 
 
-  <div class="entry-content"><div class="English" >
+  <div class="entry-content"><div class="English">
     <p>In this post I will briefly introduce the EM algorithm with two simple examples. The EM algorithm uses an iterative approach to find the Maximum Likelihood estimate for a model with latent variables.</p>
     
 <p>
@@ -396,24 +439,15 @@ $(window).ready(changeAllPosts(getLang()));
   <header>
     
       <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2014/08/21/spresource/#en">Resources to learn Spanish </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2014/08/21/spresource/#sp">Recursos para aprender español</a></div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
 
     
     
       <p class="meta">
         
 
+21 August 2014
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-21T20:00:20+02:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/21/spresource/#disqus_thread"
              data-disqus-identifier="http://jamesmcm.github.io/blog/2014/08/21/spresource/">Comments</a>
@@ -463,24 +497,15 @@ $(window).ready(changeAllPosts(getLang()));
   <header>
     
       <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2014/08/17/mendelian/#en">Introduction to Mendelian Randomization </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2014/08/17/mendelian/#sp">Introducción a aleatorización mendeliana</a></div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
 
     
     
       <p class="meta">
         
 
+17 August 2014
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-17T15:22:20+02:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/17/mendelian/#disqus_thread"
              data-disqus-identifier="http://jamesmcm.github.io/blog/2014/08/17/mendelian/">Comments</a>
@@ -533,24 +558,15 @@ $(window).ready(changeAllPosts(getLang()));
   <header>
     
       <h1 class="entry-title"> <div display='inline' class="titleEnglish"> <a href="/blog/2014/08/04/first/#en">First Post </a> </div><div class='titleSpanish' style='display: none'><a href="/blog/2014/08/04/first/#sp">Primer Enviado</a></div></h1>
-            <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span>      
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="showEnglish(this)" disabled=true>English</button> <button class="esbutton" onclick="showSpanish(this)">Spanish</button> </span> -->
 
     
     
       <p class="meta">
         
 
+4 August 2014
 
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-04T14:13:10+02:00" pubdate data-updated="true"></time>
         
            | <a href="/blog/2014/08/04/first/#disqus_thread"
              data-disqus-identifier="http://jamesmcm.github.io/blog/2014/08/04/first/">Comments</a>
@@ -560,7 +576,7 @@ $(window).ready(changeAllPosts(getLang()));
   </header>
 
 
-  <div class="entry-content"><div class="English" >
+  <div class="entry-content"><div class="English">
     <p>I've started this blog to save resources which have helped me in learning languages, concepts in statistics, and anything else which I think might help others too.</p>
 <p>I am currently a PhD student in Tübingen, Germany in "Machine Learning for Personalised Medicine". I'm particularly interested in models combining genotypic and phenotypic measurements (such as gene expression, or methylation), in addition to the application of causal inference methods to justify causal conclusions from observational data, where possible. </p>
     <p>I also intend to post summaries of my presentations and work here, as part of the "outreach" encouraged in my PhD programme.</p>
@@ -568,10 +584,6 @@ $(window).ready(changeAllPosts(getLang()));
     <p>I hope it will be useful to some others too!</p>
 
 </div>
-
-
-<p></p>
-
 <div class="Spanish" style="display: none">
     <p>He empezado este blog para conservar recursos que me han ayudado para aprender idiomas y conceptos de la estadística, y cualquieras otras cosas que creo que podrían ayudar a otras personas también.</p>
 <p>Actualmente estoy haciendo un doctorado en Tubinga, Alemania sobre "Machine Learning for Personalised Medicine" (Aprendizaje automático para la medicina personal). Me interesan mucho los modeles que combinan los datos de genotipo y fenotipo (como la expresión génica, o la metilación de los genes), junto con la aplicación de los métodos de la inferencia causal para justificar conclusiónes causales de los datos observacionales, cuando sea posible.</p>
@@ -580,8 +592,6 @@ $(window).ready(changeAllPosts(getLang()));
     
 </div>
 
-
-<p></p>
 </div>
   
   
