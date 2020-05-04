@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .bundle
 .DS_Store
 .sass-cache
@@ -12,6 +11,6 @@ source/_stash
 source/stylesheets/screen.css
 vendor
 node_modules
-=======
 _site/
->>>>>>> 76e4f056d1b417d883572c4cca38108e1b10e7d1
+Gemfile.lock*
+source/.jekyll-cache

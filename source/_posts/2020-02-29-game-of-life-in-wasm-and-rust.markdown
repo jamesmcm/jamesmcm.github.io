@@ -1,13 +1,15 @@
 ---
 layout: post
-title: "Game of Life in WASM and Rust"
-titleen: "Game of Life in WASM and Rust"
-titlesp: "Game of Life in WASM and Rust"
+title: "(Test) Game of Life in WASM and Rust"
+titleen: "(Test) Game of Life in WASM and Rust"
+titlesp: "(Test) Game of Life in WASM and Rust"
 date: 2020-02-29 18:38:23 +0100
 comments: true
 categories: 
 ---
 <!-- more -->
+
+This is a test for embedding WebAssembly on Github pages.
 
 <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
 <script type="module">

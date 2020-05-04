@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-offline: false
+offline: true
 url: http://jamesmcm.github.io
 title: Statistically Insignificant
 subtitle: Languages, Statistics and other things
@@ -32,16 +32,17 @@ root: /
 permalink: /blog/:year/:month/:day/:title/
 source: source
 destination: public
-plugins: plugins
+plugins: ["jekyll-paginate"]
+plugins_dir: plugins
 code_dir: downloads/code
 category_dir: blog/categories
-markdown: rdiscount
-rdiscount:
-  extensions:
-    - autolink
-    - footnotes
-    - smart
-highlighter: pygments # default python pygments have been replaced by pygments.rb
+#markdown: rdiscount
+#rdiscount:
+#  extensions:
+#    - autolink
+#    - footnotes
+#    - smart
+#highlighter: pygments # default python pygments have been replaced by pygments.rb
 
 paginate: 10          # Posts per page on the blog index
 paginate_path: "posts/:num"  # Directory base for pagination URLs eg. /posts/2/

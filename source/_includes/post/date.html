@@ -1,3 +1,4 @@
+{% if 1 != 1 %}
 {% capture date %}{{ page.date }}{{ post.date }}{% endcapture %}
 {% capture date_formatted %}{{ page.date_formatted }}{{ post.date_formatted }}{% endcapture %}
 {% capture has_date %}{{ date | size }}{% endcapture %}
@@ -12,4 +13,7 @@
 
 {% if was_updated != '0' %}
   {% capture updated %}<time datetime="{{ updated | datetime | date_to_xmlschema }}" class="updated">Updated {{ updated_formatted }}</time>{% endcapture %}
-{% else %}{% assign updated = false %}{% endif %}
+  {% else %}{% assign updated = false %}{% endif %}
+{% endif %}
+
+{{ post.date | date: "%-d %B %Y" }}
