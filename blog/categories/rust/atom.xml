@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-04-22T21:43:49+02:00</updated>
+  <updated>2020-05-04T22:23:53+02:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -124,7 +124,7 @@
 
 <h4 id="reading-the-excel-file">Reading the Excel file</h4>
 
-<p>First let’s write a  that will read an example of our Excel file to a buffer and create a calamine::Xlsx object from it. We do it like this (rather than using calamine’s <code class="highlighter-rouge">open_workbook()</code> function to read directly from a file) so we can maintain the same interface when reading the Excel file from S3 directly.</p>
+<p>First let’s write a test that will read an example of our Excel file to a buffer and create a calamine::Xlsx object from it. We do it like this (rather than using calamine’s <code class="highlighter-rouge">open_workbook()</code> function to read directly from a file) so we can maintain the same interface when reading the Excel file from S3 directly.</p>
 
 <div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">calamine</span><span class="p">::{</span><span class="n">Reader</span><span class="p">,</span> <span class="n">Xlsx</span><span class="p">};</span>
 
@@ -256,6 +256,12 @@
 
   <span class="c">// ...</span>
 </code></pre></div></div>
+
+<p>Note the double <code class="highlighter-rouge">??</code> on the line <code class="highlighter-rouge">.ok_or(calamine::Error::Msg("Cannot find data worksheet"))??;</code> - this is used since
+the <code class="highlighter-rouge">.worksheet_range()</code> method returns an <code class="highlighter-rouge">Option&lt;Result&lt;Range&lt;DataType&gt;, XlsxError&gt;&gt;</code> (<a href="https://docs.rs/calamine/0.16.1/calamine/struct.Xlsx.html#method.worksheet_range">see docs</a>), 
+and we convert the Option to a Result using <code class="highlighter-rouge">.ok_or()</code> (<a href="https://doc.rust-lang.org/std/option/enum.Option.html#method.ok_or">see docs</a>) to convert the
+None case to a <code class="highlighter-rouge">calamine::Error</code> (and the Some case to Ok). The double <code class="highlighter-rouge">??</code> unwraps both of these
+errors to give us the <code class="highlighter-rouge">Range&lt;DataType&gt;</code>.</p>
 
 <p>We start by getting the range for the <code class="highlighter-rouge">data</code> worksheet, and then we deserialise it to <code class="highlighter-rouge">RawExcelRow</code>s, giving us an Iterator over <code class="highlighter-rouge">RawExcelRow</code>s. With this iterator we can apply row-level filtering (or other transformations), as we serialise to CSV.</p>
 
@@ -680,7 +686,7 @@ zip <span class="nt">-j</span> rust.zip ./target/x86_64-unknown-linux-musl/relea
 
 <p><a href="https://google.github.io/flatbuffers/">FlatBuffers</a> (used for Arrow’s Table) <a href="https://github.com/google/flatbuffers/issues/5132">also has an issue open for Serde serialisation</a>.</p>
 
-<p>Ff you have any ideas for how to achieve this direct deserialisation with Serde please add a comment here in Disqus or as a <a href="https://github.com/jamesmcm/rust-lambda-test">Github issue</a>.</p>
+<p>If you have any ideas for how to achieve this direct deserialisation with Serde please add a comment here in Disqus or as a <a href="https://github.com/jamesmcm/rust-lambda-test">Github issue</a>.</p>
 
 <h3 id="compressed-parquet-output">Compressed Parquet output</h3>
 
