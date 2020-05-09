@@ -830,6 +830,11 @@ to apply asynchronous programming in Rust.</p>
 programming. However, it may take some getting used to if you do not
 have prior experience with asynchronous programming.</p>
 
+<p>These examples also demonstrate the difference between concurrency and
+parallelism. In the asynchronous single OS thread case we are handling
+tasks concurrently, but nothing is running in parallel (i.e. we use only
+one OS thread).</p>
+
 <h3 id="current-limitations">Current Limitations</h3>
 
 <p>Note that currently you cannot use <a href="https://rust-lang.github.io/async-book/07_workarounds/06_async_in_traits.html">async methods in traits</a>, and nor

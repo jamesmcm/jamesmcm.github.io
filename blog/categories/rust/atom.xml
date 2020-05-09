@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-05-09T13:24:56+02:00</updated>
+  <updated>2020-05-09T14:29:05+02:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -575,6 +575,11 @@ to apply asynchronous programming in Rust.</p>
 <p>The elegant async/await syntax allows for clear and concise asynchronous
 programming. However, it may take some getting used to if you do not
 have prior experience with asynchronous programming.</p>
+
+<p>These examples also demonstrate the difference between concurrency and
+parallelism. In the asynchronous single OS thread case we are handling
+tasks concurrently, but nothing is running in parallel (i.e. we use only
+one OS thread).</p>
 
 <h3 id="current-limitations">Current Limitations</h3>
 
