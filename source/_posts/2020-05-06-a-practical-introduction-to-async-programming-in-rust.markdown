@@ -13,7 +13,7 @@ In this post we will explore a brief example of asynchronous programming
 in Rust with the Tokio runtime, demonstrating different execution scenarios. This post is aimed
 at beginners to asynchronous programming.
 
-The source code for this example is available on Github.. TODO
+The source code for this example is [available on Github](https://github.com/jamesmcm/async-rust-example).
 
 <!--more-->
 
@@ -30,13 +30,14 @@ to actual OS threads.
 Unlike OS threads, green threads are not expensive to create and so we
 needn't worry about hitting a hard limit. Whereas OS threads need to
 hold their own stack, leading to high memory usage when dealing with
-many threads. 
+many threads. On Linux you can check your thread limit per process
+with: `cat /proc/sys/kernel/threads-max`, mine is 127,162.
+
 
 This is a significant issue if we need a separate OS
 thread to handle each request on a web server for example, and is the
 origin of the [C10k problem](https://en.wikipedia.org/wiki/C10k_problem)
-\- how to handle 10,000 concurrent connections to a web server. On Linux
-  you can check your thread limit per process with: `cat /proc/sys/kernel/threads-max`, mine is 127,162.
+\- how to handle 10,000 concurrent connections to a web server. 
 
 Early web servers did indeed use a separate OS thread per request, in order to
 handle requests in parallel. The key insight is that those threads spend
@@ -52,13 +53,15 @@ defining asynchronous code blocks and functions.
 The `async` keyword defines an async code block or function. Specifying
 that it will return a `Future`, a value that will need to be `.await`ed
 elsewhere in order to trigger the execution of the task (note the lazy
-execution) and get the return value.
+execution) and wait for the return value to be available.
 
 The `.await` keyword (which must be inside an `async` block/function)
 is used to wait asynchronously for an async task to finish, and get the return value.
 Note that while the task itself cannot progress until the `Future` is ready,
 the actual OS thread can have other tasks assigned to it by the runtime,
-and so continue to do work. Effectively the task is informing the
+and so continue to do work. 
+
+Effectively the task is informing the
 runtime that at this point it may yield the execution to another task
 (eventually, that other task will also `await` something, and if the
 Future in this task is ready, execution of this task may continue) -
@@ -81,13 +84,13 @@ parallel - for example in a ray tracer. In this case it would be best to
 parallelise the computations over OS threads directly (taking advantage
 of the multiple cores in your CPU), for example using parallel iterators in the [rayon](https://crates.io/crates/rayon)
 crate (or if you want thread-level control, then with the [crossbeam](https://crates.io/crates/crossbeam)
-and [threadpool](https://crates.io/crates/threadpool) crates). However, remember [Amdahl's
-Law](https://en.wikipedia.org/wiki/Amdahl%27s_law) and consider that
-algorithmic improvements might yield a better return than focusing
+and [threadpool](https://crates.io/crates/threadpool) crates). 
+However, remember [Amdahl's Law](https://en.wikipedia.org/wiki/Amdahl%27s_law) and consider that
+algorithmic improvements might yield a better return than focusing on 
 parallelisation in this cases.
 
 It is also not useful if there are no other tasks to do whilst waiting 
-for the IO operations. For example in the [previous blog post](), Rusoto
+for the IO operations. For example in the [previous blog post](/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en), Rusoto
 actually returns a `RusotoFuture` object when we request the DB
 credentials from AWS Secrets Manager, however in this case one
 invocation of our Lambda function corresponds to one request - there is
@@ -109,8 +112,8 @@ We will use [Tokio](https://docs.rs/tokio/0.2.20/tokio/) as our async runtime fo
 currently the most popular. The other main alternative is the
 [async_std](https://docs.rs/async-std/1.5.0/async_std/
 ) runtime. Note that both use the common [futures](https://docs.rs/futures/0.3.4/futures/
-) crate
-so you can swap async the runtime whilst keeping the same API.
+) crate 
+so you can swap the async runtime whilst keeping mostly the same API.
 
 ### Server
 
@@ -118,7 +121,7 @@ The server used in this example is adapted from the [Tokio tutorial](https://tok
 It echoes back the bytes received, after a delay of 8 seconds.
 
 The full adapted code is as follows (and [available in the source code
-for this post](TODO)):
+for this post](https://github.com/jamesmcm/async-rust-example)):
 
 ```rust
 use futures::stream::StreamExt;
@@ -165,7 +168,7 @@ another. Therefore we would expect a total execution time of `3*(2+8+4)
 = 42` seconds to finish all 3 tasks.
 
 We can visualise this case with a diagram:
-TODO
+![Synchronous execution](/images/synchronous.svg "Synchronous execution")
 
 We can implement this using only the standard library:
 
@@ -227,7 +230,7 @@ fn task(label: &str, now: std::time::Instant) -> Result<(), Box<dyn std::error::
 }
 ```
 
-Running this (see [the repo for this workspace](TODO)):
+Running this (see [the repo for this workspace](https://github.com/jamesmcm/async-rust-example)):
 ```bash
 $ cargo run --release --bin server
 $ cargo run --release --bin client_synchronous
@@ -248,8 +251,7 @@ OS Thread ThreadId(1) - task3 read: 38.008234993s
 OS Thread ThreadId(1) - task3 finished: 42.008389223s
 ```
 
-Exactly the 42 seconds execution time we had calculated above, and with
-the diagram.
+Gives exactly the 42 seconds total execution time that we calculated above.
 
 ### Synchronous requests (Tokio)
 
@@ -366,7 +368,10 @@ for each task. Therefore we expect a total execution time of
 `8+2+(3*4)=22` seconds.
 
 In a diagram:
-TODO
+![Asynchronous execution on a single OS thread](/images/asynchronous_single.svg "Asynchronous execution on a single OS thread")
+
+
+Using the same definition of `async fn task()` as before:
 
 ```rust
 use futures::stream::futures_unordered::FuturesUnordered;
@@ -416,11 +421,11 @@ repeatedly await the different Futures. However, we never use
 (as we never allow the creation of more).
 
 Note that we could use the `join!` macro here instead of allocating a
-`FuturesUnordered` we will see an example of this later. However, that
+`FuturesUnordered`, we will see an example of this later. However, that
 is only practical for a small number of Futures.
 
 We can also force Tokio to only use one thread by putting arguments in
-the annotation for our main function:
+the attribute for our main function:
 
 ```rust
 #[tokio::main(core_threads = 1, max_threads = 1)]
@@ -435,6 +440,9 @@ In the case of asynchronous requests across multiple OS threads, we can
 do every step concurrently (and the OS threads could complete other tasks
 when the tasks await). This means that we can do the final computation step in
 parallel on different OS threads.
+
+
+![Asynchronous execution on multiple OS threads](/images/asynchronous_multi.svg "Asynchronous execution on multiple OS threads")
 
 Therefore we would expect a total execution time of `2+8+4=14` seconds
 for all 3 requests. This is the best we can achieve - the same time as
@@ -461,7 +469,6 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     while let Some(_handled) = futs.next().await {}
     Ok(())
 }
-
 ```
 
 And we observe the 14 second execution time (note we don't care about
@@ -481,6 +488,9 @@ OS Thread ThreadId(3) - task3 finished: 14.003584085s
 OS Thread ThreadId(2) - task1 finished: 14.003664981s
 OS Thread ThreadId(5) - task2 finished: 14.003698375s
 ```
+
+The different OS Thread IDs demonstrate that the tasks are being
+executed on separate OS threads.
 
 For completeness, here is the same implementation using the `join!`
 macro instead of allocating a `FuturesUnordered`:
@@ -513,29 +523,64 @@ for many Futures).
 You could implement something similar for the synchronous case using OS threads directly, for
 example with the [rayon](https://crates.io/crates/rayon) crate mentioned previously.
 
-However, in that case each request would need its own OS thread, and if
+However, in this case each request would need its own OS thread, and if
 we had to carry out 10,000 concurrent requests, we might hit the thread
-limit. In the async case we only need the additional threads during the
-computation step (which is synchronous), this means that we could use a
+limit. 
+
+That is, the execution diagram would look like this:
+![Synchronous execution on multiple OS threads](/images/synchronous_multios.svg "Synchronous execution on multiple OS threads")
+
+Note that the OS threads would spend a lot of time just waiting on IO operations,
+unable to start other requests.
+
+We can modify our first synchronous example above to do this with rayon:
+
+```rust
+use rayon::prelude::*;
+
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let now = Instant::now();
+
+    ["task1", "task2", "task3"]
+        .par_iter()
+        .map(|x| task(x, now.clone()))
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(())
+}
+```
+
+And it terminates in 14 seconds as expected (note that each task is
+allocated to one OS thread):
+
+```
+OS Thread ThreadId(3) - task1 started: 280.871µs
+OS Thread ThreadId(6) - task2 started: 281.03µs
+OS Thread ThreadId(7) - task3 started: 283.838µs
+OS Thread ThreadId(6) - task2 written: 2.000605562s
+OS Thread ThreadId(7) - task3 written: 2.000619598s
+OS Thread ThreadId(3) - task1 written: 2.000679853s
+OS Thread ThreadId(3) - task1 read: 10.002321036s
+OS Thread ThreadId(6) - task2 read: 10.00233185s
+OS Thread ThreadId(7) - task3 read: 10.002384653s
+OS Thread ThreadId(3) - task1 finished: 14.002447762s
+OS Thread ThreadId(6) - task2 finished: 14.002540969s
+OS Thread ThreadId(7) - task3 finished: 14.002589621s
+```
+
+However, this would not be resource-efficient when handling a large
+number of tasks since one task corresponds to one OS thread.
+
+Whereas in the async case we only need the additional threads during the
+computation step (which is synchronous). This means that we could use a
 fixed OS threadpool size and still benefit from some parallelisation in
 the computation step whilst having guarantees about our resource usage
 (i.e. we can limit the maximum number of OS threads and still be able to
 start new requests).
 
-That is, the execution diagram would look like this:
-
-The OS threads would spend a lot of time just waiting on IO operations,
-unable to start other requests.
-
-Write pure synchronous code (no tokio) + OS thread parallelisation
-example (rayon?)
-
-
-
 ## Conclusion
 
-I hope this blog post has helped you to better understand the usage of
-asynchronous programming in Rust.
+I hope this blog post has helped you to better understand when and how
+to apply asynchronous programming in Rust.
 
 The elegant async/await syntax allows for clear and concise asynchronous
 programming. However, it may take some getting used to if you do not
@@ -550,6 +595,6 @@ block the OS thread whilst it does that - you cannot `.await` because
 `drop()` (from [Drop](https://doc.rust-lang.org/std/ops/trait.Drop.html)) is not async.
 
 I hit the latter issue in my recent [s3rename](https://github.com/jamesmcm/s3rename) crate, and am still
-attempting to work around it. See [this issue]() for details.
+attempting to work around it. See [this issue](https://github.com/jamesmcm/s3rename/issues/16) for details.
 
 
