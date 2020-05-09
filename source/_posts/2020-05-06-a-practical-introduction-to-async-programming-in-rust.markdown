@@ -584,7 +584,12 @@ to apply asynchronous programming in Rust.
 
 The elegant async/await syntax allows for clear and concise asynchronous
 programming. However, it may take some getting used to if you do not
-have prior experience with asynchronous programming. 
+have prior experience with asynchronous programming.
+
+These examples also demonstrate the difference between concurrency and
+parallelism. In the asynchronous single OS thread case we are handling
+tasks concurrently, but nothing is running in parallel (i.e. we use only
+one OS thread).
 
 ### Current Limitations
 
