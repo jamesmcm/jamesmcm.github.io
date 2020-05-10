@@ -276,7 +276,9 @@ ga('send', 'pageview');
 in Rust with the Tokio runtime, demonstrating different execution scenarios. This post is aimed
 at beginners to asynchronous programming.</p>
 
-<p>The source code for this example is <a href="https://github.com/jamesmcm/async-rust-example">available on Github</a>.</p>
+<p>The source code for this example is <a href="https://github.com/jamesmcm/async-rust-example">available on Github</a>.
+A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch</a> using the async-std runtime is also available (contributed by
+<a href="https://github.com/BartMassey">@BartMassey</a>).</p>
 
 <!--more-->
 
@@ -371,9 +373,13 @@ is on the server side)</li>
 the current OS thread to do the computation).</li>
 </ul>
 
-<p>We will use <a href="https://docs.rs/tokio/0.2.20/tokio/">Tokio</a> as our async runtime for this example, as it is
-currently the most popular. The other main alternative is the
-<a href="https://docs.rs/async-std/1.5.0/async_std/">async_std</a> runtime. Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate 
+<p>We will use <a href="https://docs.rs/tokio/0.2.20/tokio/">Tokio</a> as our async
+runtime for this example, as it is currently the most popular.
+The other main alternative is the <a href="https://docs.rs/async-std/1.5.0/async_std/">async_std</a> runtime
+- code for using this runtime is available in the <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">async-std branch of the Github repo</a> (this code
+was contributed by <a href="https://github.com/BartMassey">@BartMassey</a>).</p>
+
+<p>Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate 
 so you can swap the async runtime whilst keeping mostly the same API.</p>
 
 <h3 id="server">Server</h3>
