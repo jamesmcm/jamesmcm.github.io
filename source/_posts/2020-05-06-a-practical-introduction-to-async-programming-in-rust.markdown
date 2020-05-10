@@ -14,6 +14,8 @@ in Rust with the Tokio runtime, demonstrating different execution scenarios. Thi
 at beginners to asynchronous programming.
 
 The source code for this example is [available on Github](https://github.com/jamesmcm/async-rust-example).
+A [branch](https://github.com/jamesmcm/async-rust-example/tree/async-std) using the async-std runtime is also available (contributed by
+[@BartMassey](https://github.com/BartMassey)).
 
 <!--more-->
 
@@ -108,11 +110,13 @@ consisting of three stages:
 * Computation - a synchronous delay of 4 seconds (i.e. it has to block
   the current OS thread to do the computation).
 
-We will use [Tokio](https://docs.rs/tokio/0.2.20/tokio/) as our async runtime for this example, as it is
-currently the most popular. The other main alternative is the
-[async_std](https://docs.rs/async-std/1.5.0/async_std/
-) runtime. Note that both use the common [futures](https://docs.rs/futures/0.3.4/futures/
-) crate 
+We will use [Tokio](https://docs.rs/tokio/0.2.20/tokio/) as our async
+runtime for this example, as it is currently the most popular.
+The other main alternative is the [async_std](https://docs.rs/async-std/1.5.0/async_std/) runtime
+\- code for using this runtime is available in the [async-std branch of the Github repo](https://github.com/jamesmcm/async-rust-example/tree/async-std) (this code
+was contributed by [@BartMassey](https://github.com/BartMassey)).
+
+Note that both use the common [futures](https://docs.rs/futures/0.3.4/futures/) crate 
 so you can swap the async runtime whilst keeping mostly the same API.
 
 ### Server
