@@ -1,0 +1,573 @@
+---
+layout: post
+title: "An introduction to Data Oriented Design with Rust"
+titleen: "An introduction to Data Oriented Design with Rust"
+titlesp: "An introduction to Data Oriented Design with Rust"
+date: 2020-07-25 11:45:14 +0200
+comments: true
+categories: [Rust]
+meta: false
+---
+
+In the post we will investigate the main concepts of [Data-oriented
+Design](https://en.wikipedia.org/wiki/Data-oriented_design) using Rust.
+
+The source code for this example is [available on Github](https://github.com/jamesmcm/data-oriented-example).
+
+<!--more-->
+
+## What is data-oriented design?
+
+Data-oriented design is an approach to optimising programs by carefully
+considering the memory layout of data structures, and their implications
+for auto-vectorisation and use of the CPU cache. I highly recommend
+watching Mike Acton's ["Data-Oriented Design and C++"](https://www.youtube.com/watch?v=rX0ItVEVjHc) talk
+if you haven't seen it already.
+
+In this post we will cover 4 cases, using [criterion](https://docs.rs/criterion/0.3.3/criterion/) for
+benchmarking. The cases are:
+
+* Struct of arrays vs. array of structs
+* The cost of branching inside a hot loop
+* Linked List vs. Vector iteration
+* The cost of dynamic dispatch vs. monomorphisation
+
+
+## Struct of Arrays vs. Array of Structs
+
+The [Struct of Arrays vs. Array of Structs](https://en.wikipedia.org/wiki/AoS_and_SoA) 
+refers to two contrasting ways of organising entity data to be operated
+over.
+
+For example, imagine we are writing a video game and we would like to
+have a Player struct with the following fields:
+
+```rust
+pub struct Player {
+    name: String,
+    health: f64,
+    location: (f64, f64),
+    velocity: (f64, f64),
+    acceleration: (f64, f64),
+}
+```
+
+Then at each frame, we want to update the locations and velocities of all
+Players. We could write something like:
+
+```rust
+pub fn run_oop(players: &mut Vec<Player>) {
+    for player in players.iter_mut() {
+        player.location = (
+            player.location.0 + player.velocity.0,
+            player.location.1 + player.velocity.1,
+        );
+        player.velocity = (
+            player.velocity.0 + player.acceleration.0,
+            player.velocity.1 + player.acceleration.1,
+        );
+    }
+}
+```
+
+This would be the usual object-oriented approach to this problem. The
+issue here is that in memory the structs are stored as follows (assuming
+no field re-ordering), on a 64-bit architecture each field will be 64
+bits (8 bytes, so each Player is 64 bytes):
+
+```
+-- Vec<Player>
+name  (pointer to heap)  -- Player 1
+health    
+location0  (tuple split for clarity) 
+location1
+velocity0
+velocity1
+acceleration0
+acceleration1
+name  (pointer to heap)  -- Player 2
+location0    
+location1
+velocity0
+velocity1
+acceleration0
+acceleration1
+...
+```
+
+Note the parts we want to operate on (locations, velocities and
+accelerations) are not stored contiguously across different Players.
+This prevents us from using vector operations to operate on multiple
+players at once (since they cannot be loaded in the same CPU cache
+line, usually ~64 bytes).
+
+In contrast, the data-oriented approach is to design around this
+limitation and optimise for auto-vectorisation. Instead of using a
+struct per Player, we now use one struct for all Players and each Player
+has their values stored at their index in the separate attribute Vectors:
+
+```rust
+pub struct DOPlayers {
+    names: Vec<String>,
+    health: Vec<f64>,
+    locations: Vec<(f64, f64)>,
+    velocities: Vec<(f64, f64)>,
+    acceleration: Vec<(f64, f64)>,
+}
+```
+
+Now we can do the same calculation as in the OOP case as follows:
+
+```rust
+pub fn run_dop(world: &mut DOPlayers) {
+    for (pos, (vel, acc)) in world
+        .locations
+        .iter_mut()
+        .zip(world.velocities.iter_mut().zip(world.acceleration.iter()))
+    {
+        *pos = (pos.0 + vel.0, pos.1 + vel.1);
+        *vel = (vel.0 + acc.0, vel.1 + acc.1);
+    }
+}
+```
+
+In this case the memory layout is as follows:
+```
+-- DOPlayers
+name1    -- names
+name2
+...
+health1    -- health
+health2
+...
+location1    -- locations
+location2
+...
+```
+
+The relevant fields are now stored contiguously. Given that each
+location tuple will be 16 bytes, we could now feasibly load 4 location
+tuples on the same cache line to operate on them simultaneously with
+SIMD instructions.
+
+### Benchmark
+
+Here are the results of the criterion benchmark for the above code (the
+full code and benchmark code is available [in the Github repo](https://github.com/jamesmcm/data-oriented-example)):
+
+![AoS vs. SoA benchmark](/images/soa.svg "AoS vs. SoA benchmark")
+
+Overall, we see that the data-oriented approach finishes in half the
+time. This would seem to be due to the data-oriented case operating on
+two Players at a time - we can confirm this by reviewing the compiled
+assembly.
+
+Reviewing the [output on Godbolt](https://godbolt.org/z/d8bjMb) we see the following:
+
+```asm
+// Relevant OOP loop
+.LBB0_2:
+        movupd  xmm0, xmmword ptr [rax + rdx + 32]
+        movupd  xmm1, xmmword ptr [rax + rdx + 48]
+        movupd  xmm2, xmmword ptr [rax + rdx + 64]
+        addpd   xmm0, xmm1
+        movupd  xmmword ptr [rax + rdx + 32], xmm0
+        addpd   xmm2, xmm1
+        movupd  xmmword ptr [rax + rdx + 48], xmm2
+        add     rdx, 80
+        cmp     rcx, rdx
+        jne     .LBB0_2
+
+// ...
+// Relevant DOP loop
+.LBB1_7:
+        movupd  xmm0, xmmword ptr [rcx + rdx - 16]
+        movupd  xmm1, xmmword ptr [rax + rdx - 16]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rcx + rdx - 16], xmm1
+        movupd  xmm0, xmmword ptr [r9 + rdx - 16]
+        movupd  xmm1, xmmword ptr [rax + rdx - 16]
+        addpd   xmm1, xmm0
+        movupd  xmm0, xmmword ptr [rax + rdx]
+        movupd  xmmword ptr [rax + rdx - 16], xmm1
+        add     rdi, 2
+        movupd  xmm1, xmmword ptr [rcx + rdx]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rcx + rdx], xmm1
+        movupd  xmm0, xmmword ptr [rax + rdx]
+        movupd  xmm1, xmmword ptr [r9 + rdx]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rax + rdx], xmm1
+        add     rdx, 32
+        cmp     rsi, rdi
+        jne     .LBB1_7
+        test    r8, r8
+        je      .LBB1_5
+```
+
+We can see in the data-oriented case, the loop is unrolled to operate on
+two elements at once - resulting in the 50% speed up overall!
+
+### Summary
+
+This example demonstrates the importance of considering memory layout
+when aiming for performant code and auto-vectorisation. 
+
+Note that the same logic can also apply when working with arrays of
+structs - making your struct smaller will allow you to load more
+elements on the same cache line and possibly lead to autovectorisation.
+[Here is an example](https://github.com/Rene-007/flake_growth/blob/master/src/helpers.rs) of
+a crate (which was shared on the [Rust subreddit](https://www.reddit.com/r/rust/comments/hmqjvs/growing_gold_with_rust/)) that achieved a 40% performance
+improvement by doing just that.
+
+This particular re-organisation has a direct analogue in database design. A
+major difference between databases aimed at transactional (OLTP)
+workloads and analytical (OLAP) workloads is that the latter tend to use
+columnar-based storage. Just like the case above, this means that
+operations on one column can take advantage of the contiguous storage
+and use vector operations, which tends to be the main access pattern for
+analytical workloads (e.g. calculate the average purchase size across all rows,
+rather than updating and retrieving entire, specific rows).
+
+In the case of analytical databases this is actually a double win, since it also
+applies to the serialisation of the data to disk, where compression can
+now be applied along the column (where the data is guaranteed to be of the
+same type) leading to much better compression ratios.
+
+## Branching in a hot loop
+
+Another optimisation tactic is to avoid branching in any "hot" parts of
+the code (i.e. any part that will be executed many, many times).
+
+Branching can arise in subtle ways, often by trying to use one struct for many
+different cases. For example, we might define some general Node type as follows:
+
+```rust
+enum NodeType {
+  Player,
+  PhysicsObject,
+  Script,
+}
+
+struct Node {
+node_type: NodeType,
+position: (f64, f64),
+// ...
+}
+```
+
+And then pattern match on `node_type` when we need to operate on a Node.
+The problem comes when we have a `Vec<Node>` with tens of thousands of
+elements, which we might need to operate on every frame. By using
+`node.node_type` to decide the logic to use, we need to check
+that for every element (since the order of the `node_type`'s within the
+`Vec<Node>` is unknown).
+
+Not only does this comparison mean we must do an extra operation for
+every element, but it also impedes auto-vectorisation, since our
+relevant nodes (of the same `node_type`) may not be stored contiguously.
+
+The data-oriented approach is to split these nodes up by `node_type`.
+Ideally creating a separate struct per node type, or at least
+separating them in separate Vectors before the hot loop. This means we
+don't need to check the `node_type` inside the hot loop, and we can take
+advantage of the fact that the nodes we do operate on will be stored in
+contiguous memory.
+
+### Benchmark
+
+In this benchmark we use the following code:
+
+```rust
+#[derive(Copy, Clone)]
+pub struct Foo {
+    x: i32,
+    calc_type: CalcType,
+}
+
+#[derive(Copy, Clone)]
+pub enum CalcType {
+    Identity,
+    Square,
+    Cube,
+}
+
+// ...
+
+pub fn run_mixed(x: &[Foo]) -> Vec<i32> {
+    x.into_iter()
+        .map(|x| match x.calc_type {
+            CalcType::Identity => x.x,
+            CalcType::Square => x.x * x.x,
+            CalcType::Cube => x.x * x.x * x.x,
+        })
+        .collect()
+}
+
+pub fn run_separate(x: &[Foo], y: &[Foo], z: &[Foo]) -> (Vec<i32>, Vec<i32>, Vec<i32>) {
+    let x = x.into_iter().map(|x| x.x).collect();
+    let y = y.into_iter().map(|x| x.x * x.x).collect();
+    let z = z.into_iter().map(|x| x.x * x.x * x.x).collect();
+    (x, y, z)
+}
+```
+
+Comparing the case of a mixed vector of Foos, and separate vector of
+Foos split by `calc_type`.
+
+The results of the benchmark are as follows:
+
+![Loop branch benchmark](/images/innercheck.svg "Loop branch benchmark")
+
+Overall, we see that the data-oriented approach finishes in about a 
+quarter of the time.
+
+The [output on Godbolt](https://godbolt.org/z/Y9dYbs) is less clear this
+time, but we can see that there seems to be some unrolling in the
+separate case that isn't possible in the mixed case due to the need to
+check the `calc_type` in that case.
+
+### Summary
+
+The concept of moving any instructions you can outside of hot loops
+should be familiar, but this example also demonstrates how it can impact
+vectorisation. 
+
+## Indirection: Iteration in a Linked List
+
+In this example we will compare iterating through a (doubly) linked list
+vs. a vector. This case is well-known and mentioned in [Rust's
+LinkedList docs](https://doc.rust-lang.org/beta/std/collections/struct.LinkedList.html),
+in [Rust's std::collections docs](https://doc.rust-lang.org/beta/std/collections/index.html#use-a-linkedlist-when)
+and in [Learn Rust With Entirely Too Many Linked Lists' Public Service Announcement](https://rust-unofficial.github.io/too-many-lists/#an-obligatory-public-service-announcement).
+The latter Public Service Announcement covers a lot of cases where
+Linked Lists are commonly used, so I recommend reading that if you
+haven't already. Nevertheless, the proof is in the pudding, so I think
+it's useful to see a benchmark directly.
+
+A Linked List stores elements _indirectly_, that is, it stores an
+element and a pointer to the next element. This means that consecutive
+elements in the linked list are _not_ stored in consecutive memory
+locations.
+
+This leads to two issues that impede vectorisation:
+* The elements of the linked list may be stored arbitrarily far apart, so
+  we cannot just load a block of memory to the CPU cache to operate on
+  them simultaneously.
+* We have to dereference a pointer to get the next element in the list.
+
+
+For example, we might store a vector of i32s on the heap as follows
+(holding a pointer to the start of the vector, the vector capacity and
+the vector length, on the stack):
+
+```
+0x00 1
+0x01 2
+0x02 3
+...
+```
+
+The values are stored contiguously, whereas for a (singly) linked list, we could
+have the following case.
+
+```
+0x00 1
+0x01 0x14
+0x0C 3
+0x0D 0
+...
+0x14 2
+0x15 0x0C
+```
+
+Here the values are not stored in contiguous memory (or even necessarily
+in the same order as their pointers maintain in the list).
+
+
+### Benchmark
+
+In this case the benchmark is very simple, simply squaring all of the
+elements of a linked list and a vector:
+
+```rust
+pub fn run_list(list: &mut LinkedList<i32>) {
+    list.iter_mut().for_each(|x| {
+        *x = *x * *x;
+    });
+}
+
+pub fn run_vec(list: &mut Vec<i32>) {
+    list.iter_mut().for_each(|x| {
+        *x = *x * *x;
+    });
+}
+```
+
+The results are as follows:
+
+![LinkedList benchmark](/images/linkedlist.svg "LinkedList benchmark")
+
+Overall, we see that the data-oriented approach finishes in about a
+tenth of the time.
+
+The [output on Godbolt](https://godbolt.org/z/d6Ms5s) shows the
+unrolling in the Vec case that isn't possible in the LinkedList case.
+
+## Summary
+
+This case is well-known and demonstrates the biggest difference of all
+of the benchmarks. Note that here we look only at iteration, and not at
+other operations which could be considered to somewhat favour Linked
+Lists such as insertion, where it avoids the (amortised) cost of vector
+resizing, however as argued in [Learn Rust With Entirely Too Many Linked
+Lists](https://rust-unofficial.github.io/too-many-lists/#i-cant-afford-amortization)
+this can be avoided in Vectors too.
+
+Hopefully this will become common knowledge and we'll see fewer
+interview questions and practice problems based around linked lists and
+indirection, considering only Big O complexity and not real world
+performance.
+
+
+## Indirection: Dynamic Dispatch vs. Monomorphisation
+
+When writing generic functions (i.e. for any types implementing certain
+Traits), we have the choice between [dynamic dispatch](https://doc.rust-lang.org/book/ch17-02-trait-objects.html)
+and monomorphisation. 
+
+Dynamic dispatch allows us to work with a mixed
+collection of trait objects, i.e. we can have a `Vec<Box<dyn MyTrait>>`
+which can contain references to different types which all implement
+MyTrait. The trait object contains a pointer to the instance of the
+struct itself (implementing MyTrait) and a pointer to the struct's virtual method table
+(or vtable, a lookup table pointing to the implementation of each method
+of MyTrait). Then when we call a method on one of these trait objects, at
+runtime we work out which implementation of the method to use by
+consulting the vtable.
+
+Note that this implies indirection. Our vector has to be of pointers to
+the struct instances themselves (since the different structs implementing
+MyTrait can differ in size and fields), and we must also
+dereference the pointer in the vtable to find out
+which implementation to call.
+
+Monomorphisation, on the other hand, creates a separate implementation
+of the generic function for each possible type. For example, the
+following code would actually create two separate functions for
+`run_vecs_square()` for the `Foo` and `Bar` types respectively:
+
+```rust
+pub struct Foo {
+    id: usize,
+}
+
+pub struct Bar {
+    id: usize,
+}
+
+pub trait MyTrait {
+    fn square_id(&mut self);
+}
+
+impl MyTrait for Foo {
+    fn square_id(&mut self) {
+        self.id = self.id * self.id;
+    }
+}
+
+impl MyTrait for Bar {
+    fn square_id(&mut self) {
+        self.id = self.id * self.id * self.id;
+    }
+}
+
+
+pub fn run_vecs_square<T: MyTrait>(x: &mut Vec<T>) {
+    x.iter_mut().for_each(|x| x.square_id())
+}
+```
+
+This increases the binary size, but gives us an easy way of generating
+multiple implementations of a function for different types and allows us
+to avoid indirection (i.e. note we can use `Vec<T>` and don't need to
+use `Vec<Box<T>>`).
+
+Whereas in the following code, we use dynamic dispatch. There is only
+one implementation of `run_dyn_square` but exactly which implementation
+of `square_id()` it should call is determined at runtime by consulting
+the trait object's vtable.
+
+```rust
+pub fn run_dyn_square(x: &mut Vec<Box<dyn MyTrait>>) {
+    x.iter_mut().for_each(|x| x.square_id())
+}
+```
+
+This can be more convenient, as we can create the vector containing
+references to different types with no worry about what the actual types
+are (only that they implement MyTrait), and we don't inflate the binary
+size. However, we are forced to use indirection, since the underlying
+types could have different sizes, and as we saw with the LinkedList
+example this can have significant implications for auto-vectorisation.
+
+### Benchmark
+
+Using the example above, the benchmark results are as follows:
+
+![Dynamic Dispatch benchmark](/images/dyntrait.svg "Dynamic Dispatch benchmark")
+
+Overall, we see that the monomorphised example finishes in about a
+quarter of the time of the dynamic dispatch one. The monomorphised case
+with indirection (`Vec<Box<T>>`) is only slightly faster than the
+dynamic dispatch case which implies that most of the performance gap is
+due to the added indirection impeding vectorisation, whereas the vtable lookup
+itself only adds a small constant overhead.
+
+Unfortunately, in this case [Godbolt](https://godbolt.org/z/MEPf39)
+doesn't highlight the output we want to see but it appears there is unrolling
+in the monomorphised case.
+
+### Summary
+
+This benchmark showed that the main cost of dynamic dispatch is in
+impeding vectorisation due to the necessary introduction of indirection,
+and that the cost of the lookup in the vtable itself was relatively
+small.
+
+This means that you should definitely consider designing for
+monomorphisation if your methods are doing operations that would greatly
+benefit from vectorisation (such as the mathematical operations above).
+On the other hand, if they are carrying out operations that are not
+vectorised (for example, constructing Strings) then dynamic dispatch may
+have a negligible cost overall.
+
+As always, benchmark your specific use cases and access patterns when
+comparing different possible implementations.
+
+## Conclusion
+
+In this article we have seen four cases where considering data layout in
+memory, and the realities and limitations of the CPU cache has lead to
+significant performance improvements.
+
+This only scratches the surface of data-oriented design and optimisation. For example,
+[structure packing](http://www.catb.org/esr/structure-packing/), padding
+and alignment was not covered. The [data-oriented design book](https://www.dataorienteddesign.com/dodbook/) by
+Richard Fabian also covers some additional topics.
+
+It is important to note that in all of our examples, we did not modify
+the algorithms we used. All implementations for each case have the same
+Big O complexity, and yet in practice the performance can vary greatly,
+with speedups from 2x-10x available just by optimising for
+vectorisation and other features of modern CPUs.
+
+In summary:
+
+* Favour data structures with less/no indirection and contiguous memory
+  (you'll also have an easier time with the borrow checker!).
+* Avoid branching inside loops.
+* Benchmark your use cases and access patterns.
+* [Criterion](https://github.com/bheisler/criterion.rs) is a great benchmarking tool.
+* [cargo-asm](https://github.com/gnzlbg/cargo-asm) and [Godbolt](https://godbolt.org/) can be used to inspect the generated assembly (and
+  LLVM intermediate representation).
