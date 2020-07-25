@@ -1,0 +1,1011 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+<head>
+  <meta charset="utf-8">
+  <!--TODO: JS to select title goes here -->
+  <title>An introduction to Data Oriented Design with Rust - Statistically Insignificant</title>
+  <meta name="author" content="James McMurray">
+
+  
+  <meta name="description" content="An introduction to Data Oriented Design with Rust An introduction to Data Oriented Design with Rust In the post we will investigate the main &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jamesmcm.github.io/blog/2020/07/25/intro-dod">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Statistically Insignificant" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$$','$$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+
+
+      <script>
+
+//$(window).ready(changeAllPosts(getLang()));       
+       //window.onload=changeAllPosts(getLang());
+
+function pageLoad() {
+           if (window.location.hash){
+             var hash = window.location.hash.substring(1);
+               if (hash=="sp" || hash=="en"){
+               changeLang(hash);
+                   }
+           } else {
+               changeAllPosts(getLang());
+
+           }
+}
+       
+function changeLang(lang){
+window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
+if (window["title"+lang]){
+document.title=window["title"+lang];
+           }
+console.log("title"+lang);
+console.log(window["title"+lang]);           
+           
+setLang(lang);
+changeAllPosts(lang);
+}
+       
+function setLang(lang){
+    var exdays=30;
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toGMTString();
+    document.cookie = "lang=" + lang + "; " + expires + "; path=/";
+}
+       
+function getLang() {
+    var name = "lang" + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "en";
+}
+
+
+function changeAllPosts(lang){
+//TODO: Change subtitle too
+console.log(lang);
+l=document.getElementsByClassName("titleEnglish");
+l2=document.getElementsByClassName("titleSpanish");
+l3=document.getElementsByClassName("English");           
+l4=document.getElementsByClassName("Spanish");
+l5=document.getElementsByClassName("enbutton");
+l6=document.getElementsByClassName("esbutton");
+var arrayLength = Math.max(l.length,l3.length);
+for (var i = 0; i < arrayLength; i++) {
+if (lang=="sp"){
+
+if (typeof l[i] !== 'undefined') {
+l[i].style.display="none";
+}
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="inline";
+}                       
+if (typeof l3[i] !== 'undefined') {
+l3[i].style.display="none";
+}
+if (typeof l4[i] !== 'undefined') {
+l4[i].style.display="inline";
+}                               
+if (typeof l5[i] !== 'undefined') {
+l5[i].disabled=false;
+}
+if (typeof l6[i] !== 'undefined') {                   
+l6[i].disabled=true;
+}
+                               
+document.getElementById("hsubtitleEnglish").style.display="none";
+document.getElementById("hsubtitleSpanish").style.display="inline";
+
+} else if (lang=="en"){
+if (typeof l[i] !== 'undefined') {               
+l[i].style.display="inline";
+}                   
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="none";
+}
+if (typeof l3[i] !== 'undefined') {               
+l3[i].style.display="inline";
+}
+if (typeof l4[i] !== 'undefined') {               
+l4[i].style.display="none";
+}
+if (typeof l5[i] !== 'undefined') {               
+l5[i].disabled=true;
+}
+if (typeof l6[i] !== 'undefined') {               
+l6[i].disabled=false;
+}                   
+document.getElementById("hsubtitleEnglish").style.display="inline";
+document.getElementById("hsubtitleSpanish").style.display="none";
+}
+
+
+} 
+}
+       
+function showSpanish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="none";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="inline";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="inline";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="none";
+
+
+     btn.parentNode.getElementsByClassName("enbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+</script>
+
+
+<script>
+function showEnglish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="inline";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="none";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="none";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="inline";
+
+
+     btn.parentNode.getElementsByClassName("esbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+
+$(window).load(changeAllPosts(getLang()));
+</script>
+
+
+  <!--
+-->
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-53539911-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Statistically Insignificant</a></h1>
+  
+   <h2><div display='inline' id="hsubtitleEnglish"> Languages, Statistics and other things </div><div id='hsubtitleSpanish' style='display: none'> Los idiomas, la estadística y otras cosas </div></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!-- <ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+-->
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jamesmcm.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><div class="English"><a href="/about/#en">About</a></div><div class="Spanish"><a href="/about/#sp">Sobre este blog</a></div></li>
+</ul>
+
+
+<ul class="langs">
+  <li><a href="#en" onclick="changeLang('en');">English</a></li>
+  <li><a href="#sp" onclick="changeLang('sp');">Español</a></li>
+</ul>
+
+
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+
+  
+  <header>
+    
+
+      <h1 display="inline-block" class="entry-title"> <div display='inline' class='titleEnglish'> An introduction to Data Oriented Design with Rust</div><div class='titleSpanish' style='display: none'> An introduction to Data Oriented Design with Rust </div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>    -->
+
+
+
+    
+    
+  </header>
+
+
+    <div class="entry-content"><p>In the post we will investigate the main concepts of <a href="https://en.wikipedia.org/wiki/Data-oriented_design">Data-oriented
+Design</a> using Rust.</p>
+
+<p>The source code for this example is <a href="https://github.com/jamesmcm/data-oriented-example">available on Github</a>.</p>
+
+<!--more-->
+
+<h2 id="what-is-data-oriented-design">What is data-oriented design?</h2>
+
+<p>Data-oriented design is an approach to optimising programs by carefully
+considering the memory layout of data structures, and their implications
+for auto-vectorisation and use of the CPU cache. I highly recommend
+watching Mike Acton’s <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">“Data-Oriented Design and C++”</a> talk
+if you haven’t seen it already.</p>
+
+<p>In this post we will cover 4 cases, using <a href="https://docs.rs/criterion/0.3.3/criterion/">criterion</a> for
+benchmarking. The cases are:</p>
+
+<ul>
+  <li>Struct of arrays vs. array of structs</li>
+  <li>The cost of branching inside a hot loop</li>
+  <li>Linked List vs. Vector iteration</li>
+  <li>The cost of dynamic dispatch vs. monomorphisation</li>
+</ul>
+
+<h2 id="struct-of-arrays-vs-array-of-structs">Struct of Arrays vs. Array of Structs</h2>
+
+<p>The <a href="https://en.wikipedia.org/wiki/AoS_and_SoA">Struct of Arrays vs. Array of Structs</a> 
+refers to two contrasting ways of organising entity data to be operated
+over.</p>
+
+<p>For example, imagine we are writing a video game and we would like to
+have a Player struct with the following fields:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Player</span> <span class="p">{</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+    <span class="n">health</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span>
+    <span class="n">location</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then at each frame, we want to update the locations and velocities of all
+Players. We could write something like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_oop</span><span class="p">(</span><span class="n">players</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Player</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="n">player</span> <span class="n">in</span> <span class="n">players</span><span class="nf">.iter_mut</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">player</span><span class="py">.location</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">player</span><span class="py">.location</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">player</span><span class="py">.location</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">);</span>
+        <span class="n">player</span><span class="py">.velocity</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">player</span><span class="py">.acceleration</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">player</span><span class="py">.acceleration</span><span class="err">.</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This would be the usual object-oriented approach to this problem. The
+issue here is that in memory the structs are stored as follows (assuming
+no field re-ordering), on a 64-bit architecture each field will be 64
+bits (8 bytes, so each Player is 64 bytes):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-- Vec&lt;Player&gt;
+name  (pointer to heap)  -- Player 1
+health    
+location0  (tuple split for clarity) 
+location1
+velocity0
+velocity1
+acceleration0
+acceleration1
+name  (pointer to heap)  -- Player 2
+location0    
+location1
+velocity0
+velocity1
+acceleration0
+acceleration1
+...
+</code></pre></div></div>
+
+<p>Note the parts we want to operate on (locations, velocities and
+accelerations) are not stored contiguously across different Players.
+This prevents us from using vector operations to operate on multiple
+players at once (since they cannot be loaded in the same CPU cache
+line, usually ~64 bytes).</p>
+
+<p>In contrast, the data-oriented approach is to design around this
+limitation and optimise for auto-vectorisation. Instead of using a
+struct per Player, we now use one struct for all Players and each Player
+has their values stored at their index in the separate attribute Vectors:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">DOPlayers</span> <span class="p">{</span>
+    <span class="n">names</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">health</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">f64</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">locations</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">velocities</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now we can do the same calculation as in the OOP case as follows:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_dop</span><span class="p">(</span><span class="n">world</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">DOPlayers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="n">acc</span><span class="p">))</span> <span class="n">in</span> <span class="n">world</span>
+        <span class="py">.locations</span>
+        <span class="nf">.iter_mut</span><span class="p">()</span>
+        <span class="nf">.zip</span><span class="p">(</span><span class="n">world</span><span class="py">.velocities</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.zip</span><span class="p">(</span><span class="n">world</span><span class="py">.acceleration</span><span class="nf">.iter</span><span class="p">()))</span>
+    <span class="p">{</span>
+        <span class="o">*</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">vel</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">pos</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">vel</span><span class="err">.</span><span class="mi">1</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">acc</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">vel</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">acc</span><span class="err">.</span><span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In this case the memory layout is as follows:</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-- DOPlayers
+name1    -- names
+name2
+...
+health1    -- health
+health2
+...
+location1    -- locations
+location2
+...
+</code></pre></div></div>
+
+<p>The relevant fields are now stored contiguously. Given that each
+location tuple will be 16 bytes, we could now feasibly load 4 location
+tuples on the same cache line to operate on them simultaneously with
+SIMD instructions.</p>
+
+<h3 id="benchmark">Benchmark</h3>
+
+<p>Here are the results of the criterion benchmark for the above code (the
+full code and benchmark code is available <a href="https://github.com/jamesmcm/data-oriented-example">in the Github repo</a>):</p>
+
+<p><img src="/images/soa.svg" alt="AoS vs. SoA benchmark" title="AoS vs. SoA benchmark" /></p>
+
+<p>Overall, we see that the data-oriented approach finishes in half the
+time. This would seem to be due to the data-oriented case operating on
+two Players at a time - we can confirm this by reviewing the compiled
+assembly.</p>
+
+<p>Reviewing the <a href="https://godbolt.org/z/d8bjMb">output on Godbolt</a> we see the following:</p>
+
+<pre><code class="language-asm">// Relevant OOP loop
+.LBB0_2:
+        movupd  xmm0, xmmword ptr [rax + rdx + 32]
+        movupd  xmm1, xmmword ptr [rax + rdx + 48]
+        movupd  xmm2, xmmword ptr [rax + rdx + 64]
+        addpd   xmm0, xmm1
+        movupd  xmmword ptr [rax + rdx + 32], xmm0
+        addpd   xmm2, xmm1
+        movupd  xmmword ptr [rax + rdx + 48], xmm2
+        add     rdx, 80
+        cmp     rcx, rdx
+        jne     .LBB0_2
+
+// ...
+// Relevant DOP loop
+.LBB1_7:
+        movupd  xmm0, xmmword ptr [rcx + rdx - 16]
+        movupd  xmm1, xmmword ptr [rax + rdx - 16]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rcx + rdx - 16], xmm1
+        movupd  xmm0, xmmword ptr [r9 + rdx - 16]
+        movupd  xmm1, xmmword ptr [rax + rdx - 16]
+        addpd   xmm1, xmm0
+        movupd  xmm0, xmmword ptr [rax + rdx]
+        movupd  xmmword ptr [rax + rdx - 16], xmm1
+        add     rdi, 2
+        movupd  xmm1, xmmword ptr [rcx + rdx]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rcx + rdx], xmm1
+        movupd  xmm0, xmmword ptr [rax + rdx]
+        movupd  xmm1, xmmword ptr [r9 + rdx]
+        addpd   xmm1, xmm0
+        movupd  xmmword ptr [rax + rdx], xmm1
+        add     rdx, 32
+        cmp     rsi, rdi
+        jne     .LBB1_7
+        test    r8, r8
+        je      .LBB1_5
+</code></pre>
+
+<p>We can see in the data-oriented case, the loop is unrolled to operate on
+two elements at once - resulting in the 50% speed up overall!</p>
+
+<h3 id="summary">Summary</h3>
+
+<p>This example demonstrates the importance of considering memory layout
+when aiming for performant code and auto-vectorisation.</p>
+
+<p>Note that the same logic can also apply when working with arrays of
+structs - making your struct smaller will allow you to load more
+elements on the same cache line and possibly lead to autovectorisation.
+<a href="https://github.com/Rene-007/flake_growth/blob/master/src/helpers.rs">Here is an example</a> of
+a crate (which was shared on the <a href="https://www.reddit.com/r/rust/comments/hmqjvs/growing_gold_with_rust/">Rust subreddit</a>) that achieved a 40% performance
+improvement by doing just that.</p>
+
+<p>This particular re-organisation has a direct analogue in database design. A
+major difference between databases aimed at transactional (OLTP)
+workloads and analytical (OLAP) workloads is that the latter tend to use
+columnar-based storage. Just like the case above, this means that
+operations on one column can take advantage of the contiguous storage
+and use vector operations, which tends to be the main access pattern for
+analytical workloads (e.g. calculate the average purchase size across all rows,
+rather than updating and retrieving entire, specific rows).</p>
+
+<p>In the case of analytical databases this is actually a double win, since it also
+applies to the serialisation of the data to disk, where compression can
+now be applied along the column (where the data is guaranteed to be of the
+same type) leading to much better compression ratios.</p>
+
+<h2 id="branching-in-a-hot-loop">Branching in a hot loop</h2>
+
+<p>Another optimisation tactic is to avoid branching in any “hot” parts of
+the code (i.e. any part that will be executed many, many times).</p>
+
+<p>Branching can arise in subtle ways, often by trying to use one struct for many
+different cases. For example, we might define some general Node type as follows:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">NodeType</span> <span class="p">{</span>
+  <span class="n">Player</span><span class="p">,</span>
+  <span class="n">PhysicsObject</span><span class="p">,</span>
+  <span class="n">Script</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">struct</span> <span class="n">Node</span> <span class="p">{</span>
+<span class="n">node_type</span><span class="p">:</span> <span class="n">NodeType</span><span class="p">,</span>
+<span class="n">position</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
+<span class="c">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And then pattern match on <code class="highlighter-rouge">node_type</code> when we need to operate on a Node.
+The problem comes when we have a <code class="highlighter-rouge">Vec&lt;Node&gt;</code> with tens of thousands of
+elements, which we might need to operate on every frame. By using
+<code class="highlighter-rouge">node.node_type</code> to decide the logic to use, we need to check
+that for every element (since the order of the <code class="highlighter-rouge">node_type</code>’s within the
+<code class="highlighter-rouge">Vec&lt;Node&gt;</code> is unknown).</p>
+
+<p>Not only does this comparison mean we must do an extra operation for
+every element, but it also impedes auto-vectorisation, since our
+relevant nodes (of the same <code class="highlighter-rouge">node_type</code>) may not be stored contiguously.</p>
+
+<p>The data-oriented approach is to split these nodes up by <code class="highlighter-rouge">node_type</code>.
+Ideally creating a separate struct per node type, or at least
+separating them in separate Vectors before the hot loop. This means we
+don’t need to check the <code class="highlighter-rouge">node_type</code> inside the hot loop, and we can take
+advantage of the fact that the nodes we do operate on will be stored in
+contiguous memory.</p>
+
+<h3 id="benchmark-1">Benchmark</h3>
+
+<p>In this benchmark we use the following code:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
+    <span class="n">calc_type</span><span class="p">:</span> <span class="n">CalcType</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
+<span class="k">pub</span> <span class="k">enum</span> <span class="n">CalcType</span> <span class="p">{</span>
+    <span class="n">Identity</span><span class="p">,</span>
+    <span class="n">Square</span><span class="p">,</span>
+    <span class="n">Cube</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c">// ...</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_mixed</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">])</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">x</span><span class="nf">.into_iter</span><span class="p">()</span>
+        <span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="k">match</span> <span class="n">x</span><span class="py">.calc_type</span> <span class="p">{</span>
+            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Identity</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
+            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Square</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
+            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Cube</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="nf">.collect</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_separate</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">],</span> <span class="n">z</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">])</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
+    <span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
+    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Comparing the case of a mixed vector of Foos, and separate vector of
+Foos split by <code class="highlighter-rouge">calc_type</code>.</p>
+
+<p>The results of the benchmark are as follows:</p>
+
+<p><img src="/images/innercheck.svg" alt="Loop branch benchmark" title="Loop branch benchmark" /></p>
+
+<p>Overall, we see that the data-oriented approach finishes in about a 
+quarter of the time.</p>
+
+<p>The <a href="https://godbolt.org/z/Y9dYbs">output on Godbolt</a> is less clear this
+time, but we can see that there seems to be some unrolling in the
+separate case that isn’t possible in the mixed case due to the need to
+check the <code class="highlighter-rouge">calc_type</code> in that case.</p>
+
+<h3 id="summary-1">Summary</h3>
+
+<p>The concept of moving any instructions you can outside of hot loops
+should be familiar, but this example also demonstrates how it can impact
+vectorisation.</p>
+
+<h2 id="indirection-iteration-in-a-linked-list">Indirection: Iteration in a Linked List</h2>
+
+<p>In this example we will compare iterating through a (doubly) linked list
+vs. a vector. This case is well-known and mentioned in <a href="https://doc.rust-lang.org/beta/std/collections/struct.LinkedList.html">Rust’s
+LinkedList docs</a>,
+in <a href="https://doc.rust-lang.org/beta/std/collections/index.html#use-a-linkedlist-when">Rust’s std::collections docs</a>
+and in <a href="https://rust-unofficial.github.io/too-many-lists/#an-obligatory-public-service-announcement">Learn Rust With Entirely Too Many Linked Lists’ Public Service Announcement</a>.
+The latter Public Service Announcement covers a lot of cases where
+Linked Lists are commonly used, so I recommend reading that if you
+haven’t already. Nevertheless, the proof is in the pudding, so I think
+it’s useful to see a benchmark directly.</p>
+
+<p>A Linked List stores elements <em>indirectly</em>, that is, it stores an
+element and a pointer to the next element. This means that consecutive
+elements in the linked list are <em>not</em> stored in consecutive memory
+locations.</p>
+
+<p>This leads to two issues that impede vectorisation:</p>
+<ul>
+  <li>The elements of the linked list may be stored arbitrarily far apart, so
+we cannot just load a block of memory to the CPU cache to operate on
+them simultaneously.</li>
+  <li>We have to dereference a pointer to get the next element in the list.</li>
+</ul>
+
+<p>For example, we might store a vector of i32s on the heap as follows
+(holding a pointer to the start of the vector, the vector capacity and
+the vector length, on the stack):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00 1
+0x01 2
+0x02 3
+...
+</code></pre></div></div>
+
+<p>The values are stored contiguously, whereas for a (singly) linked list, we could
+have the following case.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00 1
+0x01 0x14
+0x0C 3
+0x0D 0
+...
+0x14 2
+0x15 0x0C
+</code></pre></div></div>
+
+<p>Here the values are not stored in contiguous memory (or even necessarily
+in the same order as their pointers maintain in the list).</p>
+
+<h3 id="benchmark-2">Benchmark</h3>
+
+<p>In this case the benchmark is very simple, simply squaring all of the
+elements of a linked list and a vector:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_list</span><span class="p">(</span><span class="n">list</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">LinkedList</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">list</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span> <span class="o">*</span> <span class="o">*</span><span class="n">x</span><span class="p">;</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_vec</span><span class="p">(</span><span class="n">list</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">list</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span> <span class="o">*</span> <span class="o">*</span><span class="n">x</span><span class="p">;</span>
+    <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The results are as follows:</p>
+
+<p><img src="/images/linkedlist.svg" alt="LinkedList benchmark" title="LinkedList benchmark" /></p>
+
+<p>Overall, we see that the data-oriented approach finishes in about a
+tenth of the time.</p>
+
+<p>The <a href="https://godbolt.org/z/d6Ms5s">output on Godbolt</a> shows the
+unrolling in the Vec case that isn’t possible in the LinkedList case.</p>
+
+<h2 id="summary-2">Summary</h2>
+
+<p>This case is well-known and demonstrates the biggest difference of all
+of the benchmarks. Note that here we look only at iteration, and not at
+other operations which could be considered to somewhat favour Linked
+Lists such as insertion, where it avoids the (amortised) cost of vector
+resizing, however as argued in <a href="https://rust-unofficial.github.io/too-many-lists/#i-cant-afford-amortization">Learn Rust With Entirely Too Many Linked
+Lists</a>
+this can be avoided in Vectors too.</p>
+
+<p>Hopefully this will become common knowledge and we’ll see fewer
+interview questions and practice problems based around linked lists and
+indirection, considering only Big O complexity and not real world
+performance.</p>
+
+<h2 id="indirection-dynamic-dispatch-vs-monomorphisation">Indirection: Dynamic Dispatch vs. Monomorphisation</h2>
+
+<p>When writing generic functions (i.e. for any types implementing certain
+Traits), we have the choice between <a href="https://doc.rust-lang.org/book/ch17-02-trait-objects.html">dynamic dispatch</a>
+and monomorphisation.</p>
+
+<p>Dynamic dispatch allows us to work with a mixed
+collection of trait objects, i.e. we can have a <code class="highlighter-rouge">Vec&lt;Box&lt;dyn MyTrait&gt;&gt;</code>
+which can contain references to different types which all implement
+MyTrait. The trait object contains a pointer to the instance of the
+struct itself (implementing MyTrait) and a pointer to the struct’s virtual method table
+(or vtable, a lookup table pointing to the implementation of each method
+of MyTrait). Then when we call a method on one of these trait objects, at
+runtime we work out which implementation of the method to use by
+consulting the vtable.</p>
+
+<p>Note that this implies indirection. Our vector has to be of pointers to
+the struct instances themselves (since the different structs implementing
+MyTrait can differ in size and fields), and we must also
+dereference the pointer in the vtable to find out
+which implementation to call.</p>
+
+<p>Monomorphisation, on the other hand, creates a separate implementation
+of the generic function for each possible type. For example, the
+following code would actually create two separate functions for
+<code class="highlighter-rouge">run_vecs_square()</code> for the <code class="highlighter-rouge">Foo</code> and <code class="highlighter-rouge">Bar</code> types respectively:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="n">id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">struct</span> <span class="n">Bar</span> <span class="p">{</span>
+    <span class="n">id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">pub</span> <span class="k">trait</span> <span class="n">MyTrait</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">MyTrait</span> <span class="k">for</span> <span class="n">Foo</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.id</span> <span class="o">=</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">impl</span> <span class="n">MyTrait</span> <span class="k">for</span> <span class="n">Bar</span> <span class="p">{</span>
+    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">self</span><span class="py">.id</span> <span class="o">=</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="k">pub</span> <span class="k">fn</span> <span class="n">run_vecs_square</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">MyTrait</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">x</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.square_id</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This increases the binary size, but gives us an easy way of generating
+multiple implementations of a function for different types and allows us
+to avoid indirection (i.e. note we can use <code class="highlighter-rouge">Vec&lt;T&gt;</code> and don’t need to
+use <code class="highlighter-rouge">Vec&lt;Box&lt;T&gt;&gt;</code>).</p>
+
+<p>Whereas in the following code, we use dynamic dispatch. There is only
+one implementation of <code class="highlighter-rouge">run_dyn_square</code> but exactly which implementation
+of <code class="highlighter-rouge">square_id()</code> it should call is determined at runtime by consulting
+the trait object’s vtable.</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_dyn_square</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">MyTrait</span><span class="o">&gt;&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">x</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.square_id</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This can be more convenient, as we can create the vector containing
+references to different types with no worry about what the actual types
+are (only that they implement MyTrait), and we don’t inflate the binary
+size. However, we are forced to use indirection, since the underlying
+types could have different sizes, and as we saw with the LinkedList
+example this can have significant implications for auto-vectorisation.</p>
+
+<h3 id="benchmark-3">Benchmark</h3>
+
+<p>Using the example above, the benchmark results are as follows:</p>
+
+<p><img src="/images/dyntrait.svg" alt="Dynamic Dispatch benchmark" title="Dynamic Dispatch benchmark" /></p>
+
+<p>Overall, we see that the monomorphised example finishes in about a
+quarter of the time of the dynamic dispatch one. The monomorphised case
+with indirection (<code class="highlighter-rouge">Vec&lt;Box&lt;T&gt;&gt;</code>) is only slightly faster than the
+dynamic dispatch case which implies that most of the performance gap is
+due to the added indirection impeding vectorisation, whereas the vtable lookup
+itself only adds a small constant overhead.</p>
+
+<p>Unfortunately, in this case <a href="https://godbolt.org/z/MEPf39">Godbolt</a>
+doesn’t highlight the output we want to see but it appears there is unrolling
+in the monomorphised case.</p>
+
+<h3 id="summary-3">Summary</h3>
+
+<p>This benchmark showed that the main cost of dynamic dispatch is in
+impeding vectorisation due to the necessary introduction of indirection,
+and that the cost of the lookup in the vtable itself was relatively
+small.</p>
+
+<p>This means that you should definitely consider designing for
+monomorphisation if your methods are doing operations that would greatly
+benefit from vectorisation (such as the mathematical operations above).
+On the other hand, if they are carrying out operations that are not
+vectorised (for example, constructing Strings) then dynamic dispatch may
+have a negligible cost overall.</p>
+
+<p>As always, benchmark your specific use cases and access patterns when
+comparing different possible implementations.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>In this article we have seen four cases where considering data layout in
+memory, and the realities and limitations of the CPU cache has lead to
+significant performance improvements.</p>
+
+<p>This only scratches the surface of data-oriented design and optimisation. For example,
+<a href="http://www.catb.org/esr/structure-packing/">structure packing</a>, padding
+and alignment was not covered. The <a href="https://www.dataorienteddesign.com/dodbook/">data-oriented design book</a> by
+Richard Fabian also covers some additional topics.</p>
+
+<p>It is important to note that in all of our examples, we did not modify
+the algorithms we used. All implementations for each case have the same
+Big O complexity, and yet in practice the performance can vary greatly,
+with speedups from 2x-10x available just by optimising for
+vectorisation and other features of modern CPUs.</p>
+
+<p>In summary:</p>
+
+<ul>
+  <li>Favour data structures with less/no indirection and contiguous memory
+(you’ll also have an easier time with the borrow checker!).</li>
+  <li>Avoid branching inside loops.</li>
+  <li>Benchmark your use cases and access patterns.</li>
+  <li><a href="https://github.com/bheisler/criterion.rs">Criterion</a> is a great benchmarking tool.</li>
+  <li><a href="https://github.com/gnzlbg/cargo-asm">cargo-asm</a> and <a href="https://godbolt.org/">Godbolt</a> can be used to inspect the generated assembly (and
+LLVM intermediate representation).</li>
+</ul>
+
+</div>
+
+
+
+
+<script>
+$(window).ready(changeAllPosts(getLang()));
+</script>
+
+   <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'statisticallyinsignificant'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+
+  <footer>
+    <p class="meta">
+      <span class = "categories">
+    <span class="English">
+        <a href="#en">Permalink</a>
+    </span>
+    <span class="Spanish">
+        <a href="#sp">Permalink</a>
+    </span>
+</span>
+
+      <!-- 
+<span class="byline author vcard"><span class="English">Written by <span class="fn">James McMurray</span></span><span class="Spanish" style="display: none">Escrito por <span class="fn">James McMurray</span></span></span>
+ --> &#9679;
+      
+
+
+ &#9679;
+      
+
+<span class="categories">
+  
+    Rust
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/" data-via="" data-counturl="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      <div class="English">
+        <a class="basic-alignment left" href="/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/" title="Previous Post: A practical introduction to async programming in Rust">&laquo; A practical introduction to async programming in Rust</a>
+</div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment left" href="/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/" title="Previous Post: A practical introduction to async programming in Rust">&laquo; A practical introduction to async programming in Rust</a>
+</div>
+      
+      
+    </p>
+  </footer>
+
+
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+    <h2><div class="English">Categories</div><div class="Spanish" display="none">Categorías</div></h2>
+<ul display=block>
+    <li><div class="English"><a href="/blog/categories/general/#en">General</a></div><div class="Spanish"><a href="/blog/categories/general/#sp">General</a></div></li>
+    <li><div class="English"><a href="/blog/categories/statistics/#en">ML/Statistics</a></div><div class="Spanish"><a href="/blog/categories/statistics/#sp">ML/Estadística</a></div></li>
+    <li><div class="English"><a href="/blog/categories/languages/#en">Languages</a></div><div class="Spanish"><a href="/blog/categories/languages/#sp">Idiomas</a></div></li>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo">
+
+<p>
+  Copyright &copy; 2020 - James McMurray -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'statisticallyinsignificant';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jamesmcm.github.io/blog/2020/07/25/intro-dod/';
+        var disqus_url = 'http://jamesmcm.github.io/blog/2020/07/25/intro-dod/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+
+  <script>
+
+
+   
+var titlesp="An introduction to Data Oriented Design with Rust";
+var titleen="An introduction to Data Oriented Design with Rust";
+
+//$(window).load(changeAllPosts(getLang()));
+
+
+$(window).load(pageLoad);
+$(window).ready(pageLoad);
+</script>
+
+</body>
+
+</html>
