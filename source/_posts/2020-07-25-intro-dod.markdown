@@ -72,7 +72,7 @@ pub fn run_oop(players: &mut Vec<Player>) {
 
 This would be the usual object-oriented approach to this problem. The
 issue here is that in memory the structs are stored as follows (assuming
-no field re-ordering), on a 64-bit architecture each field will be 64
+no field re-ordering i.e. `#[repr(C)]`), on a 64-bit architecture each field will be 64
 bits (8 bytes, so each Player is 64 bytes):
 
 ```
@@ -208,6 +208,72 @@ Reviewing the [output on Godbolt](https://godbolt.org/z/d8bjMb) we see the follo
 We can see in the data-oriented case, the loop is unrolled to operate on
 two elements at once - resulting in the 50% speed up overall!
 
+__Addendum__: As noted by [/u/five9a2 on Reddit](https://www.reddit.com/r/rust/comments/hxqwom/an_introduction_to_data_oriented_design_with_rust/fz8lxcq/)
+the above output is specifically for the default target, which is
+misleading since `cargo bench` uses the native target by default (i.e.
+all possible features on your CPU), so our benchmarks are not using the
+above assembly code.
+
+By setting the compiler flag to `-C target-cpu=skylake-avx512` to enable 
+Skylake features, we get the [following output](https://godbolt.org/z/PEPdvn):
+
+```asm
+// OOP loop
+.LBB0_2:
+        vmovupd ymm0, ymmword ptr [rax + rdx + 32]
+        vaddpd  ymm0, ymm0, ymmword ptr [rax + rdx + 48]
+        vmovupd ymmword ptr [rax + rdx + 32], ymm0
+        add     rdx, 80
+        cmp     rcx, rdx
+        jne     .LBB0_2
+
+...
+// DOP loop
+.LBB1_19:
+        vmovupd zmm0, zmmword ptr [rsi + 4*rax - 64]
+        vaddpd  zmm0, zmm0, zmmword ptr [rcx + 4*rax - 64]
+        vmovupd zmmword ptr [rsi + 4*rax - 64], zmm0
+        vmovupd zmm0, zmmword ptr [rcx + 4*rax - 64]
+        vaddpd  zmm0, zmm0, zmmword ptr [r10 + 4*rax - 64]
+        vmovupd zmmword ptr [rcx + 4*rax - 64], zmm0
+        vmovupd zmm0, zmmword ptr [rsi + 4*rax]
+        vaddpd  zmm0, zmm0, zmmword ptr [rcx + 4*rax]
+        vmovupd zmmword ptr [rsi + 4*rax], zmm0
+        vmovupd zmm0, zmmword ptr [rcx + 4*rax]
+        vaddpd  zmm0, zmm0, zmmword ptr [r10 + 4*rax]
+        vmovupd zmmword ptr [rcx + 4*rax], zmm0
+        add     r11, 8
+        add     rax, 32
+        add     rdi, 2
+        jne     .LBB1_19
+        test    r9, r9
+        je      .LBB1_22
+```
+
+Here we see the OOP loop making use of the 256-bit ymm registers for the
+position tuple and velocity tuple, and another for the velocity tuple
+and acceleration tuple. This is possible because they are adjacent in
+memory (due to the ordering of the fields). In the DOP loop,
+the 512-bit zmm register is used.
+
+It seems the performance differences comes from the bandwidth between
+cache levels, since the performance is identical for the small examples.
+This can be demonstrated further by removing the extra fields from the
+struct - in this case we see only a 25% performance difference ([godbolt
+link](https://godbolt.org/z/Th91Wa)), and this
+corresponds to Player struct now being 384 bits (and so 1/4 of the
+512-bit read/write is unused).
+
+This emphasises how important it is to consider your deployment target,
+and if deploying performance-sensitive code, to consider setting the
+target-cpu explicitly to benefit from all of its features.
+
+It also demonstrates how the ordering of fields can be important to
+performance. By default Rust will re-order fields automatically, but you can set
+`#[repr(C)]` to disable this (necessary for C interoperability for
+example).
+
+
 ### Summary
 
 This example demonstrates the importance of considering memory layout
@@ -233,6 +299,12 @@ In the case of analytical databases this is actually a double win, since it also
 applies to the serialisation of the data to disk, where compression can
 now be applied along the column (where the data is guaranteed to be of the
 same type) leading to much better compression ratios.
+
+If you are working on a problem that might benefit from the struct of
+arrays approach, and want to run a quick benchmark, you might be
+interested in the [soa-derive](https://github.com/lumol-org/soa-derive)
+crate that will allow you to derive the struct of arrays from your
+struct.
 
 ## Branching in a hot loop
 
@@ -322,7 +394,7 @@ The results of the benchmark are as follows:
 Overall, we see that the data-oriented approach finishes in about a 
 quarter of the time.
 
-The [output on Godbolt](https://godbolt.org/z/Y9dYbs) is less clear this
+The [output on Godbolt](https://godbolt.org/z/6ocTx8) is less clear this
 time, but we can see that there seems to be some unrolling in the
 separate case that isn't possible in the mixed case due to the need to
 check the `calc_type` in that case.
@@ -411,7 +483,7 @@ The results are as follows:
 Overall, we see that the data-oriented approach finishes in about a
 tenth of the time.
 
-The [output on Godbolt](https://godbolt.org/z/d6Ms5s) shows the
+The [output on Godbolt](https://godbolt.org/z/EzznM1) shows the
 unrolling in the Vec case that isn't possible in the LinkedList case.
 
 ## Summary
@@ -524,9 +596,8 @@ dynamic dispatch case which implies that most of the performance gap is
 due to the added indirection impeding vectorisation, whereas the vtable lookup
 itself only adds a small constant overhead.
 
-Unfortunately, in this case [Godbolt](https://godbolt.org/z/MEPf39)
-doesn't highlight the output we want to see but it appears there is unrolling
-in the monomorphised case.
+Unfortunately, in this case [Godbolt](https://godbolt.org/z/46WYaP)
+doesn't include the target functions in the generated output.
 
 ### Summary
 
@@ -568,6 +639,9 @@ In summary:
   (you'll also have an easier time with the borrow checker!).
 * Avoid branching inside loops.
 * Benchmark your use cases and access patterns.
+* If deploying performance sensitive code, consider targeting the CPU
+  features of your destination machine (i.e. [use RUSTFLAGS](https://rust-lang.github.io/packed_simd/perf-guide/target-feature/rustflags.html)).
 * [Criterion](https://github.com/bheisler/criterion.rs) is a great benchmarking tool.
 * [cargo-asm](https://github.com/gnzlbg/cargo-asm) and [Godbolt](https://godbolt.org/) can be used to inspect the generated assembly (and
   LLVM intermediate representation).
+* [perf](https://rust-lang.github.io/packed_simd/perf-guide/prof/linux.html) and [flamegraph](https://github.com/flamegraph-rs/flamegraph) can be used for performance profiling.
