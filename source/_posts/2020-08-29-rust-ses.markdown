@@ -13,7 +13,7 @@ In this post we will set up a simple, serverless data ingestion pipeline using R
 AWS Lambda and AWS SES with Workmail. 
 
 We will handle multiple types of
-AWS events with one Lambda function (via Serde), parse received emails
+AWS events with one Lambda function, parse received emails
 with the mailparse crate, and send email with SES and the lettre crate.
 
 The complete code for this example is [available on GitHub here](https://github.com/jamesmcm/rust_ses_example).
@@ -37,26 +37,27 @@ recipient with either a confirmation of success, or a list of
 encountered errors (either in deserialization of the attachment or
 validation) and their file for reference.
 
-Note that in [a previous post](http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en) I dealt with create a Lambda based
-pipeline for parsing Excel files and writing to Redshift. There are a
+Note that in [a previous post](http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en) 
+I dealt with creating a Lambda based
+pipeline for parsing Excel files and loading the resulting CSV to Redshift. There are a
 few differences and things to note in this process:
 
-* We will use Rustls not OpenSSL (so it is easier to statically link
+* We will use [rustls](https://crates.io/crates/rustls) not OpenSSL (so it is easier to statically link
   with musl) - in this case, we only need to select that feature in
   Rusoto.
-* The Rusoto API has changed to be asynchronous, so we must instantiate
-  a Tokio runtime (i.e. we cannot just use `.sync()` anymore)
-* I am still using the crates.io version of the lambda_runtime crate, so
-  we do not have complete async support (the Github master branch _does_
+* The Rusoto API [no longer provides the .sync() method](https://users.rust-lang.org/t/rusoto-how-to-make-sync-calls/41317), so we must instantiate
+  an async runtime to block on the Future returned.
+* I am still using the crates.io version of the [lambda_runtime](https://crates.io/crates/lambda_runtime)
+  crate (currently v0.2.1), so we do not have complete async support (the Github master branch version _does_
   allow you to just use async functions directly!)
-* Here we will deal with parsing email MIME-formatted messages.
+* Here we will deal with parsing MIME-formatted emails.
 
-Note that the justification for using Rust is the same - mainly that we
+Note that the reasoning for using Rust is the same - mainly that we
 can deploy a statically linked binary with musl, and we can easily share Rust code
 between different Lambda functions via crates with feature gates, so we can
 include only what we need - helping to control binary size.
 
-We can break this down in to the following steps:
+Overall, we can break this process down in to the following steps:
 
 * Parsing a received email (we will set up Workmail to save all emails
   directly to an S3 bucket, and trigger our Lambda function with the S3
@@ -76,10 +77,11 @@ AWS resources.
 
 Create an AWS Workmail organisation (note this will charge $4 a month
 after 30 days) in the [Workmail console](https://eu-west-1.console.aws.amazon.com/workmail/home). 
-We only need the default user and domain, now in the SES console in
+We only need the default user and domain. Now in the SES console in
 `Email Receiving > Rule Sets`, edit the `INBOUND_MAIL` Rule Set, and
 edit the existing rule to write to an S3 bucket (create a bucket if you
-don't have one). You can also specify specific recipients for the rule.
+don't have one). You can also specify specific recipients for which to
+apply the rule.
 
 Note the same effect can be achieved by setting a rule in the Workmail
 organisation to [trigger a Lambda directly](https://docs.aws.amazon.com/workmail/latest/adminguide/lambda.html), we would then need to use
@@ -116,17 +118,17 @@ Content-Type: text/html; charset="UTF-8"
 ```
 
 In this case `testses` was the Workmail domain, and the email was sent
-via GMail (in reality, there are a load of DKIM headers, etc. prior to
+via Gmail (in practice, there are a load of DKIM headers, etc. prior to
 this part - but we will not use those).
 
 The MIME format consists of many headers (containing some of the most
 relevant information such as sender address, message ID, subject and
 recipient), and a body split up in to parts. Each part is terminated
-with a separator `--000000000000d2fb5805ac63efb8` in the above case
+with a boundary separator: `--000000000000d2fb5805ac63efb8` in the above case
 (note this is specified where the multipart begins).
 
 In the above case we can see the email
-contains both a plaintext and HTML version. This means the body is
+contains both a plaintext and HTML version. The body is
 `multipart/alternative` so that the client knows it should choose
 between the two parts. If it were `multipart/mixed` then the client
 would show both parts, in this case effectively duplicating the body for
@@ -166,12 +168,12 @@ cGxhaW50ZXh0Cgo=
 ```
 
 We have the first multipart which is mixed and contains:
-* A multipart for the actual body, this is an alternative multipart so
+* A nested multipart for the actual body, this is an alternative multipart so
   the client chooses between showing the HTML email or the plaintext
   email.
 * A single part which is the plaintext attachment, encoded in base64.
 
-So the client will choose either the HTML or plaintext body, and always
+So the client will choose to display either the HTML or plaintext body, and always
 include the attachment.
 
 Already we can start to imagine how we could parse this. Fortunately
@@ -182,7 +184,7 @@ there are already crates to do this! In this post we will use the
 
 We use the [parse_mail function](https://docs.rs/mailparse/0.13.0/mailparse/fn.parse_mail.html)
 to parse the MIME message (from bytes) in to a usable struct, and
-extract the attachment body and attachment filename for the _first_
+extract the attachment body and attachment filename for the first
 attachment:
 
 ```rust
@@ -203,7 +205,7 @@ attachment:
     let attachment = attachment.get_body()?;
 ```
 
-This gives us the attachment as a `String`. Note if we were not dealing
+This gives us the first attachment as a `String`. Note if we were not dealing
 with a plaintext format, i.e. we had a zipped file, etc., we would use
 `get_body_raw()` to get a `Vec<u8>` of bytes. This already handles
 the base64 decoding for us in both cases!
@@ -214,13 +216,13 @@ In our case we expect one attachment, which will be a CSV file. If we
 have any errors reading the file we want to return these to the sender.
 For this simple example, we have a CSV with three fields:
 
-* A positive ID number: `u32`
+* A positive ID number (i.e. `u32`)
 * A start date
 * An end date
 
-We will use the [chrono crate](https://crates.io/crates/chrono) to deserialise the dates,
+We will use the [chrono crate](https://crates.io/crates/chrono) to deserialize the dates,
 and the [csv crate](https://crates.io/crates/csv) with [Serde](https://crates.io/crates/serde)
-to do the overall deserialisation.
+to do the overall deserialization.
 
 We set up for deserialization (and serialization for the dates for
 later, so we maintain the same format) as follows:
@@ -261,7 +263,7 @@ so that we can specify the format to match the original input. Note the
 alias attribute means we can deserialize from either "ID" or "id", see
 [the Serde field attributes for more details](https://serde.rs/field-attrs.html).
 
-Then to deserialise we use:
+Then to deserialize we use:
 
 ```rust
 pub fn deserialize_csv(attachment: &str) -> (Vec<Entry>, Vec<csv::Error>) {
@@ -328,7 +330,7 @@ specifically the [MessageBuilder](https://docs.rs/lettre/0.10.0-alpha.1/lettre/m
 in the current alpha version (note we use the 0.10 alpha in order to
 use rustls).
 
-Note that by default SES will be in [Sandbox mode](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html). This means you must
+By default SES will be in [Sandbox mode](https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html). This means you must
 verify the email addresses that you want to send to (and from) in the
 SES console.
 
@@ -370,8 +372,12 @@ if necessary:
     let msg_string = email.formatted();
 ```
 
-Then we make the request with Rusoto, note we need to block on the
-Future returned from `send_raw_email()`:
+Note that we don't need to base64 encode the attachment ourselves,
+lettre will do this for us.
+
+Then we make the request with Rusoto, note that we must base64 encode
+our message in the request in the `RawMessage` struct! Also note that we
+need to block on the Future returned from `send_raw_email()`:
 
 ```rust
     let raw_message = rusoto_ses::RawMessage {
@@ -455,7 +461,7 @@ the event and reading it).
 ### AWS events and Lambda
 
 We will use the [aws_lambda_events](https://crates.io/crates/aws_lambda_events)
-crate for deserialising the events we receive. In this case we want to
+crate for deserializing the events we receive. In this case we want to
 handle two different events - the Cloudwatch event from a fixed time
 trigger to send a prompt email, and the S3 event from received emails
 (being written to S3 via the SES/Workmail inbound mail rule).
@@ -475,7 +481,7 @@ enum EventEnum {
 See the [Serde enum representations docs](https://serde.rs/enum-representations.html)
 for more details and handling other possibilities.
 
-Then we can deserialise to `EventEnum` in our handler function:
+Then we can deserialize to `EventEnum` in our handler function:
 
 ```rust
 fn main() -> Result<()> {
@@ -513,7 +519,7 @@ lettre = { version = "0.10.0-alpha.0", default_features = false, features = ["ru
 tokio = {version = "0.2", default_features = false, features = ["blocking", "rt-threaded"]}
 ```
 
-Now we can compile to musl (here I assume a GNU/Linux platform,
+Now we can compile with the musl target (here I assume a GNU/Linux platform,
 for OS X you [will need to install musl-cross](https://hackernoon.com/cross-compiling-rust-on-macos-to-run-as-a-unikernel-ff1w3ypi)).
 
 ```
@@ -548,18 +554,13 @@ release so that we could use [rustls](https://crates.io/crates/rustls) everywher
 future the new API will change and hopefully become more ergonomic like
 v0.9.3.
 
-Note we could probably also parse the received emails with lettre
-instead of [mailparse](https://crates.io/crates/mailparse). But I found
-mailparse so easy to use, I wanted to highlight it here so others will
-use it too.
-
 ### Possible Improvements
 
 If we were to extend this example, a simple task would be to handle zip
 file attachments with the [zip](https://crates.io/crates/zip) crate. We
 could also send responses as actual email replies using the `In-Reply-To`
 and `References` headers, this would help to ensure the sent emails are
-appropriately viewable in the recipient's client (i.e. otherwise GMail
+appropriately viewable in the recipient's client (i.e. otherwise Gmail
 might thread our new messages with older ones since they share the same
 Subject).
 
@@ -569,3 +570,16 @@ error email sending outside of the `handle_email()` function and adding
 custom error types for these different cases. So in the case of any
 error we could send an appropriate notification email.
 
+It would also be good to deploy the Lambda function with the [AWS Cloud
+Development Kit (CDK)](https://aws.amazon.com/cdk/) so we can create all resources necessary, and
+keep the necessary infrastructure steps with the code. Unfortunately
+[jsii does not yet have Rust bindings](https://github.com/aws/jsii/issues/1684) so
+the actual CDK code would need to be written in a supported language
+such as TypeScript.
+
+---------------------------------
+
+
+Many thanks to all of the contributors to the crates used in this
+example, and especially to the maintainers of [lambda_runtime](https://github.com/awslabs/aws-lambda-rust-runtime) and [Rusoto](https://github.com/rusoto/rusoto)
+whose efforts have made Rust a viable choice in this space.
