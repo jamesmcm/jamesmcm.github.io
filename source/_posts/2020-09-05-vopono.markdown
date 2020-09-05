@@ -1,0 +1,232 @@
+---
+layout: post
+title: "Retrospective of my first useful Rust project"
+date: 2020-09-05 13:44:34 +0200
+comments: true
+categories: [Rust]
+meta: false
+---
+
+This post is a retrospective of my first "useful" Rust project: vopono.
+vopono is a Linux program to launch applications in temporary network
+namespaces (managed by vopono), in order to run specific applications
+through VPN connections, without affecting the rest of your system.
+
+vopono is available on Github (and in the AUR on Arch Linux) and
+licensed under the GPLv3.
+
+We'll consider the motivation and background to creating vopono, the
+upsides and downsides of writing it in Rust (and existing issues), and
+some points about starting FOSS development in general.
+
+<!--more-->
+
+Opinions expressed are solely my own and do not express the views or opinions of my employer.
+
+## Background
+
+I've used VPN services for many years, previously as a customer of
+PrivateInternetAccess, and now with Mullvad (since
+[PrivateInternetAccess was purchased by a less scrupulous parent
+company](https://news.ycombinator.com/item?id=21584958)), as it is very
+useful for working around network traffic restrictions (e.g. SSH access
+restrictions or blocked websites) whilst travelling.
+
+However, I often wanted to be able to quickly connect to the VPN without
+disrupting other ongoing connections (i.e. video calls, etc.). In 2015,
+I learnt how network namespaces could do this, and pieced together some
+bash scripts for OpenVPN [from this StackExchange post](https://unix.stackexchange.com/questions/149293/feed-all-traffic-through-openvpn-for-a-specific-network-namespace-only).
+
+I used this for a few years, but it was a bit inconvenient having to
+manually launch the network namespace. Especially if you wanted to
+connect to different servers in order to test geolocation for example.
+
+In April 2020, Wireguard was merged in to the Linux kernel
+5.6, and became much more readily available with VPN providers. This,
+combined with the switch to Mullvad, inspired me to add Wireguard
+support to the scripts I was using, but I thought it would be best to
+also address the issues of manually managing the network namespaces and
+create a comprehensive application to handle OpenVPN and Wireguard
+connections for various VPN providers, and create and destroy the
+network namespaces on demand. This was the start of vopono, and my first
+real useful Rust project ([s3rename](https://github.com/jamesmcm/s3rename) was also useful, but a much smaller
+scope).
+
+## Benefits of Rust
+
+I chose to write vopono in Rust as I am still learning the language, and
+greatly appreciate the ease of debugging with tools like [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer)
+and [clippy](https://github.com/rust-lang/rust-clippy).
+
+
+### Enums
+
+Rust's native enum support makes reasoning and debugging much easier
+when dealing with enumerated values (like the choice between the TCP and
+UDP protocols for OpenVPN connections). The Rust compiler forces us to
+handle every possible value helping to prevent bugs from ever being
+written.
+
+### StructOpt
+
+[StructOpt](https://crates.io/crates/structopt) is a great crate for handling command-line options and
+arguments via derived trait implementations over your structs defining
+commands and subcommands. This allows you to abstract away dealing with command-line arguments directly,
+and for the relevant code to be somewhat self-documenting (as [doc comments](https://doc.rust-lang.org/stable/rust-by-example/meta/doc.html) are used to provide the user-facing help output).
+
+Note that some developers prefer to use [clap](https://crates.io/crates/clap) directly.
+
+### Result and anyhow
+
+Rust's [Result enum](https://doc.rust-lang.org/std/result/enum.Result.html) 
+and `?` operator (the [try operator](https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/the-question-mark-operator-for-easier-error-handling.html))
+make it simple and ergonomic to handle operations which may fail
+(which are almost all operations when dealing with disk IO and
+launching processes).
+
+It is also very convenient when working with fallible operations over a
+collection, where we may want to return to the user a list of operations
+which failed. In Rust, we can 
+[filter and map over a collection of Results](https://doc.rust-lang.org/stable/rust-by-example/error/iter_result.html) 
+to a collection of Errors and then return that to the user - this feels
+very natural compared to other languages.
+
+Combined with the [anyhow crate](https://crates.io/crates/anyhow), it is easy to provide useful error
+messages to the end-user whilst also keeping the code very concise.
+
+### Serde
+
+The [Serde crate](https://crates.io/crates/serde) provides traits you can derive on your structs,
+allowing for easy serialization and deserialization. 
+
+In vopono this is used to serialize and deserialize lockfiles, so that
+if you launch a new application in an existing network namespace (via
+vopono), the namespace will not be destroyed until *both* applications
+have terminated.
+
+### Drop
+
+The [Drop trait](https://doc.rust-lang.org/std/ops/trait.Drop.html) allows us to run a destructor when a struct is
+dropped (i.e. goes out of scope). This is used in vopono to
+automatically destroy the network namespaces when the application is
+closed.
+
+Note this causes some issues (discussed below) when we want to skip
+destructors in some cases, and if vopono is instantly terminated (i.e.
+`kill -9`) these will likely not run (so vopono is written to clean up
+any orphaned resources when it is executed - i.e. namespaces or
+lockfiles with no running applications).
+
+### Cargo
+
+The Cargo package manager itself is a great benefit of using Rust. For
+example, when writing vopono it made it trivial to add the
+[compound_duration](https://crates.io/crates/compound_duration) crate,
+used only for reporting the uptime of running network namespaces.
+
+The specification of the software license in the `Cargo.toml` file is
+also a great feature, making it easy to verify that your dependencies
+have compatible licenses.
+
+### include_str macro
+
+The [include_str macro](https://doc.rust-lang.org/std/macro.include_str.html) can be used to include a file on disk as a
+static string in the binary at compile time. This is used in vopono for
+providers where we cannot download certain files by other means e.g.
+with TigerVPN because the configuration details are behind a login with
+a captcha and there is no API.
+
+### Rustls
+
+[Rustls](https://crates.io/crates/rustls) is a TLS library which can be
+used in place of OpenSSL. This is used in vopono since the sync command
+to get some provider configuration files relies on the [reqwest
+crate](https://crates.io/crates/reqwest), but we want to avoid depending on OpenSSL to make it easier to
+build a statically linked binary that will be independent of the runtime
+environment.
+
+### musl and static linking
+
+The `x86_64-unknown-linux-musl` target can be used to (cross-)compile,
+[statically linking with musl](https://blog.rust-lang.org/2016/05/13/rustup.html) instead of dynamically linking to glibc
+(the default target). This means we can deploy the resulting binary
+without worrying about glibc version mismatches (if we deploy to a
+platform with an earlier version of glibc).
+
+
+## Difficulties
+
+### Small standard library
+
+If you come from scripting languages, you may find that Rust has a
+smaller standard library compared to those languages. For example, there
+is no recursive copy (`cp -r` equivalent) in the standard library
+directly, and I had to do this using the 
+[walkdir crate](https://crates.io/crates/walkdir) and copying each item.
+
+### Compile times
+
+Rust has longer compile times than most other languages (except perhaps
+C++) this is particularly true when using crates which include
+procedural macros, such as StructOpt mentioned above.
+
+There a few options to [reduce compile times](https://vfoley.xyz/rust-compile-speed-tips/),
+such as using [sccache](https://github.com/mozilla/sccache) to cache build artifacts.
+
+### Binary size and feature creep
+
+As more dependencies are added, the final binary size can grow
+considerably. To control this, it's recommended to use [feature flags](https://doc.rust-lang.org/cargo/reference/features.html)
+in your `Cargo.toml` file (possibly also disabling default features) to
+include only what you need from large dependencies.
+
+You can also use [cargo-udeps](https://crates.io/crates/cargo-udeps) to
+detect unused dependencies.
+
+### Minimum Rust version and dependencies
+
+The Rust features and parts of the standard library that you use will
+result in an effective minimum Rust version for your project. I had [one
+issue](https://github.com/jamesmcm/vopono/issues/2) result from the
+[compund_duration crate](https://crates.io/crates/compound_duration) mentioned above which raised the minimum Rust
+version to 1.43.
+
+As far as I know there is no way to automatically determine the minimum
+Rust version, although [this discussion on Reddit](https://www.reddit.com/r/rust/comments/8kkigi/how_to_find_out_a_minimum_rust_compiler_version/)
+has scripts for compiling with many minor versions until you build
+successfully.
+
+## Ongoing issues
+
+### dialoguer validation and passing references to closures
+
+https://docs.rs/dialoguer/0.6.2/dialoguer/struct.Input.html#method.validate_with
+clones, static lifetime
+
+### Skipping destructors
+
+leak box
+https://doc.rust-lang.org/std/mem/struct.ManuallyDrop.html
+
+### VPN Providers - enum or structs with traits?
+
+Cannot downcast supertrait at runtime
+
+Want VPN provider implementations in separate files
+
+
+## Releases
+
+### Github Actions
+
+https://ebbflow.io/blog/vending-linux-2
+
+### AUR
+
+https://aur.archlinux.org/packages/vopono/
+
+## Summary
+
+Build something you can use
+
+> Looking at the monstrosity of the code, this looks like a bash script that someone decided to write in Rust for no apparent reason.
