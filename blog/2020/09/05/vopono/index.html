@@ -1,0 +1,838 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+<head>
+  <meta charset="utf-8">
+  <!--TODO: JS to select title goes here -->
+  <title>Retrospective of my first useful Rust project - Statistically Insignificant</title>
+  <meta name="author" content="James McMurray">
+
+  
+  <meta name="description" content="Retrospective of my first useful Rust project Retrospective of my first useful Rust project This post is a retrospective of my first “useful” Rust &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jamesmcm.github.io/blog/2020/09/05/vopono">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Statistically Insignificant" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$$','$$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+
+
+      <script>
+
+//$(window).ready(changeAllPosts(getLang()));       
+       //window.onload=changeAllPosts(getLang());
+
+function pageLoad() {
+           if (window.location.hash){
+             var hash = window.location.hash.substring(1);
+               if (hash=="sp" || hash=="en"){
+               changeLang(hash);
+                   }
+           } else {
+               changeAllPosts(getLang());
+
+           }
+}
+       
+function changeLang(lang){
+window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
+if (window["title"+lang]){
+document.title=window["title"+lang];
+           }
+console.log("title"+lang);
+console.log(window["title"+lang]);           
+           
+setLang(lang);
+changeAllPosts(lang);
+}
+       
+function setLang(lang){
+    var exdays=30;
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toGMTString();
+    document.cookie = "lang=" + lang + "; " + expires + "; path=/";
+}
+       
+function getLang() {
+    var name = "lang" + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "en";
+}
+
+
+function changeAllPosts(lang){
+//TODO: Change subtitle too
+console.log(lang);
+l=document.getElementsByClassName("titleEnglish");
+l2=document.getElementsByClassName("titleSpanish");
+l3=document.getElementsByClassName("English");           
+l4=document.getElementsByClassName("Spanish");
+l5=document.getElementsByClassName("enbutton");
+l6=document.getElementsByClassName("esbutton");
+var arrayLength = Math.max(l.length,l3.length);
+for (var i = 0; i < arrayLength; i++) {
+if (lang=="sp"){
+
+if (typeof l[i] !== 'undefined') {
+l[i].style.display="none";
+}
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="inline";
+}                       
+if (typeof l3[i] !== 'undefined') {
+l3[i].style.display="none";
+}
+if (typeof l4[i] !== 'undefined') {
+l4[i].style.display="inline";
+}                               
+if (typeof l5[i] !== 'undefined') {
+l5[i].disabled=false;
+}
+if (typeof l6[i] !== 'undefined') {                   
+l6[i].disabled=true;
+}
+                               
+document.getElementById("hsubtitleEnglish").style.display="none";
+document.getElementById("hsubtitleSpanish").style.display="inline";
+
+} else if (lang=="en"){
+if (typeof l[i] !== 'undefined') {               
+l[i].style.display="inline";
+}                   
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="none";
+}
+if (typeof l3[i] !== 'undefined') {               
+l3[i].style.display="inline";
+}
+if (typeof l4[i] !== 'undefined') {               
+l4[i].style.display="none";
+}
+if (typeof l5[i] !== 'undefined') {               
+l5[i].disabled=true;
+}
+if (typeof l6[i] !== 'undefined') {               
+l6[i].disabled=false;
+}                   
+document.getElementById("hsubtitleEnglish").style.display="inline";
+document.getElementById("hsubtitleSpanish").style.display="none";
+}
+
+
+} 
+}
+       
+function showSpanish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="none";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="inline";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="inline";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="none";
+
+
+     btn.parentNode.getElementsByClassName("enbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+</script>
+
+
+<script>
+function showEnglish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="inline";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="none";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="none";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="inline";
+
+
+     btn.parentNode.getElementsByClassName("esbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+
+$(window).load(changeAllPosts(getLang()));
+</script>
+
+
+  <!--
+-->
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-53539911-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Statistically Insignificant</a></h1>
+  
+   <h2><div display='inline' id="hsubtitleEnglish"> Languages, Statistics and other things </div><div id='hsubtitleSpanish' style='display: none'> Los idiomas, la estadística y otras cosas </div></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!-- <ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+-->
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jamesmcm.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><div class="English"><a href="/about/#en">About</a></div><div class="Spanish"><a href="/about/#sp">Sobre este blog</a></div></li>
+</ul>
+
+
+<ul class="langs">
+  <li><a href="#en" onclick="changeLang('en');">English</a></li>
+  <li><a href="#sp" onclick="changeLang('sp');">Español</a></li>
+</ul>
+
+
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+
+  
+  <header>
+    
+
+      <h1 display="inline-block" class="entry-title"> <div display='inline' class='titleEnglish'> Retrospective of my first useful Rust project</div><div class='titleSpanish' style='display: none'> Retrospective of my first useful Rust project </div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>    -->
+
+
+
+    
+    
+  </header>
+
+
+    <div class="entry-content"><p>This post is a retrospective of my first “useful” Rust project. <a href="https://github.com/jamesmcm/vopono">vopono</a> 
+is a Linux program to launch applications in temporary network
+namespaces (managed by vopono), in order to run specific applications
+through VPN connections, without affecting the rest of your system.</p>
+
+<p>vopono is <a href="https://github.com/jamesmcm/vopono">available on Github</a> (and in the <a href="https://aur.archlinux.org/packages/vopono/">AUR on Arch Linux</a>) and
+licensed under the GPLv3 license (<a href="https://www.gnu.org/philosophy/pragmatic.html">see reasoning here</a>).</p>
+
+<p>We’ll consider the motivation and background to creating vopono, the
+upsides and downsides of writing it in Rust (and existing issues), and
+some points about starting new side projects in general. I hope this
+helps new Rust programmers starting their own first projects, or for
+other programmers to consider using Rust.</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h2 id="background">Background</h2>
+
+<p>I’ve used VPN services for many years, previously as a customer of
+PrivateInternetAccess, and now with Mullvad (since
+<a href="https://news.ycombinator.com/item?id=21584958">PrivateInternetAccess was purchased by a less scrupulous parent company</a>), as it is very
+useful for working around network traffic restrictions (e.g. SSH access
+restrictions or blocked websites) whilst travelling.</p>
+
+<p>However, I often wanted to be able to quickly connect to the VPN without
+disrupting other ongoing connections (i.e. video calls, etc.). In 2015,
+I learnt how network namespaces could do this (on Linux), and pieced together some
+bash scripts for OpenVPN <a href="https://unix.stackexchange.com/questions/149293/feed-all-traffic-through-openvpn-for-a-specific-network-namespace-only">from this StackExchange post</a>.</p>
+
+<p>I used this for a few years, but it was a bit inconvenient having to
+manually launch the network namespace. Especially if you wanted to
+connect to different servers in order to test geolocation for example.</p>
+
+<p>In April 2020, Wireguard was merged in to the Linux kernel
+5.6, and became much more readily available with VPN providers. This,
+combined with the switch to Mullvad, inspired me to add Wireguard
+support to the scripts I was using. But I thought it would be best to
+also address the issues of manually managing the network namespaces and
+create a comprehensive application to handle OpenVPN and Wireguard
+connections for various VPN providers, and create and destroy the
+network namespaces on demand.</p>
+
+<p>This was the start of vopono, my first
+useful Rust project (I suppose <a href="https://github.com/jamesmcm/s3rename">s3rename</a> was also useful, but a much smaller
+scope).</p>
+
+<h2 id="benefits-of-rust">Benefits of Rust</h2>
+
+<p>I chose to write vopono in Rust as I am still learning the language, and
+greatly appreciate the ease of debugging with tools like <a href="https://github.com/rust-analyzer/rust-analyzer">rust-analyzer</a>
+and <a href="https://github.com/rust-lang/rust-clippy">clippy</a>. There are many
+other benefits too:</p>
+
+<h3 id="enums">Enums</h3>
+
+<p>Rust’s <a href="https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html">native enum support</a> makes reasoning and debugging much easier
+when dealing with enumerated values (like the choice between the TCP and
+UDP protocols for OpenVPN connections). The Rust compiler forces us to
+handle every possible value helping to prevent bugs from ever being
+written.</p>
+
+<h3 id="structopt">StructOpt</h3>
+
+<p><a href="https://crates.io/crates/structopt">StructOpt</a> is a great crate for handling command-line options and
+arguments via derived trait implementations over your structs defining
+commands and subcommands. This allows you to abstract away dealing with command-line arguments directly,
+and for the relevant code to be somewhat self-documenting (as <a href="https://doc.rust-lang.org/stable/rust-by-example/meta/doc.html">doc comments</a> are used to provide the user-facing help output).</p>
+
+<p>Note that some developers prefer to use <a href="https://crates.io/crates/clap">clap</a> directly.</p>
+
+<h3 id="result-and-anyhow">Result and anyhow</h3>
+
+<p>Rust’s <a href="https://doc.rust-lang.org/std/result/enum.Result.html">Result enum</a> 
+and <code class="highlighter-rouge">?</code> operator (the <a href="https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/the-question-mark-operator-for-easier-error-handling.html">try operator</a>)
+make it simple and ergonomic to handle operations which may fail
+(which are almost all operations when dealing with disk IO and
+launching processes).</p>
+
+<p>It is also very convenient when working with fallible operations over a
+collection, where we may want to return to the user a list of operations
+which failed. In Rust, we can 
+<a href="https://doc.rust-lang.org/stable/rust-by-example/error/iter_result.html">filter and map over a collection of Results</a> 
+to a collection of Errors and then return that to the user - this feels
+very natural compared to other languages.</p>
+
+<p>Combined with the <a href="https://crates.io/crates/anyhow">anyhow crate</a>, it is easy to provide useful error
+messages to the end-user whilst also keeping the code very concise.</p>
+
+<h3 id="serde">Serde</h3>
+
+<p>The <a href="https://crates.io/crates/serde">Serde crate</a> provides traits you can derive on your structs,
+allowing for easy serialization and deserialization.</p>
+
+<p>In vopono this is used to serialize and deserialize lockfiles, so that
+if you launch a new application in an existing network namespace (via
+vopono), the namespace will not be destroyed until <em>both</em> applications
+have terminated.</p>
+
+<h3 id="drop">Drop</h3>
+
+<p>The <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html">Drop trait</a> allows us to run a destructor when a struct is
+dropped (i.e. goes out of scope). This is used in vopono to
+automatically destroy the network namespaces when the application is
+closed. I initially got the idea for using <code class="highlighter-rouge">Drop</code> this way from the
+<a href="https://github.com/r-darwish/alma">ALMA source code</a>.</p>
+
+<p>Note this causes some issues (discussed below) when we want to skip
+destructors in some cases. Also if vopono is instantly terminated (i.e.
+<code class="highlighter-rouge">kill -9</code>) these will likely not run, so vopono is written to clean up
+any orphaned resources when it is executed - i.e. namespaces or
+lockfiles with no running applications.</p>
+
+<h3 id="cargo">Cargo</h3>
+
+<p>The Cargo package manager itself is a great benefit of using Rust. For
+example, when writing vopono it made it trivial to add the
+<a href="https://crates.io/crates/compound_duration">compound_duration</a> crate,
+used only for reporting the uptime of running network namespaces.</p>
+
+<p>The specification of the software license in the <code class="highlighter-rouge">Cargo.toml</code> file is
+also a great feature, making it easy to verify that your dependencies
+have compatible licenses.</p>
+
+<h3 id="include_str-macro">include_str macro</h3>
+
+<p>The <a href="https://doc.rust-lang.org/std/macro.include_str.html">include_str macro</a> can be used to include a file on disk as a
+static string in the binary at compile time. This is used in vopono for
+providers where we cannot download certain files by other means e.g.
+with TigerVPN because the configuration details are behind a login with
+a captcha and there is no API.</p>
+
+<h3 id="rustls">Rustls</h3>
+
+<p><a href="https://crates.io/crates/rustls">Rustls</a> is a TLS library which can be
+used in place of OpenSSL. This is used in the <code class="highlighter-rouge">vopono sync</code> command,
+which gets provider configuration files.</p>
+
+<p>This subcommand relies on the <a href="https://crates.io/crates/reqwest">reqwest crate</a>
+to make HTTPS requests, but we want to avoid depending on OpenSSL to make it easier to
+build a statically linked binary that will be independent of the runtime
+environment. Fortunately we only need to set the “rustls” feature flag
+in the reqwest dependency.</p>
+
+<h3 id="musl-and-static-linking">musl and static linking</h3>
+
+<p>The <code class="highlighter-rouge">x86_64-unknown-linux-musl</code> target can be used to (cross-)compile,
+<a href="https://blog.rust-lang.org/2016/05/13/rustup.html">statically linking with musl</a> instead of dynamically linking to glibc
+(the default target). This means we can deploy the resulting binary
+without worrying about glibc version mismatches (if we deploy to a
+platform with an earlier version of glibc).</p>
+
+<h2 id="difficulties">Difficulties</h2>
+
+<h3 id="small-standard-library">Small standard library</h3>
+
+<p>If you come from scripting languages, you may find that Rust has a
+smaller standard library compared to those languages. For example, there
+is no recursive copy (<code class="highlighter-rouge">cp -r</code> equivalent) in the standard library
+directly, and I had to do this using the 
+<a href="https://crates.io/crates/walkdir">walkdir crate</a> and copying each item.</p>
+
+<h3 id="compile-times">Compile times</h3>
+
+<p>Rust has longer compile times than most other languages (except perhaps
+C++) this is particularly true when using crates which include
+procedural macros.</p>
+
+<p>There a few options to <a href="https://vfoley.xyz/rust-compile-speed-tips/">reduce compile times</a>
+(also <a href="https://endler.dev/2020/rust-compile-times/">see this more recent post</a>),
+such as using <a href="https://github.com/mozilla/sccache">sccache</a> to cache build artifacts.</p>
+
+<h3 id="binary-size-and-feature-creep">Binary size and feature creep</h3>
+
+<p>As more dependencies are added, the final binary size can grow
+considerably. To control this, it’s recommended to use <a href="https://doc.rust-lang.org/cargo/reference/features.html">feature flags</a>
+in your <code class="highlighter-rouge">Cargo.toml</code> file (and disabling default features) to
+include only what you need from large dependencies.</p>
+
+<p>You can also use <a href="https://crates.io/crates/cargo-udeps">cargo-udeps</a> to
+detect unused dependencies.</p>
+
+<h3 id="minimum-rust-version-and-dependencies">Minimum Rust version and dependencies</h3>
+
+<p>The Rust features and parts of the standard library that you use will
+result in an effective minimum Rust version for your project. I had <a href="https://github.com/jamesmcm/vopono/issues/2">one
+issue</a> result from the
+<a href="https://crates.io/crates/compound_duration">compound_duration crate</a> mentioned above which raised the minimum Rust
+version to 1.43.</p>
+
+<p>As far as I know there is no way to automatically determine the minimum
+Rust version, although <a href="https://www.reddit.com/r/rust/comments/8kkigi/how_to_find_out_a_minimum_rust_compiler_version/">this discussion on Reddit</a>
+has scripts for compiling with many minor versions until you build
+successfully.</p>
+
+<h2 id="ongoing-issues">Ongoing issues</h2>
+
+<h3 id="dialoguer-validation-and-passing-references-to-closures">dialoguer validation and passing references to closures</h3>
+
+<p>vopono uses the <a href="https://crates.io/crates/dialoguer">dialoguer crate</a> for user input for the <code class="highlighter-rouge">vopono sync</code>
+command. I also validate the input using the <code class="highlighter-rouge">validate_with()</code> method so
+that the user gets feedback immediately and can correct any errors.</p>
+
+<p>However, the <code class="highlighter-rouge">validate_with()</code> method <a href="https://docs.rs/dialoguer/0.6.2/dialoguer/struct.Input.html#method.validate_with">requires that the closure used has
+a static lifetime</a>.
+This is problematic for checking whether the user-entered Wireguard private key
+matches the chosen public key, since we need to include the previously-chosen
+public key in the closure - but this doesn’t have a static lifetime.</p>
+
+<p>For now I worked around this with extra clones (<a href="https://github.com/jamesmcm/vopono/blob/master/src/providers/mozilla/wireguard.rs#L65">see devices_clone</a>)
+but hopefully a better solution is possible. Perhaps the static lifetime
+restriction in dialoguer could also be relaxed (since we know the
+closure will terminate before we receive the input and continue).</p>
+
+<p>This is <a href="https://github.com/jamesmcm/vopono/issues/19">tracked in this issue</a>. If you have any suggestions please add a comment there!</p>
+
+<h3 id="skipping-destructors">Skipping destructors</h3>
+
+<p>As mentioned previously, vopono uses the <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html">Drop trait</a> to
+automatically clean up resources when the relevant structs go out of
+scope. However, sometimes we don’t want to trigger these destructors but
+still have the structs go out of scope - for example, if we have
+multiple vopono processes running applications in the same network
+namespace, then we don’t want to destroy the network namespace until the
+final application has terminated. So if other lockfiles still exist, we need
+to prevent the clean-up destructors from firing.</p>
+
+<p>For now this is done by putting the relevant structs in a Box, and then
+calling <code class="highlighter-rouge">Box::leak()</code> (<a href="https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak">docs here</a>).
+This works but feels a bit clunky when dealing with multiple structs/fields (e.g. <a href="https://github.com/jamesmcm/vopono/blob/4ebf4b6bdc493c4d95bf6e237136b330723aaf27/src/netns.rs#L308">here preventing the destructors when another vopono instance is using the same namespace</a>):</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">debug!</span><span class="p">(</span><span class="s">"Skipping destructors since other vopono instance using this namespace!"</span><span class="p">);</span>
+<span class="k">let</span> <span class="n">openvpn</span> <span class="o">=</span> <span class="k">self</span><span class="py">.openvpn</span><span class="nf">.take</span><span class="p">();</span>
+<span class="k">let</span> <span class="n">openvpn</span> <span class="o">=</span> <span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="n">openvpn</span><span class="p">);</span>
+<span class="nn">Box</span><span class="p">::</span><span class="nf">leak</span><span class="p">(</span><span class="n">openvpn</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>One possible alternative might be to use <a href="https://doc.rust-lang.org/std/mem/struct.ManuallyDrop.html">std::mem::ManuallyDrop</a>
+, however then the <code class="highlighter-rouge">drop()</code> method is unsafe, so this might end up being
+even less ergonomic.</p>
+
+<p>This is tracked <a href="https://github.com/jamesmcm/vopono/issues/20">in this issue</a>.</p>
+
+<h3 id="vpn-providers---enum-or-structs-with-traits">VPN Providers - enum or structs with traits?</h3>
+
+<p>The most difficult design decision was regarding how to handle VPN
+provider specific code (i.e. the code that generates the OpenVPN and
+Wireguard configuration files when using <code class="highlighter-rouge">vopono sync</code>), such that it
+would be easy for contributors to add support for new VPN providers.</p>
+
+<p>Ideally we would get as close as possible to the following:</p>
+<ul>
+  <li>Contributors only need to add new source code files to add support for a new VPN
+provider.</li>
+  <li>The VPN provider specific code is independent of other VPN provider code.</li>
+  <li>The interfaces that the code must provide are clear to the contributor,
+so they know what they need to implement.</li>
+  <li>They do not need to edit the shared/core parts of vopono.</li>
+</ul>
+
+<p>Initially I had planned to use an enum for providers (since we need one
+to handle command line arguments anyway) and implement the
+code directly on that enum. However, then all the implementation code
+would be together in the enum Impl, since we cannot do separate Impl blocks for different
+enum variants (note that even the <a href="https://github.com/varkor/rfcs/blob/enum-variant-types/text/0000-enum-variant-types.md">enum variant type RFC</a>
+would prohibit this). This breaks the first 2 points above.</p>
+
+<p>Therefore I chose to use traits, creating a base VpnProvider trait, and
+then OpenVpnProvider and WireguardProvider traits which have that as a
+supertrait. This way the interfaces are clear to any contributors and
+each VPN provider can be a separate struct implementing these traits (it
+also gives contributors a lot of freedom in how they implement them - as
+they can store state in the struct, etc.).</p>
+
+<p>The idea was that we could then pass trait objects to the functions that
+use the VPN provider objects with dynamic dispatch, i.e. as <code class="highlighter-rouge">Box&lt;dyn
+VpnProvider&gt;</code>, and then check if the actual struct implements the
+necessary <code class="highlighter-rouge">WireguardProvider</code> or <code class="highlighter-rouge">OpenVpnProvider</code> traits depending on
+the command line arguments, and return an error if not.</p>
+
+<p>The problem is that there is no way to try to downcast from a supertrait
+trait object to a subtrait. We want something like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">fn</span> <span class="nf">myfn</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">VpnProvider</span><span class="o">&gt;</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">anyhow</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="p">()</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">as_wireguard</span><span class="p">:</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">WireguardProvider</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">try_downcast</span><span class="o">&lt;</span><span class="n">WireguardProvider</span><span class="o">&gt;</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+    <span class="c">// ...</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But no such function exists and, as far as I can tell, the <a href="https://crates.io/crates/downcast-rs">downcast-rs</a>
+crate is for downcasting to concrete types, not subtrait trait objects.
+<a href="https://users.rust-lang.org/t/casting-from-dyn-t-to-dyn-u-where-u-t-solved/32213">This forum post</a> offers
+some possibilities using <code class="highlighter-rouge">std::mem::transmute</code> but it is unsafe, and not
+guaranteed to be stable (note the need for <code class="highlighter-rouge">#[repr(C)]</code> for example).</p>
+
+<p>For now I worked around this by using the fact that we have the enum
+from the command line arguments, so <a href="https://github.com/jamesmcm/vopono/blob/master/src/providers/mod.rs#L42">we can use that to try to generate
+the trait object we want</a>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// Do this since we can't downcast from Provider to other trait objects</span>
+<span class="k">impl</span> <span class="n">VpnProvider</span> <span class="p">{</span>
+    <span class="c">// ...</span>
+    <span class="k">pub</span> <span class="k">fn</span> <span class="nf">get_dyn_wireguard_provider</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">anyhow</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">WireguardProvider</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
+        <span class="k">match</span> <span class="k">self</span> <span class="p">{</span>
+            <span class="nn">Self</span><span class="p">::</span><span class="n">Mullvad</span> <span class="k">=&gt;</span> <span class="nf">Ok</span><span class="p">(</span><span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">mullvad</span><span class="p">::</span><span class="n">Mullvad</span> <span class="p">{})),</span>
+            <span class="nn">Self</span><span class="p">::</span><span class="n">MozillaVpn</span> <span class="k">=&gt;</span> <span class="nf">Ok</span><span class="p">(</span><span class="nn">Box</span><span class="p">::</span><span class="nf">new</span><span class="p">(</span><span class="nn">mozilla</span><span class="p">::</span><span class="n">MozillaVPN</span> <span class="p">{})),</span>
+            <span class="nn">Self</span><span class="p">::</span><span class="n">Custom</span> <span class="k">=&gt;</span> <span class="nf">Err</span><span class="p">(</span><span class="nd">anyhow!</span><span class="p">(</span><span class="s">"Custom provider uses separate logic"</span><span class="p">)),</span>
+            <span class="mi">_</span> <span class="k">=&gt;</span> <span class="nf">Err</span><span class="p">(</span><span class="nd">anyhow!</span><span class="p">(</span><span class="s">"Wireguard not implemented"</span><span class="p">)),</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</code></pre></div></div>
+
+<p>But this is a painful workaround as we have a fair amount of boilerplate
+code and some extra allocation of trait objects.</p>
+
+<p>This also slightly violates the 4th point in the above requirements,
+that contributes now have to also add the enum variant entry to
+<code class="highlighter-rouge">providers/mod.rs</code>, but at least this is just a small boilerplate change
+and the rest of the implementation code can be in its own files with a
+lot of freedom regarding implementation.</p>
+
+<p>This <a href="https://github.com/jamesmcm/vopono/issues/21">issue is tracked on Github here</a>,
+please add a comment if you have any suggestions as this is quite a
+generic problem.</p>
+
+<h2 id="releases">Releases</h2>
+
+<p>Releases of vopono are made <a href="https://github.com/jamesmcm/vopono/releases">on Github</a>, and published to <a href="https://crates.io/crates/vopono">crates.io</a>
+and <a href="https://aur.archlinux.org/packages/vopono-bin/">the AUR</a>.</p>
+
+<h3 id="github-actions">Github Actions</h3>
+
+<p>The <a href="https://ebbflow.io/">ebbflow project</a> released <a href="https://ebbflow.io/blog/vending-linux-2">Github action workflow files</a>, which I <a href="https://github.com/jamesmcm/vopono/blob/master/.github/workflows/rust.yml">adapted for use in vopono</a>
+to generate .deb packages with <a href="https://github.com/mmstick/cargo-deb">cargo-deb</a>,
+.rpm packages with <a href="https://github.com/iqlusioninc/cargo-rpm">cargo-rpm</a> and the stand-alone binaries for release.</p>
+
+<h3 id="arch-user-repository">Arch User Repository</h3>
+
+<p>Releasing a package on <a href="https://aur.archlinux.org/">the AUR</a> is very simple. Review <a href="https://wiki.archlinux.org/index.php/AUR_submission_guidelines">this wiki
+page for submitting packages</a>,
+and <a href="https://wiki.archlinux.org/index.php/PKGBUILD">this wiki page for the PKGBUILD syntax</a>.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Overall it has been a longer project than I originally envisioned, but
+I’m glad I chose to use Rust and add the extra features like automatic
+killswitches (so traffic outside the VPN in the network namespace is
+blocked) and Wireguard support.</p>
+
+<p>If you are considering starting a new project in Rust, I hope the issues
+covered above are useful. Finally, when
+considering new projects my main advice would be to build something
+that you can use yourself, and that will be useful to you. There will be
+times when you hit difficult problems and have little time to spend on the
+project, and it’s very helpful to be able to use the result day-to-day
+to maintain motivation.</p>
+
+<p>Furthermore, not all feedback will be positive. To quote one comment on
+Reddit from a post for the first vopono release:</p>
+
+<blockquote>
+  <p>Looking at the monstrosity of the code, this looks like a bash script that someone decided to write in Rust for no apparent reason.</p>
+</blockquote>
+
+<p>Fortunately, I was later able to get some useful advice on parts of the code
+to improve (mainly where the design had been copied from the initial
+shell scripts), despite the commenter’s hostility to Rust. If I’d
+written something that I wasn’t using myself, I think this would be much harder
+to handle. But since I use vopono myself every day, I know that it is
+useful, and can be sure that it will be useful for others too (even if
+not for that specific commenter).</p>
+
+<p>I chose to call this post a retrospective instead of a post-mortem, as
+vopono isn’t dead or finished. Hopefully I’ll find better solutions to
+the issues mentioned above, and there are <a href="https://github.com/jamesmcm/vopono/issues/10">always more VPN providers to support!</a></p>
+
+</div>
+
+
+
+
+<script>
+$(window).ready(changeAllPosts(getLang()));
+</script>
+
+   <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'statisticallyinsignificant'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+
+  <footer>
+    <p class="meta">
+      <span class = "categories">
+    <span class="English">
+        <a href="#en">Permalink</a>
+    </span>
+    <span class="Spanish">
+        <a href="#sp">Permalink</a>
+    </span>
+</span>
+
+      <!-- 
+<span class="byline author vcard"><span class="English">Written by <span class="fn">James McMurray</span></span><span class="Spanish" style="display: none">Escrito por <span class="fn">James McMurray</span></span></span>
+ --> &#9679;
+      
+
+
+ &#9679;
+      
+
+<span class="categories">
+  
+    Rust
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jamesmcm.github.io/blog/2020/09/05/vopono/" data-via="" data-counturl="http://jamesmcm.github.io/blog/2020/09/05/vopono/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      <div class="English">
+        <a class="basic-alignment left" href="/blog/2020/08/29/rust-ses/" title="Previous Post: Serverless Data Ingestion with Rust and AWS SES">&laquo; Serverless Data Ingestion with Rust and AWS SES</a>
+</div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment left" href="/blog/2020/08/29/rust-ses/" title="Previous Post: Serverless Data Ingestion with Rust and AWS SES">&laquo; Serverless Data Ingestion with Rust and AWS SES</a>
+</div>
+      
+      
+    </p>
+  </footer>
+
+
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+    <h2><div class="English">Categories</div><div class="Spanish" display="none">Categorías</div></h2>
+<ul display=block>
+    <li><div class="English"><a href="/blog/categories/rust/#en">Rust</a></div><div class="Spanish"><a href="/blog/categories/rust/#sp">Rust</a></div></li>
+    <li><div class="English"><a href="/blog/categories/general/#en">General</a></div><div class="Spanish"><a href="/blog/categories/general/#sp">General</a></div></li>
+    <li><div class="English"><a href="/blog/categories/statistics/#en">ML/Statistics</a></div><div class="Spanish"><a href="/blog/categories/statistics/#sp">ML/Estadística</a></div></li>
+    <li><div class="English"><a href="/blog/categories/languages/#en">Languages</a></div><div class="Spanish"><a href="/blog/categories/languages/#sp">Idiomas</a></div></li>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo">
+
+<p>
+  Copyright &copy; 2020 - James McMurray -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'statisticallyinsignificant';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jamesmcm.github.io/blog/2020/09/05/vopono/';
+        var disqus_url = 'http://jamesmcm.github.io/blog/2020/09/05/vopono/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+
+  <script>
+
+
+   
+var titlesp="Retrospective of my first useful Rust project";
+var titleen="Retrospective of my first useful Rust project";
+
+//$(window).load(changeAllPosts(getLang()));
+
+
+$(window).load(pageLoad);
+$(window).ready(pageLoad);
+</script>
+
+</body>
+
+</html>
