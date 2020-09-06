@@ -1,14 +1,16 @@
 ---
 layout: post
 title: "Retrospective of my first useful Rust project"
+titleen: "Retrospective of my first useful Rust project"
+titlesp: "Retrospective of my first useful Rust project"
 date: 2020-09-05 13:44:34 +0200
 comments: true
 categories: [Rust]
 meta: false
 ---
 
-This post is a retrospective of my first "useful" Rust project: [vopono](https://github.com/jamesmcm/vopono).
-vopono is a Linux program to launch applications in temporary network
+This post is a retrospective of my first "useful" Rust project. [vopono](https://github.com/jamesmcm/vopono) 
+is a Linux program to launch applications in temporary network
 namespaces (managed by vopono), in order to run specific applications
 through VPN connections, without affecting the rest of your system.
 
@@ -29,8 +31,7 @@ Opinions expressed are solely my own and do not express the views or opinions of
 
 I've used VPN services for many years, previously as a customer of
 PrivateInternetAccess, and now with Mullvad (since
-[PrivateInternetAccess was purchased by a less scrupulous parent
-company](https://news.ycombinator.com/item?id=21584958)), as it is very
+[PrivateInternetAccess was purchased by a less scrupulous parent company](https://news.ycombinator.com/item?id=21584958)), as it is very
 useful for working around network traffic restrictions (e.g. SSH access
 restrictions or blocked websites) whilst travelling.
 
@@ -46,24 +47,27 @@ connect to different servers in order to test geolocation for example.
 In April 2020, Wireguard was merged in to the Linux kernel
 5.6, and became much more readily available with VPN providers. This,
 combined with the switch to Mullvad, inspired me to add Wireguard
-support to the scripts I was using, but I thought it would be best to
+support to the scripts I was using. But I thought it would be best to
 also address the issues of manually managing the network namespaces and
 create a comprehensive application to handle OpenVPN and Wireguard
 connections for various VPN providers, and create and destroy the
-network namespaces on demand. This was the start of vopono, and my first
-real useful Rust project (I suppose [s3rename](https://github.com/jamesmcm/s3rename) was also useful, but a much smaller
+network namespaces on demand. 
+
+This was the start of vopono, my first
+useful Rust project (I suppose [s3rename](https://github.com/jamesmcm/s3rename) was also useful, but a much smaller
 scope).
 
 ## Benefits of Rust
 
 I chose to write vopono in Rust as I am still learning the language, and
 greatly appreciate the ease of debugging with tools like [rust-analyzer](https://github.com/rust-analyzer/rust-analyzer)
-and [clippy](https://github.com/rust-lang/rust-clippy).
+and [clippy](https://github.com/rust-lang/rust-clippy). There are many
+other benefits too:
 
 
 ### Enums
 
-Rust's native enum support makes reasoning and debugging much easier
+Rust's [native enum support](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) makes reasoning and debugging much easier
 when dealing with enumerated values (like the choice between the TCP and
 UDP protocols for OpenVPN connections). The Rust compiler forces us to
 handle every possible value helping to prevent bugs from ever being
@@ -115,10 +119,10 @@ closed. I initially got the idea for using `Drop` this way from the
 [ALMA source code](https://github.com/r-darwish/alma).
 
 Note this causes some issues (discussed below) when we want to skip
-destructors in some cases, and if vopono is instantly terminated (i.e.
-`kill -9`) these will likely not run (so vopono is written to clean up
+destructors in some cases. Also if vopono is instantly terminated (i.e.
+`kill -9`) these will likely not run, so vopono is written to clean up
 any orphaned resources when it is executed - i.e. namespaces or
-lockfiles with no running applications).
+lockfiles with no running applications.
 
 ### Cargo
 
@@ -142,11 +146,14 @@ a captcha and there is no API.
 ### Rustls
 
 [Rustls](https://crates.io/crates/rustls) is a TLS library which can be
-used in place of OpenSSL. This is used in vopono since the sync command
-to get some provider configuration files relies on the [reqwest
-crate](https://crates.io/crates/reqwest), but we want to avoid depending on OpenSSL to make it easier to
+used in place of OpenSSL. This is used in the `vopono sync` command,
+which gets provider configuration files.
+
+This subcommand relies on the [reqwest crate](https://crates.io/crates/reqwest)
+to make HTTPS requests, but we want to avoid depending on OpenSSL to make it easier to
 build a statically linked binary that will be independent of the runtime
-environment.
+environment. Fortunately we only need to set the "rustls" feature flag
+in the reqwest dependency.
 
 ### musl and static linking
 
@@ -171,16 +178,17 @@ directly, and I had to do this using the
 
 Rust has longer compile times than most other languages (except perhaps
 C++) this is particularly true when using crates which include
-procedural macros, such as StructOpt mentioned above.
+procedural macros.
 
-There a few options to [reduce compile times](https://vfoley.xyz/rust-compile-speed-tips/),
+There a few options to [reduce compile times](https://vfoley.xyz/rust-compile-speed-tips/)
+(also [see this more recent post](https://endler.dev/2020/rust-compile-times/)),
 such as using [sccache](https://github.com/mozilla/sccache) to cache build artifacts.
 
 ### Binary size and feature creep
 
 As more dependencies are added, the final binary size can grow
 considerably. To control this, it's recommended to use [feature flags](https://doc.rust-lang.org/cargo/reference/features.html)
-in your `Cargo.toml` file (possibly also disabling default features) to
+in your `Cargo.toml` file (and disabling default features) to
 include only what you need from large dependencies.
 
 You can also use [cargo-udeps](https://crates.io/crates/cargo-udeps) to
@@ -191,7 +199,7 @@ detect unused dependencies.
 The Rust features and parts of the standard library that you use will
 result in an effective minimum Rust version for your project. I had [one
 issue](https://github.com/jamesmcm/vopono/issues/2) result from the
-[compund_duration crate](https://crates.io/crates/compound_duration) mentioned above which raised the minimum Rust
+[compound_duration crate](https://crates.io/crates/compound_duration) mentioned above which raised the minimum Rust
 version to 1.43.
 
 As far as I know there is no way to automatically determine the minimum
@@ -209,7 +217,7 @@ that the user gets feedback immediately and can correct any errors.
 
 However, the `validate_with()` method [requires that the closure used has
 a static lifetime](https://docs.rs/dialoguer/0.6.2/dialoguer/struct.Input.html#method.validate_with).
-This is problematic for checking whether the user-entered private key
+This is problematic for checking whether the user-entered Wireguard private key
 matches the chosen public key, since we need to include the previously-chosen
 public key in the closure - but this doesn't have a static lifetime.
 
@@ -228,13 +236,19 @@ scope. However, sometimes we don't want to trigger these destructors but
 still have the structs go out of scope - for example, if we have
 multiple vopono processes running applications in the same network
 namespace, then we don't want to destroy the network namespace until the
-final application has terminated. So if lockfiles still exist, we need
-to prevent the clean-up destructors from firing for the vopono instances
-terminated first.
+final application has terminated. So if other lockfiles still exist, we need
+to prevent the clean-up destructors from firing.
 
 For now this is done by putting the relevant structs in a Box, and then
 calling `Box::leak()` ([docs here](https://doc.rust-lang.org/std/boxed/struct.Box.html#method.leak)).
-This works but feels a bit clunky when dealing with multiple structs/fields (e.g. [here preventing the destructors when another vopono instance is using the same namespace](https://github.com/jamesmcm/vopono/blob/4ebf4b6bdc493c4d95bf6e237136b330723aaf27/src/netns.rs#L308)).
+This works but feels a bit clunky when dealing with multiple structs/fields (e.g. [here preventing the destructors when another vopono instance is using the same namespace](https://github.com/jamesmcm/vopono/blob/4ebf4b6bdc493c4d95bf6e237136b330723aaf27/src/netns.rs#L308)):
+
+```rust
+debug!("Skipping destructors since other vopono instance using this namespace!");
+let openvpn = self.openvpn.take();
+let openvpn = Box::new(openvpn);
+Box::leak(openvpn);
+```
 
 One possible alternative might be to use [std::mem::ManuallyDrop](https://doc.rust-lang.org/std/mem/struct.ManuallyDrop.html)
 , however then the `drop()` method is unsafe, so this might end up being
@@ -272,13 +286,13 @@ also gives contributors a lot of freedom in how they implement them - as
 they can store state in the struct, etc.).
 
 The idea was that we could then pass trait objects to the functions that
-use the VPN provider objects with dynamic dispatch (i.e. as `Box<dyn
+use the VPN provider objects with dynamic dispatch, i.e. as `Box<dyn
 VpnProvider>`, and then check if the actual struct implements the
 necessary `WireguardProvider` or `OpenVpnProvider` traits depending on
 the command line arguments, and return an error if not.
 
 The problem is that there is no way to try to downcast from a supertrait
-trait object to subtrait. That is we want something like:
+trait object to a subtrait. We want something like:
 
 ```rust
 fn myfn(obj: Box<dyn VpnProvider>) -> anyhow::Result<()> {
@@ -287,7 +301,7 @@ fn myfn(obj: Box<dyn VpnProvider>) -> anyhow::Result<()> {
 }
 ```
 
-But no such function exists. As far as I can tell, the [downcast-rs](https://crates.io/crates/downcast-rs)
+But no such function exists and, as far as I can tell, the [downcast-rs](https://crates.io/crates/downcast-rs)
 crate is for downcasting to concrete types, not subtrait trait objects.
 [This forum post](https://users.rust-lang.org/t/casting-from-dyn-t-to-dyn-u-where-u-t-solved/32213) offers
 some possibilities using `std::mem::transmute` but it is unsafe, and not
@@ -295,8 +309,24 @@ guaranteed to be stable (note the need for `#[repr(C)]` for example).
 
 For now I worked around this by using the fact that we have the enum
 from the command line arguments, so [we can use that to try to generate
-the trait object we want](https://github.com/jamesmcm/vopono/blob/master/src/providers/mod.rs#L42). But this is a painful workaround as we have
-a fair amount of boilerplate code and some extra allocation of trait objects.
+the trait object we want](https://github.com/jamesmcm/vopono/blob/master/src/providers/mod.rs#L42):
+
+```rust
+// Do this since we can't downcast from Provider to other trait objects
+impl VpnProvider {
+    // ...
+    pub fn get_dyn_wireguard_provider(&self) -> anyhow::Result<Box<dyn WireguardProvider>> {
+        match self {
+            Self::Mullvad => Ok(Box::new(mullvad::Mullvad {})),
+            Self::MozillaVpn => Ok(Box::new(mozilla::MozillaVPN {})),
+            Self::Custom => Err(anyhow!("Custom provider uses separate logic")),
+            _ => Err(anyhow!("Wireguard not implemented")),
+        }
+    }
+```
+
+But this is a painful workaround as we have a fair amount of boilerplate
+code and some extra allocation of trait objects.
 
 This also slightly violates the 4th point in the above requirements,
 that contributes now have to also add the enum variant entry to
@@ -317,7 +347,7 @@ and [the AUR](https://aur.archlinux.org/packages/vopono-bin/).
 
 The [ebbflow project](https://ebbflow.io/) released [Github action workflow files](https://ebbflow.io/blog/vending-linux-2
 ), which I [adapted for use in vopono](https://github.com/jamesmcm/vopono/blob/master/.github/workflows/rust.yml)
-to generated .deb packages with [cargo-deb](https://github.com/mmstick/cargo-deb),
+to generate .deb packages with [cargo-deb](https://github.com/mmstick/cargo-deb),
 .rpm packages with [cargo-rpm](https://github.com/iqlusioninc/cargo-rpm) and the stand-alone binaries for release.
 
 ### Arch User Repository
@@ -334,11 +364,11 @@ killswitches (so traffic outside the VPN in the network namespace is
 blocked) and Wireguard support.
 
 If you are considering starting a new project in Rust, I hope the issues
-covered above are useful. Finally when
+covered above are useful. Finally, when
 considering new projects my main advice would be to build something
 that you can use yourself, and that will be useful to you. There will be
 times when you hit difficult problems and have little time to spend on the
-project, and it's very helpful to be able to use the result day to day
+project, and it's very helpful to be able to use the result day-to-day
 to maintain motivation.
 
 Furthermore, not all feedback will be positive. To quote one comment on
@@ -356,5 +386,4 @@ not for that specific commenter).
 
 I chose to call this post a retrospective instead of a post-mortem, as
 vopono isn't dead or finished. Hopefully I'll find better solutions to
-the issues mentioned above for a start, and there are [always more VPN
-providers to support!](https://github.com/jamesmcm/vopono/issues/10)
+the issues mentioned above, and there are [always more VPN providers to support!](https://github.com/jamesmcm/vopono/issues/10)
