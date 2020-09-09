@@ -1,0 +1,197 @@
+---
+layout: post
+title: "Using ALMA for persistent LiveUSB installations of Arch Linux"
+titleen: "Using ALMA for persistent LiveUSB installations of Arch Linux"
+titlesp: "Using ALMA for persistent LiveUSB installations of Arch Linux"
+date: 2020-09-09 15:01:06 +0200
+comments: true
+categories: [Rust]
+meta: false
+---
+
+[ALMA](https://github.com/r-darwish/alma) ([AUR](https://aur.archlinux.org/packages/alma-git/))is a tool for creating
+persistent LiveUSB installations of Arch Linux. With one command you
+can generate a customised installation on a
+USB stick (or any other removable media) including the packages and 
+config files you want, with full persistence.
+
+This is very useful for disk recovery and system maintenance, and a
+great tool for all Linux users. Especially with the customisation
+options provided by collections of preset files (such as
+[arch-i3-usb](https://github.com/jamesmcm/arch-i3-usb)).
+
+
+<!--more-->
+
+Opinions expressed are solely my own and do not express the views or opinions of my employer.
+
+## ALMA
+
+[ALMA](https://github.com/r-darwish/alma) is a tool, written in Rust, to
+automate the installation of Arch Linux to removable media with
+persistent storage (i.e. it is usable as a normal system, booted from
+USB).
+
+ALMA creates an ext4 partition, installs Arch Linux and sets the locale
+and installs GRUB for you. Full disk encryption is also available with
+the `alma -e` option, using [LUKS](https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system),
+where you will be prompted for the password.
+
+Note ALMA is available in the AUR as [alma-git](https://aur.archlinux.org/packages/alma-git/).
+I recommend the git version because there are some significant unreleased changes.
+
+However, what really makes ALMA powerful is the ability to customise
+your installation with preset files.
+
+## Preset files
+
+Preset files are [TOML files](https://en.wikipedia.org/wiki/TOML) which specify one or more of the
+following:
+
+* A list of Arch Linux packages to install: `packages`
+* A list of AUR packages to install (which will be handled by the
+  user-specified AUR helper, by default this is `yay`): `aur_packages`
+* A bash script to execute __after__ installation of the above packages:
+  `script`
+* A list of directories (in the directory of preset files) which should
+  be mounted when the bash script is run: `shared_directories`
+* A list of required environment variables to be used in the script
+  (these must be passed to ALMA in the environment): `environment_variables`
+
+Here is an example for installing [alacritty](https://github.com/alacritty/alacritty) and copying its config
+file:
+
+```toml
+packages = ["alacritty"]
+shared_directories = ["alacritty_config"]
+script = """
+mkdir -p /home/${ALMA_USER}/.config/alacritty/
+cp /shared_dirs/alacritty_config/alacritty.yml /home/${ALMA_USER}/.config/alacritty/alacritty.yml
+chown -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+chgrp -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+"""
+environment_variables = ["ALMA_USER"]
+```
+
+The environment variable `ALMA_USER` would be the username, created in
+an earlier preset file.
+
+What makes ALMA so useful is that these preset files are _composable_.
+They will be executed in alphanumeric order, so you can create a
+collection of preset files for your own customised installation of Arch
+Linux, and then swap out preset files for different package
+configurations, etc. (i.e. for different sizes of removeable media).
+
+An example of this is my [arch-i3-usb](https://github.com/jamesmcm/arch-i3-usb) collection, where I have a
+"minimal" preset collection in `/preset` and additional preset files in
+`/additional` for a more comprehensive installation.
+
+This provides a full installation with i3, thunar, alacritty, neovim,
+fish and firefox ready to use.
+
+![arch-i3-usb standard installation running in qemu](/images/archqemu.png "arch-i3-usb standard installation in qemu")
+
+### Known issue - package initialisation
+
+One known issue is that if you install a package which requires some
+initialisation step (such as setting the Rust toolchain after installing
+rustup) then you can't install dependent packages by the normal preset
+lists because _all_ of the package installation takes place before any
+user scripts are run.
+
+That is the order is:
+
+1. All non-AUR packages are installed
+1. If AUR packages are present in the toml files, yay (or another specified AUR helper) is installed
+1. All AUR packages are installed.
+1. Preset scripts are executed according to their filenames in alphanumeric order.
+
+This means that in cases that need initialisation steps (such as Rust
+packages built from source), you will need to workaround this in the
+preset file. Here is an example for i3status-rust:
+
+```toml
+packages = ["i3-wm", "i3lock", "i3status", "dmenu", "arandr", "rustup", "powerline-fonts", "ttf-font-awesome", "upower"]
+aur_packages = ["autotiling", "ttf-font-awesome-4"]
+shared_directories = ["i3_config"]
+script = """
+sudo -u ${ALMA_USER} rustup toolchain install nightly
+sudo -u ${ALMA_USER} rustup default nightly
+sudo -u ${ALMA_USER} yay -S --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu --useask --removemake --norebuild --noconfirm --answeredit None --answerclean None --mflags --noconfirm i3status-rust-git
+# ...
+"""
+environment_variables = ["ALMA_USER"]
+```
+
+## Near-future improvements
+
+There are a number of small improvements that could be made in the
+near-future.
+
+### SecureBoot support
+
+Support for [SecureBoot](https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface/Secure_Boot)
+ could be added (probably to ALMA directly since it is a common
+ requirement). The main difficulty here is testing, since you need to
+ test it on actual hardware, and deal with adding the signed keys to the
+ BIOS, etc.
+
+### Better error handling and script debugging
+
+At the moment any failure in a user script results in the whole installation
+failing. This could be improved by allowing the user to edit, repeat, or
+skip a failed user script (showing the user the script output).
+
+A subcommand could also be added allowing the preset developer to lint
+their scripts with [shellcheck](https://github.com/koalaman/shellcheck) to catch syntax errors.
+
+### More preset examples
+
+It would be very useful to add a preset example for loading config files
+from a [chezmoi](https://github.com/twpayne/chezmoi) repo (and other
+dotfiles managers) instead of just mounting shared directories.
+
+It would also be useful to add a preset example for [home partition encryption](https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_a_non-root_file_system)
+(i.e. not the whole disk) and unencrypting on login with polkit, etc. -
+for cases where full disk encryption is not desirable (i.e. on a USB
+with other partitions for general file transfer on FAT32).
+
+## Far future: ALMAhub?
+
+In the more distant future, it would be great to allow ALMA to install
+to a specified (already existing) partition instead of wiping the disk.
+GRUB installation could also be optional in this case. This, plus an
+option to disable the few LiveUSB optimisations (like storing journal
+log data in memory, no swap, etc.), would allow ALMA to function as an
+installer for normal Arch Linux installations too.
+
+With these additions, and the composable preset files, one could build a
+repository like the AUR for hosting different collections of preset
+files. So you could browse the repository, choose a configuration that
+appeals to you, install it to LiveUSB to try it out, and then use that
+same LiveUSB to install it to disk if you like it.
+
+The repository would need to be easily auditable (like the AUR) since
+these preset files can install arbitrary packages and run arbitrary
+commands, so it is clearly a possible security risk (like any Linux
+distribution).
+
+Another huge addition would be the ability to run ALMA in a minimal
+Docker installation, so it could be run on non-Arch Linux platforms. It
+would be great if it could be run on Windows and Ubuntu so as to
+bootstrap the installation process (i.e. first to LiveUSB, then create
+the necessary partitions on disk from the live environment and install
+to disk from there).
+
+These are much larger additions, but I think that it would be incredibly
+useful to the Linux community as a whole to be able to share different
+configurations as installations directly. This is especially true for
+newer users, with the ability to try them out as a persistent LiveUSB first.
+
+## Summary
+
+Hopefully you will find ALMA as useful as I have, and create a LiveUSB
+installation for future debugging and system recovery.
+
+If you also find the possible future improvements interesting, please
+share your preset collections, or even contribute to ALMA directly!
