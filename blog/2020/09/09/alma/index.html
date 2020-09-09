@@ -1,0 +1,650 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+<head>
+  <meta charset="utf-8">
+  <!--TODO: JS to select title goes here -->
+  <title>Using ALMA for persistent LiveUSB installations of Arch Linux - Statistically Insignificant</title>
+  <meta name="author" content="James McMurray">
+
+  
+  <meta name="description" content="Using ALMA for persistent LiveUSB installations of Arch Linux Using ALMA for persistent LiveUSB installations of Arch Linux ALMA (available as alma- &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jamesmcm.github.io/blog/2020/09/09/alma">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Statistically Insignificant" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$$','$$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+
+
+      <script>
+
+//$(window).ready(changeAllPosts(getLang()));       
+       //window.onload=changeAllPosts(getLang());
+
+function pageLoad() {
+           if (window.location.hash){
+             var hash = window.location.hash.substring(1);
+               if (hash=="sp" || hash=="en"){
+               changeLang(hash);
+                   }
+           } else {
+               changeAllPosts(getLang());
+
+           }
+}
+       
+function changeLang(lang){
+window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
+if (window["title"+lang]){
+document.title=window["title"+lang];
+           }
+console.log("title"+lang);
+console.log(window["title"+lang]);           
+           
+setLang(lang);
+changeAllPosts(lang);
+}
+       
+function setLang(lang){
+    var exdays=30;
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toGMTString();
+    document.cookie = "lang=" + lang + "; " + expires + "; path=/";
+}
+       
+function getLang() {
+    var name = "lang" + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "en";
+}
+
+
+function changeAllPosts(lang){
+//TODO: Change subtitle too
+console.log(lang);
+l=document.getElementsByClassName("titleEnglish");
+l2=document.getElementsByClassName("titleSpanish");
+l3=document.getElementsByClassName("English");           
+l4=document.getElementsByClassName("Spanish");
+l5=document.getElementsByClassName("enbutton");
+l6=document.getElementsByClassName("esbutton");
+var arrayLength = Math.max(l.length,l3.length);
+for (var i = 0; i < arrayLength; i++) {
+if (lang=="sp"){
+
+if (typeof l[i] !== 'undefined') {
+l[i].style.display="none";
+}
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="inline";
+}                       
+if (typeof l3[i] !== 'undefined') {
+l3[i].style.display="none";
+}
+if (typeof l4[i] !== 'undefined') {
+l4[i].style.display="inline";
+}                               
+if (typeof l5[i] !== 'undefined') {
+l5[i].disabled=false;
+}
+if (typeof l6[i] !== 'undefined') {                   
+l6[i].disabled=true;
+}
+                               
+document.getElementById("hsubtitleEnglish").style.display="none";
+document.getElementById("hsubtitleSpanish").style.display="inline";
+
+} else if (lang=="en"){
+if (typeof l[i] !== 'undefined') {               
+l[i].style.display="inline";
+}                   
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="none";
+}
+if (typeof l3[i] !== 'undefined') {               
+l3[i].style.display="inline";
+}
+if (typeof l4[i] !== 'undefined') {               
+l4[i].style.display="none";
+}
+if (typeof l5[i] !== 'undefined') {               
+l5[i].disabled=true;
+}
+if (typeof l6[i] !== 'undefined') {               
+l6[i].disabled=false;
+}                   
+document.getElementById("hsubtitleEnglish").style.display="inline";
+document.getElementById("hsubtitleSpanish").style.display="none";
+}
+
+
+} 
+}
+       
+function showSpanish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="none";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="inline";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="inline";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="none";
+
+
+     btn.parentNode.getElementsByClassName("enbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+</script>
+
+
+<script>
+function showEnglish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="inline";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="none";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="none";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="inline";
+
+
+     btn.parentNode.getElementsByClassName("esbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+
+$(window).load(changeAllPosts(getLang()));
+</script>
+
+
+  <!--
+-->
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-53539911-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Statistically Insignificant</a></h1>
+  
+   <h2><div display='inline' id="hsubtitleEnglish"> Languages, Statistics and other things </div><div id='hsubtitleSpanish' style='display: none'> Los idiomas, la estadística y otras cosas </div></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!-- <ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+-->
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jamesmcm.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><div class="English"><a href="/about/#en">About</a></div><div class="Spanish"><a href="/about/#sp">Sobre este blog</a></div></li>
+</ul>
+
+
+<ul class="langs">
+  <li><a href="#en" onclick="changeLang('en');">English</a></li>
+  <li><a href="#sp" onclick="changeLang('sp');">Español</a></li>
+</ul>
+
+
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+
+  
+  <header>
+    
+
+      <h1 display="inline-block" class="entry-title"> <div display='inline' class='titleEnglish'> Using ALMA for persistent LiveUSB installations of Arch Linux</div><div class='titleSpanish' style='display: none'> Using ALMA for persistent LiveUSB installations of Arch Linux </div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>    -->
+
+
+
+    
+    
+  </header>
+
+
+    <div class="entry-content"><p><a href="https://github.com/r-darwish/alma">ALMA</a> (available as <a href="https://aur.archlinux.org/packages/alma-git/">alma-git on the AUR</a>) is a tool for creating
+persistent LiveUSB installations of Arch Linux. With one command you
+can generate a customised installation on a
+USB stick (or any other removable media) including the packages and 
+config files you want, with full persistence.</p>
+
+<p>This is very useful for disk recovery and system maintenance, and a
+great tool for all Linux users. Especially with the customisation
+options provided by collections of preset files (such as
+<a href="https://github.com/jamesmcm/arch-i3-usb">arch-i3-usb</a>).</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h2 id="alma">ALMA</h2>
+
+<p><a href="https://github.com/r-darwish/alma">ALMA</a> is a tool, written in Rust, to
+automate the installation of Arch Linux to removable media with
+persistent storage (i.e. it is usable as a normal system, booted from
+USB).</p>
+
+<p>ALMA creates an ext4 partition, installs Arch Linux and sets the locale
+and installs GRUB for you. Full disk encryption is also available with
+the <code class="highlighter-rouge">alma -e</code> option, using <a href="https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system">LUKS</a>,
+where you will be prompted for the password.</p>
+
+<p>Note ALMA is available in the AUR as <a href="https://aur.archlinux.org/packages/alma-git/">alma-git</a>.
+I recommend the git version because there are some significant unreleased changes.</p>
+
+<p>However, what really makes ALMA powerful is the ability to customise
+your installation with preset files.</p>
+
+<h2 id="preset-files">Preset files</h2>
+
+<p>Preset files are <a href="https://en.wikipedia.org/wiki/TOML">TOML files</a> which specify one or more of the
+following:</p>
+
+<ul>
+  <li>A list of Arch Linux packages to install: <code class="highlighter-rouge">packages</code></li>
+  <li>A list of AUR packages to install (which will be handled by the
+user-specified AUR helper, by default this is <code class="highlighter-rouge">yay</code>): <code class="highlighter-rouge">aur_packages</code></li>
+  <li>A bash script to execute <strong>after</strong> installation of the above packages:
+<code class="highlighter-rouge">script</code></li>
+  <li>A list of directories (in the directory of preset files) which should
+be mounted when the bash script is run: <code class="highlighter-rouge">shared_directories</code></li>
+  <li>A list of required environment variables to be used in the script
+(these must be passed to ALMA in the environment): <code class="highlighter-rouge">environment_variables</code></li>
+</ul>
+
+<p>Here is an example for installing <a href="https://github.com/alacritty/alacritty">alacritty</a> and copying its config
+file:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">packages</span> <span class="p">=</span> <span class="nn">["alacritty"]</span>
+<span class="py">shared_directories</span> <span class="p">=</span> <span class="nn">["alacritty_config"]</span>
+<span class="py">script</span> <span class="p">=</span> <span class="s">"""
+mkdir -p /home/${ALMA_USER}/.config/alacritty/
+cp /shared_dirs/alacritty_config/alacritty.yml /home/${ALMA_USER}/.config/alacritty/alacritty.yml
+chown -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+chgrp -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+"""</span>
+<span class="py">environment_variables</span> <span class="p">=</span> <span class="nn">["ALMA_USER"]</span>
+</code></pre></div></div>
+
+<p>The environment variable <code class="highlighter-rouge">ALMA_USER</code> would be the username, created in
+an earlier preset file.</p>
+
+<p>What makes ALMA so useful is that these preset files are <em>composable</em>.
+They will be executed in alphanumeric order, so you can create a
+collection of preset files for your own customised installation of Arch
+Linux, and then swap out preset files for different package
+configurations, etc. (i.e. for different sizes of removeable media).</p>
+
+<p>An example of this is my <a href="https://github.com/jamesmcm/arch-i3-usb">arch-i3-usb</a> collection, where I have a
+“minimal” preset collection in <code class="highlighter-rouge">/preset</code> and additional preset files in
+<code class="highlighter-rouge">/additional</code> for a more comprehensive installation.</p>
+
+<p>This provides a full installation with i3, thunar, alacritty, neovim,
+fish and firefox ready to use.</p>
+
+<p><img src="/images/archqemu.png" alt="arch-i3-usb standard installation running in qemu" title="arch-i3-usb standard installation in qemu" /></p>
+
+<h3 id="known-issue---package-initialisation">Known issue - package initialisation</h3>
+
+<p>One known issue is that if you install a package which requires some
+initialisation step (such as setting the Rust toolchain after installing
+rustup) then you can’t install dependent packages by the normal preset
+lists because <em>all</em> of the package installation takes place before any
+user scripts are run.</p>
+
+<p>i.e. the order is:</p>
+
+<ol>
+  <li>All non-AUR packages are installed</li>
+  <li>If AUR packages are present in the toml files, yay (or another specified AUR helper) is installed</li>
+  <li>All AUR packages are installed.</li>
+  <li>Preset scripts are executed according to their filenames in alphanumeric order.</li>
+</ol>
+
+<p>This means that in cases that need initialisation steps (such as Rust
+packages built from source), you will need to workaround this in the
+preset file. Here is an example for i3status-rust:</p>
+
+<div class="language-toml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">packages</span> <span class="p">=</span> <span class="p">[</span><span class="s">"i3-wm"</span><span class="p">,</span> <span class="s">"i3lock"</span><span class="p">,</span> <span class="s">"i3status"</span><span class="p">,</span> <span class="s">"dmenu"</span><span class="p">,</span> <span class="s">"arandr"</span><span class="p">,</span> <span class="s">"rustup"</span><span class="p">,</span> <span class="s">"powerline-fonts"</span><span class="p">,</span> <span class="s">"ttf-font-awesome"</span><span class="p">,</span> <span class="s">"upower"</span><span class="p">]</span>
+<span class="py">aur_packages</span> <span class="p">=</span> <span class="p">[</span><span class="s">"autotiling"</span><span class="p">,</span> <span class="s">"ttf-font-awesome-4"</span><span class="p">]</span>
+<span class="py">shared_directories</span> <span class="p">=</span> <span class="nn">["i3_config"]</span>
+<span class="py">script</span> <span class="p">=</span> <span class="s">"""
+sudo -u ${ALMA_USER} rustup toolchain install nightly
+sudo -u ${ALMA_USER} rustup default nightly
+sudo -u ${ALMA_USER} yay -S --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu --useask --removemake --norebuild --noconfirm --answeredit None --answerclean None --mflags --noconfirm i3status-rust-git
+# ...
+"""</span>
+<span class="py">environment_variables</span> <span class="p">=</span> <span class="nn">["ALMA_USER"]</span>
+</code></pre></div></div>
+
+<h2 id="near-future-improvements">Near-future improvements</h2>
+
+<p>There are a number of small improvements that could be made in the
+near-future.</p>
+
+<h3 id="secureboot-support">SecureBoot support</h3>
+
+<p>Support for <a href="https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface/Secure_Boot">SecureBoot</a>
+ could be added (probably to ALMA directly since it is a common
+ requirement). The main difficulty here is testing, since you need to
+ test it on actual hardware, and deal with adding the signed keys to the
+ BIOS, etc.</p>
+
+<h3 id="better-error-handling-and-script-debugging">Better error handling and script debugging</h3>
+
+<p>At the moment any failure in a user script results in the whole installation
+failing. This could be improved by allowing the user to edit, repeat, or
+skip a failed user script (showing the user the script output).</p>
+
+<p>A subcommand could also be added allowing the preset developer to lint
+their scripts with <a href="https://github.com/koalaman/shellcheck">shellcheck</a> to catch syntax errors.</p>
+
+<h3 id="more-preset-examples">More preset examples</h3>
+
+<p>It would be very useful to add a preset example for loading config files
+from a <a href="https://github.com/twpayne/chezmoi">chezmoi</a> repo (and other
+dotfiles managers) instead of just mounting shared directories.</p>
+
+<p>It would also be useful to add a preset example for <a href="https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_a_non-root_file_system">home partition encryption</a>
+(i.e. not the whole disk) and unencrypting on login with polkit, etc. -
+for cases where full disk encryption is not desirable (i.e. on a USB
+with other partitions for general file transfer on FAT32).</p>
+
+<h2 id="far-future-almahub">Far future: ALMAhub?</h2>
+
+<p>In the more distant future, it would be great to allow ALMA to install
+to a specified (already existing) partition instead of wiping the disk.
+GRUB installation could also be optional in this case. This, plus an
+option to disable the few LiveUSB optimisations (like storing journal
+log data in memory, no swap, etc.), would allow ALMA to function as an
+installer for normal Arch Linux installations too.</p>
+
+<p>With these additions, and the composable preset files, one could build a
+repository like the AUR for hosting different collections of preset
+files. So you could browse the repository, choose a configuration that
+appeals to you, install it to LiveUSB to try it out, and then use that
+same LiveUSB to install it to disk if you like it.</p>
+
+<p>The repository would need to be easily auditable (like the AUR) since
+these preset files can install arbitrary packages and run arbitrary
+commands, so it is clearly a possible security risk (like any custom
+installer for Linux
+distributions).</p>
+
+<p>Another huge addition would be the ability to run ALMA in a minimal
+Docker container, so it could be run on non-Arch Linux platforms. It
+would be great if it could be run on Windows and Ubuntu so as to
+bootstrap the installation process (i.e. first to LiveUSB, then create
+the necessary partitions on disk from the live environment and install
+to disk from there).</p>
+
+<p>These are much larger additions, but I think that it would be incredibly
+useful to the Linux community as a whole to be able to share different
+configurations as installations directly. This is especially true for
+newer users, with the ability to try them out as a persistent LiveUSB first.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Hopefully you will find ALMA as useful as I have, and create a LiveUSB
+installation for future debugging and system recovery.</p>
+
+<p>If you also find the possible future improvements interesting, please
+share your preset collections, or even contribute to ALMA directly!</p>
+
+</div>
+
+
+
+
+<script>
+$(window).ready(changeAllPosts(getLang()));
+</script>
+
+   <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'statisticallyinsignificant'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+
+  <footer>
+    <p class="meta">
+      <span class = "categories">
+    <span class="English">
+        <a href="#en">Permalink</a>
+    </span>
+    <span class="Spanish">
+        <a href="#sp">Permalink</a>
+    </span>
+</span>
+
+      <!-- 
+<span class="byline author vcard"><span class="English">Written by <span class="fn">James McMurray</span></span><span class="Spanish" style="display: none">Escrito por <span class="fn">James McMurray</span></span></span>
+ --> &#9679;
+      
+
+
+ &#9679;
+      
+
+<span class="categories">
+  
+    Rust
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jamesmcm.github.io/blog/2020/09/09/alma/" data-via="" data-counturl="http://jamesmcm.github.io/blog/2020/09/09/alma/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      <div class="English">
+        <a class="basic-alignment left" href="/blog/2020/09/05/vopono/" title="Previous Post: Retrospective of my first useful Rust project">&laquo; Retrospective of my first useful Rust project</a>
+</div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment left" href="/blog/2020/09/05/vopono/" title="Previous Post: Retrospective of my first useful Rust project">&laquo; Retrospective of my first useful Rust project</a>
+</div>
+      
+      
+    </p>
+  </footer>
+
+
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+    <h2><div class="English">Categories</div><div class="Spanish" display="none">Categorías</div></h2>
+<ul display=block>
+    <li><div class="English"><a href="/blog/categories/rust/#en">Rust</a></div><div class="Spanish"><a href="/blog/categories/rust/#sp">Rust</a></div></li>
+    <li><div class="English"><a href="/blog/categories/general/#en">General</a></div><div class="Spanish"><a href="/blog/categories/general/#sp">General</a></div></li>
+    <li><div class="English"><a href="/blog/categories/statistics/#en">ML/Statistics</a></div><div class="Spanish"><a href="/blog/categories/statistics/#sp">ML/Estadística</a></div></li>
+    <li><div class="English"><a href="/blog/categories/languages/#en">Languages</a></div><div class="Spanish"><a href="/blog/categories/languages/#sp">Idiomas</a></div></li>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo">
+
+<p>
+  Copyright &copy; 2020 - James McMurray -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'statisticallyinsignificant';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://jamesmcm.github.io/blog/2020/09/09/alma/';
+        var disqus_url = 'http://jamesmcm.github.io/blog/2020/09/09/alma/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+
+  <script>
+
+
+   
+var titlesp="Using ALMA for persistent LiveUSB installations of Arch Linux";
+var titleen="Using ALMA for persistent LiveUSB installations of Arch Linux";
+
+//$(window).load(changeAllPosts(getLang()));
+
+
+$(window).load(pageLoad);
+$(window).ready(pageLoad);
+</script>
+
+</body>
+
+</html>

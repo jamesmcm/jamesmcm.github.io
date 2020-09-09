@@ -41,6 +41,10 @@
 <lastmod>2020-09-05T13:44:34+02:00</lastmod>
 </url>
 <url>
+<loc>http://jamesmcm.github.io/blog/2020/09/09/alma/</loc>
+<lastmod>2020-09-09T15:01:06+02:00</lastmod>
+</url>
+<url>
 <loc>http://jamesmcm.github.io/blog/archives/</loc>
 </url>
 <url>
@@ -60,5 +64,8 @@
 </url>
 <url>
 <loc>http://jamesmcm.github.io/blog/categories/rust/</loc>
+</url>
+<url>
+<loc>http://jamesmcm.github.io/posts/2/</loc>
 </url>
 </urlset>
