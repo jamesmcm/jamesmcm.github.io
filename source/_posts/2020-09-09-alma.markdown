@@ -9,7 +9,7 @@ categories: [Rust]
 meta: false
 ---
 
-[ALMA](https://github.com/r-darwish/alma) ([AUR](https://aur.archlinux.org/packages/alma-git/))is a tool for creating
+[ALMA](https://github.com/r-darwish/alma) (available as [alma-git on the AUR](https://aur.archlinux.org/packages/alma-git/)) is a tool for creating
 persistent LiveUSB installations of Arch Linux. With one command you
 can generate a customised installation on a
 USB stick (or any other removable media) including the packages and 
@@ -99,7 +99,7 @@ rustup) then you can't install dependent packages by the normal preset
 lists because _all_ of the package installation takes place before any
 user scripts are run.
 
-That is the order is:
+i.e. the order is:
 
 1. All non-AUR packages are installed
 1. If AUR packages are present in the toml files, yay (or another specified AUR helper) is installed
@@ -173,11 +173,12 @@ same LiveUSB to install it to disk if you like it.
 
 The repository would need to be easily auditable (like the AUR) since
 these preset files can install arbitrary packages and run arbitrary
-commands, so it is clearly a possible security risk (like any Linux
-distribution).
+commands, so it is clearly a possible security risk (like any custom
+installer for Linux
+distributions).
 
 Another huge addition would be the ability to run ALMA in a minimal
-Docker installation, so it could be run on non-Arch Linux platforms. It
+Docker container, so it could be run on non-Arch Linux platforms. It
 would be great if it could be run on Windows and Ubuntu so as to
 bootstrap the installation process (i.e. first to LiveUSB, then create
 the necessary partitions on disk from the live environment and install
