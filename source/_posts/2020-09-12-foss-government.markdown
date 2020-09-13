@@ -134,7 +134,7 @@ In Europe especially, the current dependence on proprietary software
 often means a dependence on foreign corporations which operate in
 co-operation with their country's intelligence service. As revealed by
 Edward Snowden, [Microsoft provided backdoor access to encrypted messages](https://www.theguardian.com/world/2013/jul/11/microsoft-nsa-collaboration-user-data) to
-the NSA, CIA and FBI as part of the [PRISM programme](https://en.wikipedia.org/wiki/PRISM_(surveillance_program\)).
+the NSA, CIA and FBI as part of the [PRISM programme](https://en.wikipedia.org/wiki/PRISM_(surveillance_program)).
 
 It is indefensible that such a company can run the critical infrastructure
 of the vast majority of local and central government administrations, as
