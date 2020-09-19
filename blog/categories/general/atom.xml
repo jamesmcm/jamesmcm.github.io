@@ -4,7 +4,7 @@
   <title><![CDATA[Category: General | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/general/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-09-13T17:11:43+02:00</updated>
+  <updated>2020-09-20T00:51:57+02:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How to fix high CPU usage by the CacheDelete daemon in OS X Catalina]]></title>
+    <link href="http://jamesmcm.github.io/blog/2020/09/20/catalina-cachedelete/"/>
+    <updated>2020-09-20T00:22:42+02:00</updated>
+    <id>http://jamesmcm.github.io/blog/2020/09/20/catalina-cachedelete</id>
+    <content type="html"><![CDATA[<p>I recently had an ongoing issue with the <code class="highlighter-rouge">deleted</code> CacheDelete daemon
+using huge amounts of CPU time almost constantly. This post covers how I
+fixed it and a few tips for OS X recovery and performance improvements.</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h2 id="deleted-daemon">deleted daemon</h2>
+
+<p>The problem I had was that the <code class="highlighter-rouge">deleted</code> daemon was often taking 90%+ of
+CPU usage on my 2017 Macbook Pro, resulting in massive stuttering when trying to use the
+system.</p>
+
+<p>Looking up details for the process, I found that <a href="https://apple.stackexchange.com/questions/254810/what-is-the-deleted-daemon-in-macos">the daemon is
+responsible for purging caches</a>
+and had caused issues for others. Unfortunately, on Catalina it is not
+trivial to disable due to the read-only System volume and the built-in
+<a href="https://support.apple.com/en-us/HT204899">System Integrity Protection</a>
+that forbids any changes to system files, even as root.</p>
+
+<p>By looking at the output of <code class="highlighter-rouge">ps</code> we can see that the binaries are stored
+in <code class="highlighter-rouge">/System/Library/PrivateFrameworks/CacheDelete.framework/</code>, meanwhile
+the page linked above mentions that the registered applications with the
+daemon are contained in plist files in <code class="highlighter-rouge">/System/Library/CacheDelete/</code>.</p>
+
+<p>In order to fix this issue, we can simply move all of those plist files.
+Then <code class="highlighter-rouge">deleted</code> will no longer run. Do <strong>not</strong> remove the <code class="highlighter-rouge">deleted</code>
+binary itself or your system will fail to boot (at login if on a system
+with an encrypted disk).</p>
+
+<h2 id="removing-the-plist-files">Removing the plist files</h2>
+
+<p>First we need to disable the System Integrity Protection (SIP), this must be
+done in recovery mode. To access recovery mode reboot the Macbook and
+press Cmd+R whilst it is booting up, the screen should flash white and
+take you to a recovery shell with options to reinstall OS X.</p>
+
+<p>In the menu bar at the top, select <code class="highlighter-rouge">Utilities &gt; Terminal</code> to access the
+terminal and then run <code class="highlighter-rouge">csrutil disable</code>. You should receive a message
+that the SIP is now disabled. Reboot the machine.</p>
+
+<p>Log in as usual and open a terminal window. First you must mount the
+System volume as writeable:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo </span>mount <span class="nt">-uw</span> /
+</code></pre></div></div>
+
+<p>And then move the CacheDelete plist files:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">sudo mv</span> /System/Library/CacheDelete /System/Library/CacheDeleteBackup
+</code></pre></div></div>
+
+<p>Now reboot and <code class="highlighter-rouge">deleted</code> should no longer run.</p>
+
+<p>Note if you also moved
+the actual binaries above then the system will no longer boot, this is
+easy to fix (assuming you didn’t remove them completely) but involves a
+few extra steps if your hard disk is encrypted.</p>
+
+<h3 id="mounting-an-encrypted-hard-disk-from-recovery">Mounting an encrypted hard disk from recovery</h3>
+
+<p>First boot to recover mode and open a terminal as above. Then you need to unlock the encrypted disk.</p>
+
+<p>Use <code class="highlighter-rouge">diskutil apfs list</code> to find the correct volume (check the capacity
+and label), and copy the Logical Volume UUID (it will be something like
+<code class="highlighter-rouge">B807C2A0-577F-3DB0-9002-F82B9137696C</code>).</p>
+
+<p>Then unlock the disk with your disk password (this may be the same as
+your user password):</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>diskutil apfs unlockVolume B807C2A0-577F-3DB0-9002-F82B9137696C
+</code></pre></div></div>
+
+<p>Once it is unlocked correctly, you can mount it with diskutil by name,
+e.g.”</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>diskutil mount disk2
+</code></pre></div></div>
+
+<p>And then find it mounted in <code class="highlighter-rouge">/Volumes/${LABEL}</code>, there you can make any
+necessary fixes and then reboot.</p>
+
+<h2 id="other-fixes">Other fixes</h2>
+
+<p>The above steps fixed the issue I had with CacheDelete which was a
+major problem for a few weeks. But I also recommend the following
+improvements.</p>
+
+<h3 id="disabling-spotlight">Disabling Spotlight</h3>
+
+<p>Spotlight (the OS X file searcher) indexes all files for rapid
+searching, but this indexing can be CPU and Disk IO intensive and run at
+inopportune times (you may see this as the <code class="highlighter-rouge">mds_stores</code> process). Since I never use Spotlight, I just disable it
+completely (I only use <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a>).</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+</code></pre></div></div>
+
+<p>Note that you need the SIP disabled to run that.</p>
+
+<h3 id="disabling-transparency">Disabling transparency</h3>
+
+<p>Disabling transparency helps to reduce CPU usage by the <code class="highlighter-rouge">WindowServer</code>
+process.</p>
+
+<p>Simply go to the accessibility settings and check Reduce Transparency
+under Display.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I hope this helps anyone else facing the same issue, it was a huge
+frustration for weeks. I’ve written this as much for my own reference
+too!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[first]]></title>
