@@ -129,3 +129,5 @@ under Display.
 I hope this helps anyone else facing the same issue, it was a huge
 frustration for weeks. I've written this as much for my own reference
 too!
+
+Hopefully one day we'll be able to use Arch Linux at work too.
