@@ -1,8 +1,8 @@
 ---
 layout: post
-title: "My Rust 2021"
-titleen: "My Rust 2021"
-titlesp: "My Rust 2021"
+title: "My Rust 2021 roadmap: crates, concision, and community"
+titleen: "My Rust 2021 roadmap: crates, concision, and community"
+titlesp: "My Rust 2021 roadmap: crates, concision, and community"
 date: 2020-09-24 16:03:21 +0200
 comments: true
 categories: [Rust]
@@ -11,7 +11,7 @@ meta: false
 
 The Rust core team recently released a [call for blog posts](https://blog.rust-lang.org/2020/09/03/Planning-2021-Roadmap.html) as part of
 the 2021 roadmap for Rust. In this post I will detail my own experience
-with Rust, the current strengths and weaknesses and areas I'd like to
+with Rust, and areas I'd like to
 see improved during 2021.
 
 <!--more-->
@@ -23,8 +23,8 @@ Opinions expressed are solely my own and do not express the views or opinions of
 I'm currently a Data Engineer and over the last few months I have
 proposed and started implementing the migration of our serverless data
 ingestion pipelines to Rust. The requirements of these pipelines vary
-but usually involve receiving some external data (e.g. via email or S3 (possibly
-via [SFTP to S3](https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/))), 
+but usually involve receiving some external data (e.g. via email or S3, possibly
+via [SFTP to S3](https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/)), 
 validating and transforming that data (with AWS Lambda) and loading it to a data
 warehouse.
 
@@ -42,13 +42,13 @@ issues.
 Carrying out this proposal has given me direct experience in solving
 business problems in Rust, working with other team members to introduce
 Rust to the team, and deployment in an enterprise environment (although
-the hard parts of this are largely taken care of by other teams).
+the hard parts of deployment are largely handled by other teams).
 
 I have published two personal programs written in Rust: [vopono](https://github.com/jamesmcm/vopono) for
 running specific applications through VPN connections, and [s3rename](https://github.com/jamesmcm/s3rename)
 for mass-renaming keys in an S3 bucket. I have also written a few prior
-blog posts on Rust, the most popular being [about data-oriented
-programming](http://jamesmcm.github.io/blog/2020/07/25/intro-dod/#en) and [an introduction to async programming](http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en).
+blog posts on Rust, the most popular being [about data-oriented design in Rust](http://jamesmcm.github.io/blog/2020/07/25/intro-dod/#en)
+and [an introduction to async programming](http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en).
 
 To summarise: As a data engineer, I want to be able to easily test and
 deploy statically linked Rust binaries on various platforms and
@@ -104,7 +104,7 @@ notation in many cases, and rust-analyzer providing a fast debug loop
 The main thing to note here for the future, in my opinion, is just how much
 language and syntax improvements can help new users and further adoption. I hope Rust
 continues to work on making the code more concise for the developer in
-the majority of use cases. For Rust 2021 this might include
+the majority of use cases. For Rust 2021 and beyond this might include
 [assignment with destructuring](https://github.com/rust-lang/rfcs/pull/2909),
 [auto-dereferencing in operators](https://github.com/rust-lang/rust/issues/44762),
 and [lifetime elision in structs](https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914).
@@ -123,9 +123,8 @@ In German there is a saying "Wenn schon, denn schon.", which roughly translates
 to "if you're going to do it, do it properly". This is where I believe Rust
 excels - whilst you might hit a few lifetime and ownership issues during
 the development of your program, in the end you are saved from a whole
-class of bugs and also aren't bound by issues like the [Global
-Interpreter Lock](https://en.wikipedia.org/wiki/Global_interpreter_lock) or the lack of type safety as in simpler scripting
-languages.
+class of bugs and also aren't bound by issues like the [Global Interpreter Lock](https://en.wikipedia.org/wiki/Global_interpreter_lock) 
+or the lack of type safety as in simpler scripting languages.
 
 But it is important to ensure
 that the feedback loop is fast for the developer. Here I think the great
@@ -144,11 +143,11 @@ of relevant libraries.
 
 ### Crates and ecosystem
 
-Rust _is_ still a very new language with the first stable release in
+Rust _is_ still a very new language, with the first stable release in
 2015 and more widespread adoption with the release of Rust 2018. This
 leads to a common concern that Rust may be lacking some libraries, and
 so could cost significant developer time compared to languages with a
-larger and older ecosystem.
+larger and more mature ecosystem.
 
 There are already many excellent crates unique to Rust, such as Serde
 which I miss when working with other languages. The great accessibility
@@ -175,12 +174,13 @@ provide crate documentation and detailed developer and contributor
 guides. Throughout 2021 we should aim to expand existing documentation,
 and ensure that it is accessible for new developers to do so too - for
 example, contributing common use cases to [the Rust cookbook](https://rust-lang-nursery.github.io/rust-cookbook/). 
-Myself, I struggled greatly with Serde's `deserialize_with` attribute until looking at examples.
+Myself, I struggled greatly with Serde's `deserialize_with` field attribute until looking at examples.
 
 Hopefully in the future, the establishment of the [Rust foundation](https://blog.rust-lang.org/2020/08/18/laying-the-foundation-for-rusts-future.html)
 will eventually be able to provide commercial support to critical projects like
 Rustls, Serde, and Tokio to ensure the crates are maintained and
-improved in the long-term.
+improved in the long-term. I think this would help a lot with the adoption
+of Rust in enterprise.
 
 It'd also be great if Rust support were added to [jsii](https://github.com/aws/jsii)
 so Rust could be used with the AWS [Cloud Development Kit](https://github.com/aws/aws-cdk) directly.
@@ -204,7 +204,7 @@ enum MyEnum {
 fn main() {
     let myenum = MyEnum::WithString("test".to_string());
     match myenum {
-        MyEnum::WithString(x) if x == "test" => {println!("Was string")},
+        MyEnum::WithString("test") => {println!("Was string")},
         _ => {},
     }
 }
@@ -226,8 +226,7 @@ blocking, synchronous case only) if possible.
 ### Lifetimes of trait objects defaults to 'static
 
 I have been caught out a few times by the lifetime of a trait object
-defaulting to `'static`. Recently, in this [PR to the dialoguer
-crate](https://github.com/mitsuhiko/dialoguer/pull/81/files#diff-25c234b5525af56f20a73cb80796026bR47).
+defaulting to `'static`. Recently, in this [PR to the dialoguer crate](https://github.com/mitsuhiko/dialoguer/pull/81/files#diff-25c234b5525af56f20a73cb80796026bR47).
 
 Specifically the original struct:
 
@@ -258,7 +257,8 @@ unintuitive, this seems to be decided by the
 It'd be nice if this could be adjusted similar to the
 [lifetime elision in structs](https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914) 
 RFC mentioned above so that if the containing struct has a specified
-lifetime then the trait object would default to that lifetime. Perhaps
+lifetime then the trait object would default to that lifetime (the
+developer could always specify `'static` if required). Perhaps
 this is impractical or undesirable due to other consequences though.
 
 
@@ -288,7 +288,7 @@ what `AsRef<T>` provides us). Perhaps there are reasons this isn't
 viable and the type arguments used above should change, but it was a
 frustrating issue to hit as a developer.
 
-As a side note, related to `AsRef` it'd be nice to [introduce the syntax
+As a side note related to `AsRef`, it'd be nice to [introduce the syntax
 mentioned here](https://www.reddit.com/r/rust/comments/3ntsbn/whats_the_point_of_asref/cvr5n5f/).
 
 ## Summary
@@ -300,7 +300,7 @@ concerns that come up.
 In summary, during 2021 I'd like to see:
 
 * Rust expand to more domains outside of systems programming (i.e. web
-  development and data engineering)
+  development and data engineering).
 * Further language syntax improvements to keep Rust concise.
 * Continued improvements in IDE support (especially outside of VS Code).
 * Expanded documentation of common crates and use case examples (i.e.
