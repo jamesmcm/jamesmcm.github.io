@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-09-20T00:51:57+02:00</updated>
+  <updated>2020-09-24T22:19:52+02:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -12,6 +12,337 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My Rust 2021 roadmap: crates, concision, and community]]></title>
+    <link href="http://jamesmcm.github.io/blog/2020/09/24/rust2021/"/>
+    <updated>2020-09-24T16:03:21+02:00</updated>
+    <id>http://jamesmcm.github.io/blog/2020/09/24/rust2021</id>
+    <content type="html"><![CDATA[<p>The Rust core team recently released a <a href="https://blog.rust-lang.org/2020/09/03/Planning-2021-Roadmap.html">call for blog posts</a> as part of
+the 2021 roadmap for Rust. In this post I will detail my own experience
+with Rust, and areas I’d like to
+see improved during 2021.</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h2 id="my-background">My background</h2>
+
+<p>I’m currently a Data Engineer and over the last few months I have
+proposed and started implementing the migration of our serverless data
+ingestion pipelines to Rust. The requirements of these pipelines vary
+but usually involve receiving some external data (e.g. via email or S3, possibly
+via <a href="https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/">SFTP to S3</a>), 
+validating and transforming that data (with AWS Lambda) and loading it to a data
+warehouse.</p>
+
+<p>I originally proposed switching to Rust due to having deployment issues
+with Python (when depending on native modules, like NumPy) due to
+possible glibc version mismatches as well as the total size of the deployed
+package.</p>
+
+<p>Rust solves these issues by allowing us to compile a statically linked
+binary with musl, and feature flags allow us to include useful code from
+a shared crate without building in the entire crate and its
+dependencies (for parts we don’t need). <a href="https://github.com/ctz/rustls">Rustls</a> also allows us to avoid any OpenSSL-related deployment
+issues.</p>
+
+<p>Carrying out this proposal has given me direct experience in solving
+business problems in Rust, working with other team members to introduce
+Rust to the team, and deployment in an enterprise environment (although
+the hard parts of deployment are largely handled by other teams).</p>
+
+<p>I have published two personal programs written in Rust: <a href="https://github.com/jamesmcm/vopono">vopono</a> for
+running specific applications through VPN connections, and <a href="https://github.com/jamesmcm/s3rename">s3rename</a>
+for mass-renaming keys in an S3 bucket. I have also written a few prior
+blog posts on Rust, the most popular being <a href="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/#en">about data-oriented design in Rust</a>
+and <a href="http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en">an introduction to async programming</a>.</p>
+
+<p>To summarise: As a data engineer, I want to be able to easily test and
+deploy statically linked Rust binaries on various platforms and
+architectures, and interact with popular services and protocols without
+friction.</p>
+
+<h2 id="considerations">Considerations</h2>
+
+<p>When working as an engineer in an agile team, sprint velocity and
+speed of delivery is key. Engineers want to use the language and tooling
+that will help them to complete their tasks as quickly as possible,
+without frustration or the need to dig deep in to the implementations of
+dependencies.</p>
+
+<p>Amongst engineers I have seen two main reasons for push-back against
+Rust deployment:</p>
+
+<ul>
+  <li>
+    <p>The language is perceived to be very difficult to write (mostly due to
+lifetimes), low-level and slow to develop in.</p>
+  </li>
+  <li>
+    <p>The language is perceived to be very new, with an immature and
+unstable ecosystem that might be lacking critical functionality and
+could lead to a loss of development time if some dependencies have to
+be created in-house.</p>
+  </li>
+</ul>
+
+<p>These aren’t issues that can be solved directly necessarily (especially
+the perception itself), but we can consider how the community can help
+to turn around these perceptions.</p>
+
+<h3 id="development-speed">Development speed</h3>
+
+<h4 id="low-level">Low-level?</h4>
+
+<p>The first misconception is that Rust is a low-level language and that
+the experience might be similar to writing C (i.e. dealing directly with
+malloc, etc.). I think a lot of this comes from Rust often being
+compared to C and C++ implementations in benchmarks, and being more
+strongly adopted in the systems programming community.</p>
+
+<p>I think this will largely be countered by Rust usage becoming more widespread in other
+domains, such as Web Development with crates like Actix, Rocket, Hyper, etc. on the
+backend and Seed and Yew on the frontend, and Data Engineering with crates
+like ndarray, Serde, Polars, Calamine, Amadeus and Ballista.</p>
+
+<h4 id="difficult-to-write">Difficult to write?</h4>
+
+<p>Rust is also often perceived as difficult to write, particularly due to
+the lifetime notation. Here I think a lot of great work has already
+been done with non-lexical lifetimes greatly simplifying the necessary
+notation in many cases, and rust-analyzer providing a fast debug loop
+(along with the ongoing efforts to improve error messages).</p>
+
+<p>The main thing to note here for the future, in my opinion, is just how much
+language and syntax improvements can help new users and further adoption. I hope Rust
+continues to work on making the code more concise for the developer in
+the majority of use cases. For Rust 2021 and beyond this might include
+<a href="https://github.com/rust-lang/rfcs/pull/2909">assignment with destructuring</a>,
+<a href="https://github.com/rust-lang/rust/issues/44762">auto-dereferencing in operators</a>,
+and <a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a>.</p>
+
+<h4 id="slower-to-implement">Slower to implement?</h4>
+
+<p>Related to the above point, Rust is often considered slower to develop
+in (usually when compared to dynamic scripting languages like Python or
+JavaScript). Here I think it’s important to note that hitting lots of error messages
+from the compiler or borrow checker during development doesn’t
+necessarily mean development is slower - as those errors are probably
+catching lots of issues that might go unnoticed in other languages
+(until you hit an issue in production).</p>
+
+<p>In German there is a saying “Wenn schon, denn schon.”, which roughly translates
+to “if you’re going to do it, do it properly”. This is where I believe Rust
+excels - whilst you might hit a few lifetime and ownership issues during
+the development of your program, in the end you are saved from a whole
+class of bugs and also aren’t bound by issues like the <a href="https://en.wikipedia.org/wiki/Global_interpreter_lock">Global Interpreter Lock</a> 
+or the lack of type safety as in simpler scripting languages.</p>
+
+<p>But it is important to ensure
+that the feedback loop is fast for the developer. Here I think the great
+improvements in rust-analyzer have helped already, and hopefully there
+will be further improvements to compile speeds to make this even faster
+in the future.</p>
+
+<p>Ultimately with the great tooling available, I think the development
+speed can actually be faster in Rust than Python or Ruby when you
+consider the whole software life cycle including fixing bugs and scaling
+up the system.</p>
+
+<p>However, development speed is also greatly affected by the availability
+of relevant libraries.</p>
+
+<h3 id="crates-and-ecosystem">Crates and ecosystem</h3>
+
+<p>Rust <em>is</em> still a very new language, with the first stable release in
+2015 and more widespread adoption with the release of Rust 2018. This
+leads to a common concern that Rust may be lacking some libraries, and
+so could cost significant developer time compared to languages with a
+larger and more mature ecosystem.</p>
+
+<p>There are already many excellent crates unique to Rust, such as Serde
+which I miss when working with other languages. The great accessibility
+of cargo, <a href="https://crates.io/">crates.io</a> and <a href="https://docs.rs/">docs.rs</a> also make it easy to discover new crates.</p>
+
+<p>However, there are still some areas for improvement for the ecosystem as
+a whole. For example, Rusoto is still slightly less user-friendly than
+<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/index.html">boto3</a> (i.e. having to create <code class="highlighter-rouge">_Request</code> structs for each client
+request).</p>
+
+<p>Another example would be the need to provide root CA certificates (i.e. in a
+PEM file) to rustls for use with <a href="https://crates.io/crates/tokio-postgres-rustls">tokio-postgres-rustls</a> for example.
+This is a minor issue, but one that is not necessary in more “batteries-included” libraries in other
+languages (e.g. psycopg2 in Python).</p>
+
+<p>These are small examples but can impact the learning curve for new
+developers. As a community, I think we should try to create issues for
+any such “paper-cuts” we come across and contribute pull requests where
+possible.</p>
+
+<p>Documentation is also relevant to this. Overall, Rust has excellent
+documentation with the combination of rustdoc and mdBook being used to
+provide crate documentation and detailed developer and contributor
+guides. Throughout 2021 we should aim to expand existing documentation,
+and ensure that it is accessible for new developers to do so too - for
+example, contributing common use cases to <a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>. 
+Myself, I struggled greatly with Serde’s <code class="highlighter-rouge">deserialize_with</code> field attribute until looking at examples.</p>
+
+<p>Hopefully in the future, the establishment of the <a href="https://blog.rust-lang.org/2020/08/18/laying-the-foundation-for-rusts-future.html">Rust foundation</a>
+will eventually be able to provide commercial support to critical projects like
+Rustls, Serde, and Tokio to ensure the crates are maintained and
+improved in the long-term. I think this would help a lot with the adoption
+of Rust in enterprise.</p>
+
+<p>It’d also be great if Rust support were added to <a href="https://github.com/aws/jsii">jsii</a>
+so Rust could be used with the AWS <a href="https://github.com/aws/aws-cdk">Cloud Development Kit</a> directly.</p>
+
+<h2 id="other-small-issues">Other small issues</h2>
+
+<p>There are some other small issues I’d love to see improved during 2021.</p>
+
+<h3 id="auto-ref-in-pattern-matching">Auto Ref in pattern matching</h3>
+
+<p>I couldn’t find an RFC for this, but it’d great to be able to use a
+static <code class="highlighter-rouge">&amp;str</code> when matching on an enum containing a <code class="highlighter-rouge">String</code>. i.e. so
+<a href="https://play.rust-lang.org/?version=stable&amp;mode=debug&amp;edition=2018&amp;gist=284089e5b13b5925449574ce2c5e41f2">this would be possible</a>:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">MyEnum</span> <span class="p">{</span>
+    <span class="nf">WithString</span><span class="p">(</span><span class="nb">String</span><span class="p">),</span>
+    <span class="n">Other</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="n">myenum</span> <span class="o">=</span> <span class="nn">MyEnum</span><span class="p">::</span><span class="nf">WithString</span><span class="p">(</span><span class="s">"test"</span><span class="nf">.to_string</span><span class="p">());</span>
+    <span class="k">match</span> <span class="n">myenum</span> <span class="p">{</span>
+        <span class="nn">MyEnum</span><span class="p">::</span><span class="nf">WithString</span><span class="p">(</span><span class="s">"test"</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span><span class="nd">println!</span><span class="p">(</span><span class="s">"Was string"</span><span class="p">)},</span>
+        <span class="mi">_</span> <span class="k">=&gt;</span> <span class="p">{},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Currently it is necessary to use a match guard (as far as I know). The
+<a href="https://github.com/rust-lang/rust/issues/42640">closest RFC I could find</a> handles auto deref but not ref. 
+Note that is already implemented.</p>
+
+<h3 id="blocking-futures-without-an-async-runtime">Blocking Futures without an async runtime</h3>
+
+<p>At the moment if any crate returns a Future, the developer has to use an
+async runtime even if just to block on the future synchronously - i.e. <a href="https://docs.rs/tokio/0.2.22/tokio/runtime/struct.Runtime.html#method.block_on">tokio’s
+block_on</a>.</p>
+
+<p>It’d be nice if this were built in to the standard library (for the
+blocking, synchronous case only) if possible.</p>
+
+<h3 id="lifetimes-of-trait-objects-defaults-to-static">Lifetimes of trait objects defaults to ‘static</h3>
+
+<p>I have been caught out a few times by the lifetime of a trait object
+defaulting to <code class="highlighter-rouge">'static</code>. Recently, in this <a href="https://github.com/mitsuhiko/dialoguer/pull/81/files#diff-25c234b5525af56f20a73cb80796026bR47">PR to the dialoguer crate</a>.</p>
+
+<p>Specifically the original struct:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Input</span><span class="o">&lt;</span><span class="nv">'a</span><span class="p">,</span> <span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">prompt</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">show_default</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">initial_text</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">theme</span><span class="p">:</span> <span class="o">&amp;</span><span class="nv">'a</span> <span class="n">dyn</span> <span class="n">Theme</span><span class="p">,</span>
+    <span class="n">permit_empty</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">validator</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="nf">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Requires that the validator closure has a <code class="highlighter-rouge">'static</code> lifetime, not the
+<code class="highlighter-rouge">'a</code> of the struct. This can be fixed by specifying the <code class="highlighter-rouge">'a</code> lifetime
+explicitly:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="n">validator</span><span class="p">:</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="nf">Fn</span><span class="p">(</span><span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nb">Option</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span> <span class="o">+</span> <span class="nv">'a</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+</code></pre></div></div>
+
+<p>However, I found the fact that it defaults to <code class="highlighter-rouge">'static</code> quite
+unintuitive, this seems to be decided by the
+<a href="https://doc.rust-lang.org/reference/lifetime-elision.html#default-trait-object-lifetimes">default trait object lifetime rules</a>.</p>
+
+<p>It’d be nice if this could be adjusted similar to the
+<a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a> 
+RFC mentioned above so that if the containing struct has a specified
+lifetime then the trait object would default to that lifetime (the
+developer could always specify <code class="highlighter-rouge">'static</code> if required). Perhaps
+this is impractical or undesirable due to other consequences though.</p>
+
+<h3 id="deref-in-closure-signature">Deref in closure signature</h3>
+
+<p>Related to the PR mentioned in the previous section, we have a
+<code class="highlighter-rouge">Validator&lt;T&gt;</code> that must implement the validate method:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">trait</span> <span class="n">Validator</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">type</span> <span class="nb">Err</span><span class="p">:</span> <span class="n">Debug</span> <span class="o">+</span> <span class="n">Display</span><span class="p">;</span>
+
+    <span class="k">fn</span> <span class="nf">validate</span><span class="p">(</span><span class="o">&amp;</span><span class="k">self</span><span class="p">,</span> <span class="n">input</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">T</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nn">Self</span><span class="p">::</span><span class="nb">Err</span><span class="o">&gt;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>However, this means if we want to validate a <code class="highlighter-rouge">String</code> we must pass a
+<code class="highlighter-rouge">&amp;String</code> to validate. We cannot pass an <code class="highlighter-rouge">&amp;str</code>. If <code class="highlighter-rouge">T</code> were an <code class="highlighter-rouge">&amp;str</code>
+itself then we could use <a href="https://doc.rust-lang.org/beta/std/convert/trait.AsRef.html">AsRef</a>
+to accept a <code class="highlighter-rouge">String</code> in the signature, but the other way around doesn’t
+seem possible even though in the end the <code class="highlighter-rouge">&amp;str</code> and <code class="highlighter-rouge">&amp;String</code> are
+equivalent for our purposes.</p>
+
+<p>That is, we’d like to accept any type which
+<code class="highlighter-rouge">T</code> could ref in to, not any type which could ref in to <code class="highlighter-rouge">T</code> (which is
+what <code class="highlighter-rouge">AsRef&lt;T&gt;</code> provides us). Perhaps there are reasons this isn’t
+viable and the type arguments used above should change, but it was a
+frustrating issue to hit as a developer.</p>
+
+<p>As a side note related to <code class="highlighter-rouge">AsRef</code>, it’d be nice to <a href="https://www.reddit.com/r/rust/comments/3ntsbn/whats_the_point_of_asref/cvr5n5f/">introduce the syntax
+mentioned here</a>.</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>I’ve covered a lot of different issues here, but I really wanted to
+emphasise my own experience in introducing Rust to a team and the common
+concerns that come up.</p>
+
+<p>In summary, during 2021 I’d like to see:</p>
+
+<ul>
+  <li>Rust expand to more domains outside of systems programming (i.e. web
+development and data engineering).</li>
+  <li>Further language syntax improvements to keep Rust concise.</li>
+  <li>Continued improvements in IDE support (especially outside of VS Code).</li>
+  <li>Expanded documentation of common crates and use case examples (i.e.
+<a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>).</li>
+</ul>
+
+<p>In my opinion, a major part of making this possible is making it easier
+for newer Rust developers to contribute to Rust itself (and major
+crates). For example, I have written about some issues I’ve had above
+and linked to some related RFCs - but I would have no idea where to
+start with testing implementations to solve any of those issues.</p>
+
+<p>The <a href="https://forge.rust-lang.org/">Rust Forge</a> is a good start for this,
+but I’d also love to see some worked examples of implementing features
+and bug fixes. For example, <a href="https://github.com/jonhoo">Jon Gjengset</a>’s Crust of Rust series
+has been excellent for covering the basics of the implementations of
+some common Rust concepts, and it’d be great to see more blog posts focussed
+on making improvements to Rust itself (or major crates).</p>
+
+<p>Other possibilities are to host specific training sessions for new
+contributors like <a href="https://www.youtube.com/watch?v=aS26sqT09Pw">the Veloren project has done</a>,
+or to host community bug-squashing days aimed at new contributors like
+Arch Linux and KDE have done.</p>
+
+<p>Having a larger pool of contributors would help to alleviate the
+workload on current maintainers, and bring a more diverse range of
+perspectives from different problem domains and platforms.</p>
+
+<p>Overall, Rust is already in an excellent position with the most
+welcoming community and most comprehensive documentation that I have
+seen in any ecosystem. I look forward to what 2021 will bring!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using ALMA for persistent LiveUSB installations of Arch Linux]]></title>
@@ -1797,594 +2128,6 @@ features of your destination machine (i.e. <a href="https://rust-lang.github.io/
 LLVM intermediate representation).</li>
   <li><a href="https://rust-lang.github.io/packed_simd/perf-guide/prof/linux.html">perf</a> and <a href="https://github.com/flamegraph-rs/flamegraph">flamegraph</a> can be used for performance profiling.</li>
 </ul>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[A practical introduction to async programming in Rust]]></title>
-    <link href="http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/"/>
-    <updated>2020-05-06T23:40:04+02:00</updated>
-    <id>http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust</id>
-    <content type="html"><![CDATA[<p>In this post we will explore a brief example of asynchronous programming
-in Rust with the Tokio runtime, demonstrating different execution scenarios. This post is aimed
-at beginners to asynchronous programming.</p>
-
-<p>The source code for this example is <a href="https://github.com/jamesmcm/async-rust-example">available on Github</a>.
-A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch</a> using the async-std runtime is also available (contributed by
-<a href="https://github.com/BartMassey">@BartMassey</a>).</p>
-
-<!--more-->
-
-<h2 id="what-is-asynchronous-programming">What is asynchronous programming?</h2>
-
-<p>Asynchronous programming allows you to continue carrying out computations
-whilst waiting for results from IO operations
-(often network requests or responses), even on a single OS thread.</p>
-
-<p>This is achieved via the use of an async runtime which handles the
-assignment of async tasks (i.e. <a href="https://en.wikipedia.org/wiki/Green_threads">green threads</a>)
-to actual OS threads.</p>
-
-<p>Unlike OS threads, green threads are not expensive to create and so we
-needn’t worry about hitting a hard limit. Whereas OS threads need to
-hold their own stack, leading to high memory usage when dealing with
-many threads. On Linux you can check your thread limit per process
-with: <code class="highlighter-rouge">cat /proc/sys/kernel/threads-max</code>, mine is 127,162.</p>
-
-<p>This is a significant issue if we need a separate OS
-thread to handle each request on a web server for example, and is the
-origin of the <a href="https://en.wikipedia.org/wiki/C10k_problem">C10k problem</a>
-- how to handle 10,000 concurrent connections to a web server.</p>
-
-<p>Early web servers did indeed use a separate OS thread per request, in order to
-handle requests in parallel. The key insight is that those threads spend
-most of their time waiting for network responses, rather than doing any
-computation.</p>
-
-<h3 id="async-and-await">Async and await</h3>
-
-<p>Rust has adopted the
-<a href="https://en.wikipedia.org/wiki/Async/await">async/await</a> syntax for
-defining asynchronous code blocks and functions.</p>
-
-<p>The <code class="highlighter-rouge">async</code> keyword defines an async code block or function. Specifying
-that it will return a <code class="highlighter-rouge">Future</code>, a value that will need to be <code class="highlighter-rouge">.await</code>ed
-elsewhere in order to trigger the execution of the task (note the lazy
-execution) and wait for the return value to be available.</p>
-
-<p>The <code class="highlighter-rouge">.await</code> keyword (which must be inside an <code class="highlighter-rouge">async</code> block/function)
-is used to wait asynchronously for an async task to finish, and get the return value.
-Note that while the task itself cannot progress until the <code class="highlighter-rouge">Future</code> is ready,
-the actual OS thread can have other tasks assigned to it by the runtime,
-and so continue to do work.</p>
-
-<p>Effectively the task is informing the
-runtime that at this point it may yield the execution to another task
-(eventually, that other task will also <code class="highlighter-rouge">await</code> something, and if the
-Future in this task is ready, execution of this task may continue) -
-this is an implementation of <a href="https://en.wikipedia.org/wiki/Cooperative_multitasking">co-operative multitasking</a>.</p>
-
-<p>This syntax is very elegant, and allows us to write asynchronous
-programs that maintain a structure similar to simple, synchronous
-programs.</p>
-
-<h2 id="when-should-i-use-async">When should I use async?</h2>
-
-<p>Asynchronous programming is useful when the thread would otherwise just be 
-waiting on IO operations - for example when making network requests or
-responses, reading or writing to disk, or waiting for user input.</p>
-
-<p>It is not useful if you are always doing computations and there is no
-waiting on IO operations, even if those computations could run in
-parallel - for example in a ray tracer. In this case it would be best to
-parallelise the computations over OS threads directly (taking advantage
-of the multiple cores in your CPU), for example using parallel iterators in the <a href="https://crates.io/crates/rayon">rayon</a>
-crate (or if you want thread-level control, then with the <a href="https://crates.io/crates/crossbeam">crossbeam</a>
-and <a href="https://crates.io/crates/threadpool">threadpool</a> crates). 
-However, remember <a href="https://en.wikipedia.org/wiki/Amdahl%27s_law">Amdahl’s Law</a> and consider that
-algorithmic improvements might yield a better return than focusing on 
-parallelisation in this cases.</p>
-
-<p>It is also not useful if there are no other tasks to do whilst waiting 
-for the IO operations. For example in the <a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">previous blog post</a>, Rusoto
-actually returns a <code class="highlighter-rouge">RusotoFuture</code> object when we request the DB
-credentials from AWS Secrets Manager, however in this case one
-invocation of our Lambda function corresponds to one request - there is
-no work to be done whilst waiting for the DB credentials to arrive. So
-we can just program synchronously (fortunately <code class="highlighter-rouge">RusotoFuture</code> provides the
-<code class="highlighter-rouge">.sync()</code> method to do exactly that).</p>
-
-<h2 id="example">Example</h2>
-
-<p>In this example we will simulate three very slow network requests,
-consisting of three stages:</p>
-<ul>
-  <li>Connection - an asynchronous delay of 2 seconds</li>
-  <li>Waiting for a response - an asynchronous delay of 8 seconds (the delay
-is on the server side)</li>
-  <li>Computation - a synchronous delay of 4 seconds (i.e. it has to block
-the current OS thread to do the computation).</li>
-</ul>
-
-<p>We will use <a href="https://docs.rs/tokio/0.2.20/tokio/">Tokio</a> as our async
-runtime for this example, as it is currently the most popular.
-The other main alternative is the <a href="https://docs.rs/async-std/1.5.0/async_std/">async_std</a> runtime
-- code for using this runtime is available in the <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">async-std branch of the Github repo</a> (this code
-was contributed by <a href="https://github.com/BartMassey">@BartMassey</a>).</p>
-
-<p>Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate 
-so you can swap the async runtime whilst keeping mostly the same API.</p>
-
-<h3 id="server">Server</h3>
-
-<p>The server used in this example is adapted from the <a href="https://tokio.rs/docs/getting-started/echo/">Tokio tutorial</a>.
-It echoes back the bytes received, after a delay of 8 seconds.</p>
-
-<p>The full adapted code is as follows (and <a href="https://github.com/jamesmcm/async-rust-example">available in the source code
-for this post</a>):</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">futures</span><span class="p">::</span><span class="nn">stream</span><span class="p">::</span><span class="n">StreamExt</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="n">TcpListener</span><span class="p">;</span>
-
-<span class="nd">#[tokio::main]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">addr</span> <span class="o">=</span> <span class="s">"127.0.0.1:6142"</span><span class="p">;</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">listener</span> <span class="o">=</span> <span class="nn">TcpListener</span><span class="p">::</span><span class="nf">bind</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span><span class="py">.await</span><span class="nf">.unwrap</span><span class="p">();</span>
-
-    <span class="k">let</span> <span class="n">server</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="k">async</span> <span class="k">move</span> <span class="p">{</span>
-            <span class="k">let</span> <span class="k">mut</span> <span class="n">incoming</span> <span class="o">=</span> <span class="n">listener</span><span class="nf">.incoming</span><span class="p">();</span>
-            <span class="k">while</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span> <span class="o">=</span> <span class="n">incoming</span><span class="nf">.next</span><span class="p">()</span><span class="py">.await</span> <span class="p">{</span>
-                <span class="k">match</span> <span class="n">conn</span> <span class="p">{</span>
-                    <span class="nf">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="nd">eprintln!</span><span class="p">(</span><span class="s">"accept failed = {:?}"</span><span class="p">,</span> <span class="n">e</span><span class="p">),</span>
-                    <span class="nf">Ok</span><span class="p">(</span><span class="k">mut</span> <span class="n">sock</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-                        <span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="k">async</span> <span class="k">move</span> <span class="p">{</span>
-                            <span class="k">let</span> <span class="p">(</span><span class="k">mut</span> <span class="n">reader</span><span class="p">,</span> <span class="k">mut</span> <span class="n">writer</span><span class="p">)</span> <span class="o">=</span> <span class="n">sock</span><span class="nf">.split</span><span class="p">();</span>
-                            <span class="nn">tokio</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nf">delay_for</span><span class="p">(</span><span class="nn">tokio</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span><span class="py">.await</span><span class="p">;</span>
-                            <span class="k">match</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">io</span><span class="p">::</span><span class="k">copy</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">reader</span><span class="p">,</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">writer</span><span class="p">)</span><span class="py">.await</span> <span class="p">{</span>
-                                <span class="nf">Ok</span><span class="p">(</span><span class="n">amt</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-                                    <span class="nd">println!</span><span class="p">(</span><span class="s">"wrote {} bytes"</span><span class="p">,</span> <span class="n">amt</span><span class="p">);</span>
-                                <span class="p">}</span>
-                                <span class="nf">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-                                    <span class="nd">eprintln!</span><span class="p">(</span><span class="s">"IO error {:?}"</span><span class="p">,</span> <span class="n">err</span><span class="p">);</span>
-                                <span class="p">}</span>
-                            <span class="p">}</span>
-                        <span class="p">});</span>
-                    <span class="p">}</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">};</span>
-    <span class="nd">println!</span><span class="p">(</span><span class="s">"Server running on localhost:6142"</span><span class="p">);</span>
-    <span class="n">server</span><span class="py">.await</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="synchronous-requests">Synchronous requests</h3>
-
-<p>In the synchronous case, we simply run each request in series, one after
-another. Therefore we would expect a total execution time of <code class="highlighter-rouge">3*(2+8+4)
-= 42</code> seconds to finish all 3 tasks.</p>
-
-<p>We can visualise this case with a diagram:
-<img src="/images/synchronous.svg" alt="Synchronous execution" title="Synchronous execution" /></p>
-
-<p>We can implement this using only the standard library:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">io</span><span class="p">::</span><span class="nn">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="n">TcpStream</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="n">sleep</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
-
-<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="nn">std</span><span class="p">::</span><span class="nn">error</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task1"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task2"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task3"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-
-<span class="k">fn</span> <span class="nf">task</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="nn">std</span><span class="p">::</span><span class="nn">error</span><span class="p">::</span><span class="n">Error</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="c">// Simulate network delay using thread sleep for 2 seconds</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} started: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">(),</span>
-    <span class="p">);</span>
-    <span class="nf">sleep</span><span class="p">(</span><span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
-
-    <span class="c">// Write to server - server will echo this back to us with 8 second delay</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">stream</span> <span class="o">=</span> <span class="nn">TcpStream</span><span class="p">::</span><span class="nf">connect</span><span class="p">(</span><span class="s">"127.0.0.1:6142"</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-    <span class="n">stream</span><span class="nf">.write_all</span><span class="p">(</span><span class="n">label</span><span class="nf">.as_bytes</span><span class="p">())</span><span class="o">?</span><span class="p">;</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} written: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-
-    <span class="c">// Read 5 chars we expect (to avoid dealing with EOF, etc.)</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">5</span><span class="p">];</span>
-    <span class="n">stream</span><span class="nf">.read_exact</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">buffer</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-    <span class="n">stream</span><span class="nf">.shutdown</span><span class="p">(</span><span class="nn">std</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="nn">Shutdown</span><span class="p">::</span><span class="n">Both</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} read: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-
-    <span class="c">// Simulate computation work by sleeping actual thread for 4 seconds</span>
-    <span class="nf">sleep</span><span class="p">(</span><span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">4</span><span class="p">));</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} finished: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">)</span><span class="o">?</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Running this (see <a href="https://github.com/jamesmcm/async-rust-example">the repo for this workspace</a>):</p>
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>cargo run <span class="nt">--release</span> <span class="nt">--bin</span> server
-<span class="nv">$ </span>cargo run <span class="nt">--release</span> <span class="nt">--bin</span> client_synchronous
-</code></pre></div></div>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OS Thread ThreadId(1) - task1 started: 578ns
-OS Thread ThreadId(1) - task1 written: 2.000346788s
-OS Thread ThreadId(1) - task1 read: 10.002177173s
-OS Thread ThreadId(1) - task1 finished: 14.002328699s
-OS Thread ThreadId(1) - task2 started: 14.002387112s
-OS Thread ThreadId(1) - task2 written: 16.002673602s
-OS Thread ThreadId(1) - task2 read: 24.006071003s
-OS Thread ThreadId(1) - task2 finished: 28.006204147s
-OS Thread ThreadId(1) - task3 started: 28.006263855s
-OS Thread ThreadId(1) - task3 written: 30.00652763s
-OS Thread ThreadId(1) - task3 read: 38.008234993s
-OS Thread ThreadId(1) - task3 finished: 42.008389223s
-</code></pre></div></div>
-
-<p>Gives exactly the 42 seconds total execution time that we calculated above.</p>
-
-<h3 id="synchronous-requests-tokio">Synchronous requests (Tokio)</h3>
-
-<p>Note that it is possible to get synchronous behaviour from async
-functions when using Tokio (sometimes unintentionally). Implementing the
-above with Tokio:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">futures</span><span class="p">::</span><span class="nn">stream</span><span class="p">::</span><span class="n">StreamExt</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">error</span><span class="p">::</span><span class="n">Error</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="n">sleep</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="n">join</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="n">TcpStream</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
-
-<span class="nd">#[tokio::main]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-
-    <span class="c">// Synchronous</span>
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task1"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task2"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">task</span><span class="p">(</span><span class="s">"task3"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">task</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">,</span> <span class="n">now</span><span class="p">:</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="c">// Simulate network delay using Tokio async delay for 2 seconds</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} started: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">(),</span>
-    <span class="p">);</span>
-    <span class="nn">tokio</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nf">delay_for</span><span class="p">(</span><span class="nn">tokio</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="py">.await</span><span class="p">;</span>
-
-    <span class="c">// Write to server - server will echo this back to us with 8 second delay</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">stream</span> <span class="o">=</span> <span class="nn">TcpStream</span><span class="p">::</span><span class="nf">connect</span><span class="p">(</span><span class="s">"127.0.0.1:6142"</span><span class="p">)</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="n">stream</span><span class="nf">.write_all</span><span class="p">(</span><span class="n">label</span><span class="nf">.as_bytes</span><span class="p">())</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} written: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-
-    <span class="c">// Read 5 chars we expect (to avoid dealing with EOF, etc.)</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">buffer</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">5</span><span class="p">];</span>
-    <span class="n">stream</span><span class="nf">.read_exact</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="n">buffer</span><span class="p">)</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
-    <span class="n">stream</span><span class="nf">.shutdown</span><span class="p">(</span><span class="nn">std</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="nn">Shutdown</span><span class="p">::</span><span class="n">Both</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} read: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="n">label</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-
-    <span class="c">// Simulate computation work by sleeping actual thread for 4 seconds</span>
-    <span class="nf">sleep</span><span class="p">(</span><span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="nn">Duration</span><span class="p">::</span><span class="nf">from_secs</span><span class="p">(</span><span class="mi">4</span><span class="p">));</span>
-    <span class="nd">println!</span><span class="p">(</span>
-        <span class="s">"OS Thread {:?} - {} finished: {:?}"</span><span class="p">,</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="nf">current</span><span class="p">()</span><span class="nf">.id</span><span class="p">(),</span>
-        <span class="nn">std</span><span class="p">::</span><span class="nn">str</span><span class="p">::</span><span class="nf">from_utf8</span><span class="p">(</span><span class="o">&amp;</span><span class="n">buffer</span><span class="p">)</span><span class="o">?</span><span class="p">,</span>
-        <span class="n">now</span><span class="nf">.elapsed</span><span class="p">()</span>
-    <span class="p">);</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Running this produces the same output as before:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>cargo run <span class="nt">--release</span> <span class="nt">--bin</span> client_async
-</code></pre></div></div>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OS Thread ThreadId(1) - task1 started: 333ns
-OS Thread ThreadId(1) - task1 written: 2.001476012s
-OS Thread ThreadId(1) - task1 read: 10.003284491s
-OS Thread ThreadId(1) - task1 finished: 14.003404307s
-OS Thread ThreadId(1) - task2 started: 14.003476979s
-OS Thread ThreadId(1) - task2 written: 16.005013941s
-OS Thread ThreadId(1) - task2 read: 24.005471439s
-OS Thread ThreadId(1) - task2 finished: 28.005575307s
-OS Thread ThreadId(1) - task3 started: 28.005615372s
-OS Thread ThreadId(1) - task3 written: 30.007082377s
-OS Thread ThreadId(1) - task3 read: 38.009223127s
-OS Thread ThreadId(1) - task3 finished: 42.009349576s
-</code></pre></div></div>
-
-<p>It is the <code class="highlighter-rouge">.await</code>ing of the tasks in series which causes this to be
-synchronous. The main function is async, but the use of <code class="highlighter-rouge">.await</code> causes
-it to wait for the result of that Future before continuing. There is
-nothing special about the main function compared to other async
-functions in this regard. No other tasks exist at
-that time to yield execution to, causing the execution to be
-synchronous in practice.</p>
-
-<p>Note the Send + Sync bounds are not required for the above
-implementation (since it runs on only one OS thread),
-but we will need them in the last example. This is also why we clone
-<code class="highlighter-rouge">now</code> instead of borrowing it in <code class="highlighter-rouge">task()</code> (alternatively we could wrap
-it in an <code class="highlighter-rouge">Arc</code>).</p>
-
-<p>We will use the same <code class="highlighter-rouge">async fn task()</code> definition for the following
-examples, where it will be omitted.</p>
-
-<h3 id="asynchronous-requests-one-os-thread">Asynchronous requests (one OS thread)</h3>
-
-<p>In the asynchronous, single OS thread case we start the waiting
-steps (connection and getting the server response) concurrently.
-However, the final computation step will still need to be done in series
-for each task. Therefore we expect a total execution time of
-<code class="highlighter-rouge">8+2+(3*4)=22</code> seconds.</p>
-
-<p>In a diagram:
-<img src="/images/asynchronous_single.svg" alt="Asynchronous execution on a single OS thread" title="Asynchronous execution on a single OS thread" /></p>
-
-<p>Using the same definition of <code class="highlighter-rouge">async fn task()</code> as before:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">futures</span><span class="p">::</span><span class="nn">stream</span><span class="p">::</span><span class="nn">futures_unordered</span><span class="p">::</span><span class="n">FuturesUnordered</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">futures</span><span class="p">::</span><span class="nn">stream</span><span class="p">::</span><span class="n">StreamExt</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">error</span><span class="p">::</span><span class="n">Error</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">thread</span><span class="p">::</span><span class="n">sleep</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">std</span><span class="p">::</span><span class="nn">time</span><span class="p">::</span><span class="n">Instant</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">net</span><span class="p">::</span><span class="n">TcpStream</span><span class="p">;</span>
-<span class="k">use</span> <span class="nn">tokio</span><span class="p">::</span><span class="nn">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
-
-<span class="nd">#[tokio::main]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-
-    <span class="c">// Asynchronous single-thread</span>
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">futs</span> <span class="o">=</span> <span class="nn">FuturesUnordered</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task1"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">()));</span>
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task2"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">()));</span>
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task3"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">()));</span>
-
-    <span class="k">while</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">_</span><span class="n">handled</span><span class="p">)</span> <span class="o">=</span> <span class="n">futs</span><span class="nf">.next</span><span class="p">()</span><span class="py">.await</span> <span class="p">{}</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Running this gives our expected total execution time of 22 seconds:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OS Thread ThreadId(1) - task1 started: 3.994µs
-OS Thread ThreadId(1) - task2 started: 21.174µs
-OS Thread ThreadId(1) - task3 started: 25.511µs
-OS Thread ThreadId(1) - task3 written: 2.002221984s
-OS Thread ThreadId(1) - task2 written: 2.002406898s
-OS Thread ThreadId(1) - task1 written: 2.002483563s
-OS Thread ThreadId(1) - task3 read: 10.003326999s
-OS Thread ThreadId(1) - task3 finished: 14.003478669s
-OS Thread ThreadId(1) - task2 read: 14.00365763s
-OS Thread ThreadId(1) - task2 finished: 18.00379238s
-OS Thread ThreadId(1) - task1 read: 18.003951713s
-OS Thread ThreadId(1) - task1 finished: 22.004094444s
-</code></pre></div></div>
-
-<p>In this case we use a <code class="highlighter-rouge">FuturesUnordered</code> collection to allow us to
-repeatedly await the different Futures. However, we never use
-<code class="highlighter-rouge">tokio::spawn()</code> so it is only running on the single OS thread
-(as we never allow the creation of more).</p>
-
-<p>Note that we could use the <code class="highlighter-rouge">join!</code> macro here instead of allocating a
-<code class="highlighter-rouge">FuturesUnordered</code>, we will see an example of this later. However, that
-is only practical for a small number of Futures.</p>
-
-<p>We can also force Tokio to only use one thread by putting arguments in
-the attribute for our main function:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[tokio::main(core_threads</span> <span class="nd">=</span> <span class="mi">1</span><span class="nd">,</span> <span class="nd">max_threads</span> <span class="nd">=</span> <span class="mi">1</span><span class="nd">)]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-<span class="o">...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<h3 id="asynchronous-requests-multiple-os-threads">Asynchronous requests (multiple OS threads)</h3>
-
-<p>In the case of asynchronous requests across multiple OS threads, we can
-do every step concurrently (and the OS threads could complete other tasks
-when the tasks await). This means that we can do the final computation step in
-parallel on different OS threads.</p>
-
-<p><img src="/images/asynchronous_multi.svg" alt="Asynchronous execution on multiple OS threads" title="Asynchronous execution on multiple OS threads" /></p>
-
-<p>Therefore we would expect a total execution time of <code class="highlighter-rouge">2+8+4=14</code> seconds
-for all 3 requests. This is the best we can achieve - the same time as
-completing a single request.</p>
-
-<p>Note that this requires the types we send across threads to be
-thread-safe, i.e. implementing Send or Sync - just as we would if we were
-using OS threads directly.</p>
-
-<p>The implementation is very similar to the previous example, but instead
-of awaiting on the futures directly, we <code class="highlighter-rouge">tokio::spawn</code> the tasks and
-await their handles. This allows Tokio to execute them on different OS
-threads.</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[tokio::main]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-
-    <span class="k">let</span> <span class="k">mut</span> <span class="n">futs</span> <span class="o">=</span> <span class="nn">FuturesUnordered</span><span class="p">::</span><span class="nf">new</span><span class="p">();</span>
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task1"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())));</span>
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task2"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())));</span>
-    <span class="n">futs</span><span class="nf">.push</span><span class="p">(</span><span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task3"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())));</span>
-    <span class="k">while</span> <span class="k">let</span> <span class="nf">Some</span><span class="p">(</span><span class="mi">_</span><span class="n">handled</span><span class="p">)</span> <span class="o">=</span> <span class="n">futs</span><span class="nf">.next</span><span class="p">()</span><span class="py">.await</span> <span class="p">{}</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>And we observe the 14 second execution time (note we don’t care about
-the order of execution):</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OS Thread ThreadId(2) - task1 started: 17.055µs
-OS Thread ThreadId(3) - task2 started: 30.227µs
-OS Thread ThreadId(2) - task3 started: 32.513µs
-OS Thread ThreadId(2) - task3 written: 2.001499145s
-OS Thread ThreadId(3) - task1 written: 2.00153689s
-OS Thread ThreadId(5) - task2 written: 2.001721878s
-OS Thread ThreadId(3) - task3 read: 10.003403756s
-OS Thread ThreadId(2) - task1 read: 10.003501s
-OS Thread ThreadId(5) - task2 read: 10.003417328s
-OS Thread ThreadId(3) - task3 finished: 14.003584085s
-OS Thread ThreadId(2) - task1 finished: 14.003664981s
-OS Thread ThreadId(5) - task2 finished: 14.003698375s
-</code></pre></div></div>
-
-<p>The different OS Thread IDs demonstrate that the tasks are being
-executed on separate OS threads.</p>
-
-<p>For completeness, here is the same implementation using the <code class="highlighter-rouge">join!</code>
-macro instead of allocating a <code class="highlighter-rouge">FuturesUnordered</code>:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[tokio::main]</span>
-<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-    <span class="c">// Asynchronous multi-threaded</span>
-
-    <span class="k">match</span> <span class="nd">join!</span><span class="p">(</span>
-        <span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task1"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())),</span>
-        <span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task2"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">())),</span>
-        <span class="nn">tokio</span><span class="p">::</span><span class="nf">spawn</span><span class="p">(</span><span class="nf">task</span><span class="p">(</span><span class="s">"task3"</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">()))</span>
-    <span class="p">)</span> <span class="p">{</span>
-        <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
-            <span class="p">(</span><span class="n">x</span><span class="nf">.ok</span><span class="p">(),</span> <span class="n">y</span><span class="nf">.ok</span><span class="p">(),</span> <span class="n">z</span><span class="nf">.ok</span><span class="p">())</span>
-        <span class="p">}</span>
-    <span class="p">};</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>This saves the allocation of the <code class="highlighter-rouge">FuturesUnordered</code> but it can be
-awkward to work with the tuple of Results that is returned (especially
-for many Futures).</p>
-
-<h4 id="how-does-this-differ-from-os-thread-parallelisation">How does this differ from OS thread parallelisation?</h4>
-
-<p>You could implement something similar for the synchronous case using OS threads directly, for
-example with the <a href="https://crates.io/crates/rayon">rayon</a> crate mentioned previously.</p>
-
-<p>However, in this case each request would need its own OS thread, and if
-we had to carry out 10,000 concurrent requests, we might hit the thread
-limit.</p>
-
-<p>That is, the execution diagram would look like this:
-<img src="/images/synchronous_multios.svg" alt="Synchronous execution on multiple OS threads" title="Synchronous execution on multiple OS threads" /></p>
-
-<p>Note that the OS threads would spend a lot of time just waiting on IO operations,
-unable to start other requests.</p>
-
-<p>We can modify our first synchronous example above to do this with rayon:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">rayon</span><span class="p">::</span><span class="nn">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
-
-<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="nn">std</span><span class="p">::</span><span class="nn">error</span><span class="p">::</span><span class="n">Error</span> <span class="o">+</span> <span class="nb">Send</span> <span class="o">+</span> <span class="n">Sync</span><span class="o">&gt;&gt;</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">now</span> <span class="o">=</span> <span class="nn">Instant</span><span class="p">::</span><span class="nf">now</span><span class="p">();</span>
-
-    <span class="p">[</span><span class="s">"task1"</span><span class="p">,</span> <span class="s">"task2"</span><span class="p">,</span> <span class="s">"task3"</span><span class="p">]</span>
-        <span class="nf">.par_iter</span><span class="p">()</span>
-        <span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="nf">task</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">now</span><span class="nf">.clone</span><span class="p">()))</span>
-        <span class="py">.collect</span><span class="p">::</span><span class="o">&lt;</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="mi">_</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">_</span><span class="o">&gt;&gt;</span><span class="p">()</span><span class="o">?</span><span class="p">;</span>
-    <span class="nf">Ok</span><span class="p">(())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>And it terminates in 14 seconds as expected (note that each task is
-allocated to one OS thread):</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>OS Thread ThreadId(3) - task1 started: 280.871µs
-OS Thread ThreadId(6) - task2 started: 281.03µs
-OS Thread ThreadId(7) - task3 started: 283.838µs
-OS Thread ThreadId(6) - task2 written: 2.000605562s
-OS Thread ThreadId(7) - task3 written: 2.000619598s
-OS Thread ThreadId(3) - task1 written: 2.000679853s
-OS Thread ThreadId(3) - task1 read: 10.002321036s
-OS Thread ThreadId(6) - task2 read: 10.00233185s
-OS Thread ThreadId(7) - task3 read: 10.002384653s
-OS Thread ThreadId(3) - task1 finished: 14.002447762s
-OS Thread ThreadId(6) - task2 finished: 14.002540969s
-OS Thread ThreadId(7) - task3 finished: 14.002589621s
-</code></pre></div></div>
-
-<p>However, this would not be resource-efficient when handling a large
-number of tasks since one task corresponds to one OS thread.</p>
-
-<p>Whereas in the async case we only need the additional threads during the
-computation step (which is synchronous). This means that we could use a
-fixed OS threadpool size and still benefit from some parallelisation in
-the computation step whilst having guarantees about our resource usage
-(i.e. we can limit the maximum number of OS threads and still be able to
-start new requests).</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>I hope this blog post has helped you to better understand when and how
-to apply asynchronous programming in Rust.</p>
-
-<p>The elegant async/await syntax allows for clear and concise asynchronous
-programming. However, it may take some getting used to if you do not
-have prior experience with asynchronous programming.</p>
-
-<p>These examples also demonstrate the difference between concurrency and
-parallelism. In the asynchronous single OS thread case we are handling
-tasks concurrently, but nothing is running in parallel (i.e. we use only
-one OS thread).</p>
-
-<h3 id="current-limitations">Current Limitations</h3>
-
-<p>Note that currently you cannot use <a href="https://rust-lang.github.io/async-book/07_workarounds/06_async_in_traits.html">async methods in traits</a>, and nor
-can you create <a href="https://boats.gitlab.io/blog/post/poll-drop/">async destructors</a>. This is a problem if you want a struct
-to make a network request when it is dropped, but you don’t want to
-block the OS thread whilst it does that - you cannot <code class="highlighter-rouge">.await</code> because
-<code class="highlighter-rouge">drop()</code> (from <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html">Drop</a>) is not async.</p>
-
-<p>I hit the latter issue in my recent <a href="https://github.com/jamesmcm/s3rename">s3rename</a> crate, and am still
-attempting to work around it. See <a href="https://github.com/jamesmcm/s3rename/issues/16">this issue</a> for details.</p>
-
 ]]></content>
   </entry>
   
