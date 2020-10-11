@@ -145,30 +145,112 @@ recommend other excellent online courses I have completed:
 
 ## Ray Tracer
 
-Ray Tracer challenge + blog posts
-Ray tracer in one weekend
-wgpu
-DOOM renderer - bisqwit
+Implementing a [Ray Tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics\)) is a great project for producing a visible
+result that you can share with others. I highly recommend [The Ray
+Tracer Challenge book](https://pragprog.com/titles/jbtracer/the-ray-tracer-challenge/)
+(and don't forget [the bonus chapters](http://www.raytracerchallenge.com/#bonus) at the end!).
+The book uses Test-Driven Development and does not prescribe a specific
+programming language.
 
+I implemented the [project in Scala](https://github.com/jamesmcm/raytracer_challenge_scala).
+If I were to do it again, I'd recommend making sure your primitives are
+as fast as possible (i.e. use the appropriate linear algebra libraries)
+to ensure better performance later on. I'd also recommend implementing
+it such that it can compile to WebAssembly or JavaScript - e.g. with [wgpu in
+Rust](https://sotrh.github.io/learn-wgpu/) so that it is easy to show to
+others whilst keeping good performance.
+
+There is also the [Ray Tracing in One Weekend](https://raytracing.github.io/)
+for an alternative resource aimed at C++.
+
+Graphics programming is a very deep rabbit hole, if you find the Ray
+Tracer interesting I'd definitely recommend Bisqwit's YouTube channel
+with videos on [DOOM-style rendering](https://www.youtube.com/watch?v=HQYsFshbkYw),
+[Polygon Rasterisation](https://www.youtube.com/watch?v=PahbNFypubE) and 
+[Illumination](https://www.youtube.com/watch?v=Nwfm6cpskIM) mostly in C
+and C++.
 
 # My project ideas
-Scrabble solver
 
-CK3 save analyzer
-like Chronicle
-debug saves + ironman issue
+## Scrabble solver
 
-Use Xbox controller as MIDI synthesizer
+[Scrabble](https://en.wikipedia.org/wiki/Scrabble) / Words With Friends 
+is a popular word game where you must form the best words from your character
+tiles to score the highest points against your opponent.
 
-Alexa skill for Reddit usage
+I wrote a simple [Scrabble solver in Scala](https://github.com/jamesmcm/scala-scrabble-solver)
+which uses a more-or-less brute force approach of scoring every possible
+word, using [regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
+to find possibilities from the wordlist for each
+possible board position. The main issue is that it can be very slow for
+complicated boards (i.e. near late-game) taking ~3-4 minutes to produce
+the best solution.
+
+I'd really like to re-implement this in Rust so it could be built for
+WebAssembly. Note that in WebAssembly multiple threads are not yet
+supported in most browsers, so the solution would need to be
+single-threaded. This also makes the performance very important and it
+would be necessary to either improve the algorithm if possible (maybe
+some sort of [Trie structure](https://en.wikipedia.org/wiki/Trie) could be used instead of separate
+regular expressions) or use heuristics to discard many positions/moves
+so they don't all need to be evaluated.
+
+But remember that the board bonuses can mean that score isn't directly
+correlated with word length. Also you may often have the 3rd and 5th
+letter of a word constrained but not the first letter for example, so
+the data structure for the wordlist would need to account for that.
+
+## Crusader Kings 3 save-game file analyzer
+
+[Crusader Kings 3](https://store.steampowered.com/app/1158310/Crusader_Kings_III/) 
+is an excellent Grand Strategy game available on GNU/Linux. Overall, the
+game is a great improvement to its predecessor, however one feature that
+it lacks is the "Chronicle" which, in Crusader Kings 2, documented the
+history of your dynasty and their rise to power.
+
+It'd be great to build a WebAssembly based tool that could parse CK3
+save game files and show the history of the game (using the title owner
+change dates and their respective dynasties), the trees of different
+characters' dynasties, and graphs for the number of alive dynasty
+members over time, and other interesting metrics.
+
+Whilst running the game in debug
+mode - without Ironman mode so achivements are disabled, it is possible
+to export a save game in JSON format that is easy to parse. However,
+for Ironman saves in the normal game (the most common scenario for
+players unlocking achievements) the savegame is serialised in a
+different, binary format.
+
+The idea would be to first handle deserialising the relevant parts of
+the JSON debug saves to useful structs, and then build this to
+WebAssembly with a frontend framework (e.g. [Seed](https://seed-rs.org/))
+and some JavaScript (e.g. [plotly.js](https://github.com/plotly/plotly.js)) 
+to create the visualisations.
+
+Once something is useful for the debug saves, then a deserialiser for
+the Ironman saves could be created. From my brief analysis of the save
+files, it seems the fields are in the same order as in the debug saves
+and I was already able to extract character IDs, names and faiths for
+example.
+
+The end result could be something like [Rakaly](https://rakaly.com/eu4)
+(note the [save game analysis crate is FOSS](https://github.com/rakaly/eu4save))
+is for EU4 saves ([also written in Rust](https://nickb.dev/blog/my-bet-on-rust-has-been-vindicated))
+but focussed on the Chronicle functionality. Rakaly has already dealt
+with the Ironman issue for EU4 saves too, so it is not insurmountable.
+
+
+## Use Xbox controller as MIDI synthesizer
+
+## Alexa skill for Reddit usage
 Able to read and post comments, navigate subreddits and comment trees
 Authentication issues
 No free narration - cannot post comments?
 Can host state machine in AWS Lambda
 
-ALMA docker support + ALMA Hub
+## ALMA docker support + ALMA Hub
 
-Linux CLI Hex editor
+## Linux CLI Hex editor
 neovim plugin?
 Like ghex show highlighted text in both text and bytes
 support UTF-8 conversion (i.e. valid UTF-8 can show in text window, need
@@ -178,34 +260,34 @@ support search by decimal values (converting to big-endian or
 little-endian)
 Copy from bytes or text
 
-Linux packet editor
+## Linux packet editor
 like Winsock Packet Editor (WPE)
 need to MITM TLS
 How to get application specific packets - namespace + nftables?
 memory editor - GameConqueror
 
-Joust Battle Royale
+## Joust Battle Royale
 Real-time web assembly game
 Browsers TCP only
 multiplayer puzzle game post
 
-Google Keep alternative
+## Google Keep alternative
 Support org-mode style markdown for notes
 Markdown editor online when editing notes
 
-AI for Democracy 3
+## AI for Democracy 3
 Equations relating variables in game files
 Need to simulate outside of the game?
 Use Q-learning and simulation to learn policy
 
-FOSS engine for Netstorm
+## FOSS engine for Netstorm
 Online play from Linux
 Server improvements
 
-Writing your own database
+## Writing your own database
 Github repo
 
-Conversion Optimisation platform
+## Conversion Optimisation platform
 Use multi-armed bandit models
 Decide which content alternative to show in real-time by polling the
 model
@@ -214,12 +296,12 @@ Bayesian hackers book
 
 # Completed projects
 
-s3rename
+## s3rename
 Needed to restructure s3 directories to use AWS Glue
 Previously generated awscli commands with Python script - slow and
 awkward
 
-vopono
+## vopono
 Originally used bash scripts for OpenVPN only
 
 # Summary
@@ -227,4 +309,10 @@ Originally used bash scripts for OpenVPN only
 Find something creative and enjoyable which can be useful in a few
 weekends
 
+IRC Client/Server - now Matrix?
+Email client
+Simple Web Browser
+
 OneLoneCoder community
+
+Free Software, Free Society
