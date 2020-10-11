@@ -4,9 +4,9 @@ title: "What should I program?"
 titleen: "What should I program?"
 titlesp: "What should I program?"
 date: 2020-10-11 10:59:37 +0200
-comments: true
+comments: false
+meta: true
 categories: [General]
-meta: false
 ---
 
 Doing projects is often the best way to get more programming experience
