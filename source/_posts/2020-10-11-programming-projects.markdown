@@ -28,6 +28,10 @@ Opinions expressed are solely my own and do not express the views or opinions of
 
 # Classic projects
 
+In this section I list some classic project ideas, in ascending order of
+time investment / difficulty. I'd recommend these to all new
+programmers.
+
 ## Sudoku solver
 
 Since a [Sudoku](https://en.wikipedia.org/wiki/Sudoku) grid is only 9x9, it is feasible to just use Depth First
@@ -172,6 +176,14 @@ and C++.
 
 # My project ideas
 
+The above project ideas are very popular and almost a rite of passage
+for new programmers now. In this section I will present many different
+project ideas I've had but have not had time to fully implement (or even
+begin!).
+
+As in the previous section, projects are sorted by approximate difficulty in
+ascending order.
+
 ## Scrabble solver
 
 [Scrabble](https://en.wikipedia.org/wiki/Scrabble) / Words With Friends 
@@ -240,7 +252,19 @@ but focussed on the Chronicle functionality. Rakaly has already dealt
 with the Ironman issue for EU4 saves too, so it is not insurmountable.
 
 
-## Use Xbox controller as MIDI synthesizer
+## Using an Xbox One controller as a MIDI synthesizer
+
+It would be cool to be able to use an Xbox One controller to create
+music with a software [MIDI](https://en.wikipedia.org/wiki/MIDI) synthesizer.
+I found two repositories on Github doing this already:
+[midibox360](https://github.com/quotepilgrim/midibox360) and 
+[xbox-midi-controller](https://github.com/maxmechanic/xbox-midi-controller).
+I tried out midixbox360 but the latency was too high to be usable so I
+tried my own test in Rust.
+
+* Not Bluetooth audio
+* JACK
+* Realtime Linux kernel
 
 ## Alexa skill for Reddit usage
 Able to read and post comments, navigate subreddits and comment trees
@@ -308,6 +332,8 @@ Originally used bash scripts for OpenVPN only
 
 Find something creative and enjoyable which can be useful in a few
 weekends
+
+Beginner: Leetcode, Project Rosalind, Advent Of Code, Project Euler
 
 IRC Client/Server - now Matrix?
 Email client
