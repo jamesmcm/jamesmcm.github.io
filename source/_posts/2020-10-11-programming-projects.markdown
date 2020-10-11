@@ -10,21 +10,20 @@ meta: false
 ---
 
 Doing projects is often the best way to get more programming experience
-and learn new concepts and problem domains. However, a common issue for
-beginner and intermediate programmers is finding feasible projects of a
-reasonable scope that can be completed in a few weekends.
+and learn about new concepts and problem domains. However, a common issue 
+is finding feasible projects of a reasonable scope that can 
+produce something useful in a few weekends.
 
 In this post I will list some classic project ideas for beginner and
 intermediate programmers (most of which should be achievable in 2-3
 weekends), along with many other project ideas I've had but have never
-had time to implement (and a few which I did!).
+had time to implement (and a few which I did).
 
 There are many long lists of project ideas available on Github, like
 [build-your-own-x](https://github.com/danistefanovic/build-your-own-x)
 and [100 Projects of Code](https://github.com/aceking007/100ProjectsOfCode)
 but these often lack a real description and justification of the
-project, so I thought I'd go more in-depth with different project ideas
-in this article.
+projects. In this article I will go more in-depth with the different project ideas.
 
 Within each section the projects are ordered in ascending difficulty /
 time investment.
@@ -52,9 +51,9 @@ search algorithms.
 Here is [my implementation in Scala](https://github.com/jamesmcm/scala-sudoku-solver/blob/master/src/main/scala/sudoku/Main.scala) (this was my first Scala
 program).
 
-To make it more interesting, you could solve it using [simulated
-annealing](https://www.adrian.idv.hk/2019-01-30-simanneal/) or
+To make it more interesting, you could solve it using [simulated annealing](https://www.adrian.idv.hk/2019-01-30-simanneal/) or
 [other methods](https://www.researchgate.net/publication/256087959_Finding_Solutions_to_Sudoku_Puzzles_Using_Human_Intuitive_Heuristics).
+Another interesting project using graph search algorithms is [maze solving](https://en.wikipedia.org/wiki/Maze_solving_algorithm).
 
 ## TCP client/server or proxy
 
@@ -86,7 +85,8 @@ if you choose to do this project. I wrote [an implementation in Go](https://gith
 which includes the documentation of the opcodes and some issues which I hit 
 mentioned in the README.
 
-![My CHIP-8 interpreter running Breakout](/images/breakout.png)
+Here is my CHIP-8 interpreter running Breakout:
+![My CHIP-8 interpreter running Breakout](/images/breakout.png "My CHIP-8 interpreter running Breakout")
 
 If you enjoy building an emulator/Virtual Machine I'd also recommend the 
 [Advent of Code 2019](https://adventofcode.com/2019/day/2) intcode problems
@@ -118,9 +118,10 @@ This is the best course I have ever taken, and I wholeheartedly
 recommend it to anyone who hasn't completed it already. It is a very
 hands-on and fun computer architecture course with the basics of
 compilers and operating systems development included too. If you do try
-this course, I've uploaded the [KeepUp game I made for Week 8 to Github](https://github.com/jamesmcm/HackKeepUp).
+this course, I've uploaded the [KeepUp game I made for Week 8 to Github](https://github.com/jamesmcm/HackKeepUp) so you can try it out.
 
-![My KeepUp game running in the Hack Virtual Machine](/images/hackku.png)
+Here is my assembled game running on the Hack Virtual Machine:
+![My KeepUp game running in the Hack Virtual Machine](/images/hackku.png "My KeepUp game running in the Hack Virtual Machine")
 
 If you find the course interesting, for computer architecture projects
 (in addition to the emulator ones mentioned above), you could try
@@ -161,9 +162,8 @@ recommend other excellent online courses I have completed:
 
 ## Ray Tracer
 
-Implementing a [Ray Tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics\)) is a great project for producing a visible
-result that you can share with others. I highly recommend [The Ray
-Tracer Challenge book](https://pragprog.com/titles/jbtracer/the-ray-tracer-challenge/)
+Implementing a [Ray Tracer](https://en.wikipedia.org/wiki/Ray_tracing_(graphics)) is a great project for producing a visible
+result that you can share with others. I highly recommend [The Ray Tracer Challenge book](https://pragprog.com/titles/jbtracer/the-ray-tracer-challenge/)
 (and don't forget [the bonus chapters](http://www.raytracerchallenge.com/#bonus) at the end!).
 The book uses Test-Driven Development and does not prescribe a specific
 programming language.
@@ -172,17 +172,18 @@ I implemented the [project in Scala](https://github.com/jamesmcm/raytracer_chall
 If I were to do it again, I'd recommend making sure your primitives are
 as fast as possible (i.e. use the appropriate linear algebra libraries)
 to ensure better performance later on. I'd also recommend implementing
-it such that it can compile to WebAssembly or JavaScript - e.g. with [wgpu in
-Rust](https://sotrh.github.io/learn-wgpu/) so that it is easy to show to
+it such that it can compile to WebAssembly or JavaScript - e.g. with [wgpu in Rust](https://sotrh.github.io/learn-wgpu/)
+so that it is easy to show to
 others whilst keeping good performance.
 
-![Example image from my Ray Tracer implementation based on The Ray Tracer Challenge (the Scala logo model was created in Blender)](/images/scala_colour_big.png)
+Here is an example image from my ray tracer implementation based on The Ray Tracer Challenge (the Scala logo model was created in Blender):
+![Example image from my Ray Tracer implementation](/images/scala_colour_big.png "Example image from my Ray Tracer implementation")
 
-There is also the [Ray Tracing in One Weekend](https://raytracing.github.io/)
+There is also the [Ray Tracing in One Weekend series](https://raytracing.github.io/)
 for an alternative resource aimed at C++.
 
-Graphics programming is a very deep rabbit hole, if you find the Ray
-Tracer interesting I'd definitely recommend Bisqwit's YouTube channel
+Graphics programming is a very deep rabbit hole. If you find the Ray
+Tracer project interesting, I'd definitely recommend Bisqwit's YouTube channel
 with videos on [DOOM-style rendering](https://www.youtube.com/watch?v=HQYsFshbkYw),
 [Polygon Rasterisation](https://www.youtube.com/watch?v=PahbNFypubE) and 
 [Illumination](https://www.youtube.com/watch?v=Nwfm6cpskIM) mostly in C
@@ -207,7 +208,7 @@ tiles to score the highest points against your opponent.
 I wrote a simple [Scrabble solver in Scala](https://github.com/jamesmcm/scala-scrabble-solver)
 which uses a more-or-less brute force approach of scoring every possible
 word, using [regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
-to find possibilities from the wordlist for each
+to find possibilities from the word list for each
 possible board position. The main issue is that it can be very slow for
 complicated boards (i.e. near late-game) taking ~3-4 minutes to produce
 the best solution, since it finds all possible moves and then ranks them.
@@ -222,9 +223,10 @@ regular expressions) or use heuristics to discard many positions/moves
 so they don't all need to be evaluated.
 
 But remember that the board bonuses can mean that score isn't directly
-correlated with word length. Also you may often have the 3rd and 5th
+correlated with word length, which can make it tricky to define a
+heuristic to discard positions/moves. Also you may often have the 3rd and 5th
 letter of a word constrained but not the first letter for example, so
-the data structure for the wordlist would need to account for that.
+the data structure for the word list would need to account for that.
 
 ## Crusader Kings 3 save-game file analyzer
 
@@ -241,7 +243,7 @@ characters' dynasties, and graphs for the number of alive dynasty
 members over time, and other interesting metrics.
 
 Whilst running the game in debug
-mode - without Ironman mode so achivements are disabled, it is possible
+mode - without Ironman mode so achivements are disabled - it is possible
 to export a save game in JSON format that is easy to parse. However,
 for Ironman saves in the normal game (the most common scenario for
 players unlocking achievements) the savegame is serialised in a
@@ -260,8 +262,9 @@ and I was already able to extract character IDs, names and faiths for
 example.
 
 The end result could be something like [Rakaly](https://rakaly.com/eu4)
-(note the [save game analysis crate is FOSS](https://github.com/rakaly/eu4save))
-is for Europa Universalis 4 save files ([also written in Rust](https://nickb.dev/blog/my-bet-on-rust-has-been-vindicated))
+([also written in Rust](https://nickb.dev/blog/my-bet-on-rust-has-been-vindicated),
+note the [save game analysis crate is FOSS](https://github.com/rakaly/eu4save))
+is for Europa Universalis 4 save files
 but focussed on the Chronicle functionality. Rakaly has already dealt
 with the Ironman issue for EU4 saves too, so it is not insurmountable.
 
@@ -282,7 +285,7 @@ At some point I will try the following steps to improve that:
 
 * Using a wired headset to remove any dependency on Bluetooth audio.
 * Using the JACK audio system instead of ALSA (and using the `jack`
-  dependency in the `midir` crate)
+  feature in the `midir` crate)
 * Using a different software MIDI synthesizer (so far I only tried
   [TiMidity++](http://timidity.sourceforge.net/) and adjusting the buffer size)
 * Using a Linux kernel [with realtime patches](https://wiki.archlinux.org/index.php/Professional_audio#Realtime_kernel)
@@ -387,7 +390,8 @@ In the olden days, there was a very easy-to-use packet editor on Windows
 called the Winsock Packet Editor (WPE Pro). This made it easy to just
 select an application and analyse or modify its traffic.
 
-![WPE Pro running on Windows](/images/wpe2.JPG)
+A screenshot of WPE Pro running on Windows XP:
+![WPE Pro running on Windows XP](/images/wpe2.JPG "WPE Pro running on Windows XP")
 
 It'd be great to build something similar on Linux for modern systems,
 perhaps using temporary network namespaces and nftables to mark the
@@ -465,7 +469,8 @@ is a political/economic management video game where you
 choose social and economic policies to try to win re-election whilst
 balancing the economy and popularity with different demographics.
 
-![The main game view of Democracy 3 showing the relationships between different variables](/images/democracy3.jpg)
+The main game view of Democracy 3 showing the relationships between different variables:
+![The main game view of Democracy 3](/images/democracy3.jpg "The main game view of Democracy 3")
 
 The idea here would be to build an AI that can play the game
 successfully, managing the different policy choices 
@@ -507,7 +512,8 @@ Tetris-style bridge patterns, and tower defences which have different
 ranges and attack patterns. This creates unique puzzle-style competitive
 gameplay when played in multiplayer.
 
-![Netstorm: Islands At War](/images/netstorm.png)
+A screenshot of Netstorm:
+![Netstorm: Islands At War](/images/netstorm.png "Netstorm: Islands At War")
 
 There is still a [popular community](http://www.netstormhq.net/) based
 around patched versions of the original game. The project idea here
@@ -547,13 +553,13 @@ idea for this project originally came from having to rename loads of
 keys in an S3 bucket for use with AWS Glue (which requires specific
 syntax for a partition hierarchy).
 
-At the time I was using a Python script to generate awscli commands, but
+At the time I was using a Python script to generate AWS CLI commands, but
 this was very slow to run (since all the AWS CLI commands were
 independent), and it was a pain to modify the script for different
 transformations needed.
 
 s3rename allows you to use sed-style regexes to define the rename
-transformation, and is implemented in Rust with Tokio for asynchronous
+operations, and is implemented in Rust with Tokio for asynchronous
 operations so it can process many operations at a time (and is much
 faster than calling the AWS CLI separately).
 
