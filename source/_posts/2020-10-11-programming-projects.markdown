@@ -94,11 +94,9 @@ If you enjoy building an emulator/Virtual Machine I'd also recommend the
 
 Then if you really want a greater challenge you could try implementing a 
 NES or Gameboy emulator (also check out [Reddit's /r/EmuDev](https://www.reddit.com/r/EmuDev/)). The [NesDev Wiki](http://wiki.nesdev.com/w/index.php/Nesdev_Wiki)
-is a great resource for the former, combined with [OneLoneCoder's video
-series](https://www.youtube.com/watch?v=nViZg02IMQo&list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf). 
+is a great resource for the former, combined with [OneLoneCoder's video series](https://www.youtube.com/watch?v=nViZg02IMQo&list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf). 
 For the Gameboy the [gbdev community](https://github.com/gbdev/awesome-gbdev) 
-has a lot of comprehensive documentation. Here is [a Gameboy emulator
-compiled to WebAssembly](https://github.com/BlueBlazin/gbemu) for
+has a lot of comprehensive documentation. Here is [a Gameboy emulator compiled to WebAssembly](https://github.com/BlueBlazin/gbemu) for
 example.
 
 A great advanced project idea would be a SNES emulator compiled to WebAssembly
