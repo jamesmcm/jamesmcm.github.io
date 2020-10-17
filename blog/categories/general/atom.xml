@@ -4,7 +4,7 @@
   <title><![CDATA[Category: General | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/general/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-10-11T21:17:22+02:00</updated>
+  <updated>2020-10-17T16:24:08+02:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -103,11 +103,9 @@ mentioned in the README.</p>
 
 <p>Then if you really want a greater challenge you could try implementing a 
 NES or Gameboy emulator (also check out <a href="https://www.reddit.com/r/EmuDev/">Reddit’s /r/EmuDev</a>). The <a href="http://wiki.nesdev.com/w/index.php/Nesdev_Wiki">NesDev Wiki</a>
-is a great resource for the former, combined with <a href="https://www.youtube.com/watch?v=nViZg02IMQo&amp;list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf">OneLoneCoder’s video
-series</a>. 
+is a great resource for the former, combined with <a href="https://www.youtube.com/watch?v=nViZg02IMQo&amp;list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf">OneLoneCoder’s video series</a>. 
 For the Gameboy the <a href="https://github.com/gbdev/awesome-gbdev">gbdev community</a> 
-has a lot of comprehensive documentation. Here is <a href="https://github.com/BlueBlazin/gbemu">a Gameboy emulator
-compiled to WebAssembly</a> for
+has a lot of comprehensive documentation. Here is <a href="https://github.com/BlueBlazin/gbemu">a Gameboy emulator compiled to WebAssembly</a> for
 example.</p>
 
 <p>A great advanced project idea would be a SNES emulator compiled to WebAssembly
