@@ -448,6 +448,19 @@ successful test case:</p>
 
 <p><img src="/images/lambda_error.png" alt="Error test case" title="Error test case" /></p>
 
+<p>Note when deploying, you will likely want to use static linking by using
+the musl target to avoid issues with glibc version mismatches:</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>cargo build <span class="nt">--release</span> <span class="nt">--target</span><span class="o">=</span>x86_64-unknown-linux-musl
+<span class="nv">$ </span><span class="nb">cp</span> ./target/x86_64-unknown-linux-musl/release/bootstrap ./
+<span class="nv">$ </span>strip <span class="nt">--strip-all</span> ./bootstrap
+<span class="nv">$ </span>zip bootstrap.zip bootstrap
+</code></pre></div></div>
+
+<p>If you do use dynamic linking with glibc, then consider setting the
+Lambda function to use Amazon Linux 2 (AL2) in the AWS Lambda Console, so the
+container will have a newer version of glibc at least.</p>
+
 <h2 id="lambda_runtime-and-lambda">lambda_runtime and #[lambda]</h2>
 
 <p>Now we can understand the comment about the <code class="highlighter-rouge">#[lambda]</code> macro in the
