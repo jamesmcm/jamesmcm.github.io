@@ -177,6 +177,21 @@ And for an error test case:
 
 ![Error test case](/images/lambda_error.png "Error test case")
 
+Note when deploying, you will likely want to use static linking by using
+the musl target to avoid issues with glibc version mismatches:
+
+```sh
+$ cargo build --release --target=x86_64-unknown-linux-musl
+$ cp ./target/x86_64-unknown-linux-musl/release/bootstrap ./
+$ strip --strip-all ./bootstrap
+$ zip bootstrap.zip bootstrap
+```
+
+If you do use dynamic linking with glibc, then consider setting the
+Lambda function to use Amazon Linux 2 (AL2) in the AWS Lambda Console, so the
+container will have a newer version of glibc at least.
+
+
 ## lambda_runtime and #[lambda]
 
 Now we can understand the comment about the `#[lambda]` macro in the
