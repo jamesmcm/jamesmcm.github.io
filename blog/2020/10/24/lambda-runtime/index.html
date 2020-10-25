@@ -413,6 +413,10 @@ crate does.</p>
 <p>This code is available on Github in 
 my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
 
+<p>If you want to follow along, the 
+<a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html">tutorial on publishing a custom runtime</a> is
+also very useful - covering an example of an AWS Lambda custom runtime in bash.</p>
+
 <h2 id="example-lambda-function">Example Lambda function</h2>
 
 <p>Using the above library crate, a Lambda function might look like:</p>
@@ -515,6 +519,9 @@ a <a href="https://rust-embedded.github.io/book/intro/no-std.html">#[no_std] cra
 but the requirement to make HTTP requests made this too difficult,
 considering the networking required. If you do know how to handle this
 well please create an issue or PR on the repo!</p>
+
+<p>Another possible extension of this would be to support the 
+<a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-extensions-api.html">AWS Lambda Extensions API</a>.</p>
 
 </div>
 
