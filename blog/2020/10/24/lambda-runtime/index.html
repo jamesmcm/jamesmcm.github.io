@@ -1,0 +1,680 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css" />
+
+<head>
+  <meta charset="utf-8">
+  <!--TODO: JS to select title goes here -->
+  <title>Writing a simple AWS Lambda Custom Runtime in Rust - Statistically Insignificant</title>
+  <meta name="author" content="James McMurray">
+
+  
+  <meta name="description" content="Writing a simple AWS Lambda Custom Runtime in Rust Writing a simple AWS Lambda Custom Runtime in Rust I was recently reading more about the &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://jamesmcm.github.io/blog/2020/10/24/lambda-runtime">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Statistically Insignificant" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+
+
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$$','$$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+
+
+      <script>
+
+//$(window).ready(changeAllPosts(getLang()));       
+       //window.onload=changeAllPosts(getLang());
+
+function pageLoad() {
+           if (window.location.hash){
+             var hash = window.location.hash.substring(1);
+               if (hash=="sp" || hash=="en"){
+               changeLang(hash);
+                   }
+           } else {
+               changeAllPosts(getLang());
+
+           }
+}
+       
+function changeLang(lang){
+window.location=document.location.href.match(/(^[^#]*)/)[0]+"#"+lang
+if (window["title"+lang]){
+document.title=window["title"+lang];
+           }
+console.log("title"+lang);
+console.log(window["title"+lang]);           
+           
+setLang(lang);
+changeAllPosts(lang);
+}
+       
+function setLang(lang){
+    var exdays=30;
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toGMTString();
+    document.cookie = "lang=" + lang + "; " + expires + "; path=/";
+}
+       
+function getLang() {
+    var name = "lang" + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "en";
+}
+
+
+function changeAllPosts(lang){
+//TODO: Change subtitle too
+console.log(lang);
+l=document.getElementsByClassName("titleEnglish");
+l2=document.getElementsByClassName("titleSpanish");
+l3=document.getElementsByClassName("English");           
+l4=document.getElementsByClassName("Spanish");
+l5=document.getElementsByClassName("enbutton");
+l6=document.getElementsByClassName("esbutton");
+var arrayLength = Math.max(l.length,l3.length);
+for (var i = 0; i < arrayLength; i++) {
+if (lang=="sp"){
+
+if (typeof l[i] !== 'undefined') {
+l[i].style.display="none";
+}
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="inline";
+}                       
+if (typeof l3[i] !== 'undefined') {
+l3[i].style.display="none";
+}
+if (typeof l4[i] !== 'undefined') {
+l4[i].style.display="inline";
+}                               
+if (typeof l5[i] !== 'undefined') {
+l5[i].disabled=false;
+}
+if (typeof l6[i] !== 'undefined') {                   
+l6[i].disabled=true;
+}
+                               
+document.getElementById("hsubtitleEnglish").style.display="none";
+document.getElementById("hsubtitleSpanish").style.display="inline";
+
+} else if (lang=="en"){
+if (typeof l[i] !== 'undefined') {               
+l[i].style.display="inline";
+}                   
+if (typeof l2[i] !== 'undefined') {                   
+l2[i].style.display="none";
+}
+if (typeof l3[i] !== 'undefined') {               
+l3[i].style.display="inline";
+}
+if (typeof l4[i] !== 'undefined') {               
+l4[i].style.display="none";
+}
+if (typeof l5[i] !== 'undefined') {               
+l5[i].disabled=true;
+}
+if (typeof l6[i] !== 'undefined') {               
+l6[i].disabled=false;
+}                   
+document.getElementById("hsubtitleEnglish").style.display="inline";
+document.getElementById("hsubtitleSpanish").style.display="none";
+}
+
+
+} 
+}
+       
+function showSpanish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="none";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="inline";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="inline";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="none";
+
+
+     btn.parentNode.getElementsByClassName("enbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+</script>
+
+
+<script>
+function showEnglish(btn){
+     var test = btn.parentNode.parentNode.getElementsByClassName("entry-title");
+
+test[0].getElementsByClassName("titleEnglish")[0].style.display="inline";
+test[0].getElementsByClassName("titleSpanish")[0].style.display="none";
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("Spanish");
+     test2[0].style.display="none";
+
+
+var test2=btn.parentNode.parentNode.parentNode.getElementsByClassName("English");
+     test2[0].style.display="inline";
+
+
+     btn.parentNode.getElementsByClassName("esbutton")[0].disabled=false;
+        btn.disabled=true;
+
+}
+
+$(window).load(changeAllPosts(getLang()));
+</script>
+
+
+  <!--
+-->
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-53539911-1', 'auto');
+ga('send', 'pageview');
+
+</script>
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Statistically Insignificant</a></h1>
+  
+   <h2><div display='inline' id="hsubtitleEnglish"> Languages, Statistics and other things </div><div id='hsubtitleSpanish' style='display: none'> Los idiomas, la estadística y otras cosas </div></h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><!-- <ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+-->
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:jamesmcm.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><div class="English"><a href="/about/#en">About</a></div><div class="Spanish"><a href="/about/#sp">Sobre este blog</a></div></li>
+</ul>
+
+
+<ul class="langs">
+  <li><a href="#en" onclick="changeLang('en');">English</a></li>
+  <li><a href="#sp" onclick="changeLang('sp');">Español</a></li>
+</ul>
+
+
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+
+  
+  <header>
+    
+
+      <h1 display="inline-block" class="entry-title"> <div display='inline' class='titleEnglish'> Writing a simple AWS Lambda Custom Runtime in Rust</div><div class='titleSpanish' style='display: none'> Writing a simple AWS Lambda Custom Runtime in Rust </div></h1>
+      <!-- <span display="inline" style="float:right"><button class="enbutton" onclick="changeLang('en')" disabled=true>English</button> <button class="esbutton" onclick="changeLang('sp')">Spanish</button> </span>    -->
+
+
+
+    
+    
+      <p class="meta">
+        
+
+
+
+      </p>
+    
+  </header>
+
+
+    <div class="entry-content"><p>I was recently reading more about the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime crate</a>
+ and came across <a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">this issue</a> 
+ where it is mentioned that the <code class="highlighter-rouge">#[lambda]</code> procedural macro can be
+ misleading and cause problems if used naively.</p>
+
+<p>In this post we will implement our own simple custom runtime for
+AWS Lambda in Rust, and understand the reasons behind this issue.</p>
+
+<p>The code used in this blog post is available on Github in 
+my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h1 id="aws-lambda">AWS Lambda</h1>
+
+<p><a href="https://aws.amazon.com/lambda/">AWS Lambda</a> is a serverless computing service. I have previously covered
+setting up serverless data pipelines <a href="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">from Excel files on S3</a>, and
+<a href="http://jamesmcm.github.io/blog/2020/08/29/rust-ses/#en">from email attachments with SES and Workmail</a> using Rust and the
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime">lambda_runtime crate</a>.</p>
+
+<h2 id="custom-runtimes">Custom Runtimes</h2>
+
+<p>A <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html">Custom Runtime</a> allows you to run any x86_64 binary as an AWS Lambda
+function, by providing the runtime code to interact with the <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html">AWS Lambda
+Custom Runtime API</a>.</p>
+
+<p>The idea is you first retrieve some of the Lambda function settings
+provided to the executable as environment variables, run any one-time or
+shared initialisation code, and then call the handler function (i.e. the
+function that will be called for each invocation), passing it the AWS
+Lambda event JSON.</p>
+
+<p>In summary, the runtime code should:</p>
+<ol>
+  <li>Read relevant environment variables, in our case only <code class="highlighter-rouge">AWS_LAMBDA_RUNTIME_API</code>
+is necessary since we will include the runtime and handler function together in our final binary.</li>
+  <li>Run any initialisation code - note in our case this could be defined
+either as part of the runtime library crate, or in the application
+code prior to passing the handler function to the Lambda runtime.</li>
+  <li>Loop indefinitely, polling the Lambda Runtime API for new
+invocations and sending these to the handler function - then POST the
+output to either the invocation response or error endpoint.</li>
+</ol>
+
+<p>It’s important to note that a single runtime execution may serve several
+Lambda function invocations if they arrive close together  - this is
+called a <em>warm start</em>. As opposed to a <em>cold start</em> where AWS Lambda has
+to spin up the container and start the runtime. For functions that need
+to always respond with a very low latency, some users even schedule
+dummy invocations (i.e. with a specific Cloudwatch event, etc.)
+to keep the runtime running and ensure warm starts.</p>
+
+<h2 id="lambda-runtime-api">Lambda Runtime API</h2>
+
+<p>The <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html">AWS Lambda Runtime API</a> currently contains only four endpoints:</p>
+
+<ul>
+  <li>Initalization error - for if the initialization steps fail (i.e. doing one-time initializations for global resources, etc.) prior to calling the handler function: POST <code class="highlighter-rouge">/runtime/init/error</code></li>
+  <li>Next invocation - an endpoint from which to GET the invocation event and some metadata (AWS Request ID): GET <code class="highlighter-rouge">/runtime/invocation/next</code></li>
+  <li>Invocation response - an endpoint to POST the successful response of the handler function: POST <code class="highlighter-rouge">/runtime/invocation/${AwsRequestId}/response</code></li>
+  <li>Invocation error - an endpoint to POST the error message of the handler function, if it fails: POST <code class="highlighter-rouge">/runtime/invocation/${AwsRequestId}/error</code></li>
+</ul>
+
+<p>The base URL for each API call is <code class="highlighter-rouge">http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/</code> - note we do not need TLS.</p>
+
+<p>We need to extract the AWS Request ID from the headers returned in the
+next invocation response. The body of the response is the JSON for the
+triggering event itself (note that the <a href="https://github.com/LegNeato/aws-lambda-events">aws_lambda_events crate</a> has
+templates for deserializing the events from AWS services).</p>
+
+<h2 id="runtime-library">Runtime library</h2>
+
+<p>Using all of the above, we can implement a custom runtime in a very
+small amount of code:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">lambda</span><span class="p">(</span><span class="n">handler</span><span class="p">:</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">std</span><span class="p">::</span><span class="nn">result</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span> <span class="nb">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// Could initialise one-time resources here</span>
+    <span class="c">// If initialisation error, POST to /runtime/init/error</span>
+
+    <span class="k">let</span> <span class="n">aws_lambda_runtime_api</span> <span class="o">=</span> <span class="nn">std</span><span class="p">::</span><span class="nn">env</span><span class="p">::</span><span class="nf">var</span><span class="p">(</span><span class="s">"AWS_LAMBDA_RUNTIME_API"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="c">// Loop getting new invocation events and passing to handler</span>
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">invocation</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">get</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+            <span class="s">"http://{}/2018-06-01/runtime/invocation/next"</span><span class="p">,</span>
+            <span class="n">aws_lambda_runtime_api</span>
+        <span class="p">))</span>
+        <span class="nf">.call</span><span class="p">();</span>
+
+	<span class="c">// Extract AWS Request ID for in order to post responses</span>
+        <span class="k">let</span> <span class="n">request_id</span> <span class="o">=</span> <span class="n">invocation</span>
+            <span class="nf">.header</span><span class="p">(</span><span class="s">"Lambda-Runtime-Aws-Request-Id"</span><span class="p">)</span>
+            <span class="nf">.unwrap</span><span class="p">()</span>
+            <span class="nf">.to_string</span><span class="p">();</span>
+
+	<span class="c">// Run the handler function and get the output (note above we</span>
+	<span class="c">// specified this will be a Result&lt;String, String&gt; )</span>
+        <span class="k">let</span> <span class="n">response</span> <span class="o">=</span> <span class="nf">handler</span><span class="p">(</span><span class="n">invocation</span><span class="nf">.into_string</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.as_str</span><span class="p">());</span>
+
+        <span class="k">match</span> <span class="n">response</span> <span class="p">{</span>
+	    <span class="c">// If succeeded post output to response</span>
+            <span class="nf">Ok</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="mi">_</span><span class="n">resp</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">post</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+                    <span class="s">"http://{}/2018-06-01/runtime/invocation/{}/response"</span><span class="p">,</span>
+                    <span class="n">aws_lambda_runtime_api</span><span class="p">,</span> <span class="n">request_id</span>
+                <span class="p">))</span>
+                <span class="nf">.send_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">res</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nf">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+                <span class="c">// If invocation error, POST to /runtime/invocation/AwsRequestId/error</span>
+                <span class="k">let</span> <span class="mi">_</span><span class="n">resp</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">post</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+                    <span class="s">"http://{}/2018-06-01/runtime/invocation/{}/error"</span><span class="p">,</span>
+                    <span class="n">aws_lambda_runtime_api</span><span class="p">,</span> <span class="n">request_id</span>
+                <span class="p">))</span>
+                <span class="nf">.send_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">err</span><span class="nf">.to_string</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In this case we just call <code class="highlighter-rouge">lambda()</code> with a function that takes a <code class="highlighter-rouge">&amp;str</code>
+(which will be the event JSON), and returns a <code class="highlighter-rouge">Result&lt;String, String&gt;</code>.</p>
+
+<p>Note that in practice you would want to support different response and error types
+(perhaps anything that implements Display), and possibly also
+asynchronous handler functions, etc. - this is what the lambda_runtime
+crate does.</p>
+
+<p>This code is available on Github in 
+my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
+
+<h2 id="example-lambda-function">Example Lambda function</h2>
+
+<p>Using the above library crate, a Lambda function might look like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">micro_lambda</span><span class="p">::</span><span class="n">lambda</span><span class="p">;</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c">// Put one-time initialisations (loggers, etc.)</span>
+    <span class="c">// before calling lambda()</span>
+    <span class="nf">lambda</span><span class="p">(</span><span class="n">handler</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">std</span><span class="p">::</span><span class="nn">result</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span> <span class="nb">String</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">event</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">event</span><span class="nf">.contains</span><span class="p">(</span><span class="s">"fail"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">Err</span><span class="p">(</span><span class="s">"ERROR"</span><span class="nf">.to_string</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="nf">Ok</span><span class="p">(</span><span class="s">"SUCCESS"</span><span class="nf">.to_string</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>We can then upload this to AWS Lambda, and verify that it works for a
+successful test case:</p>
+
+<p><img src="/images/lambda_success.png" alt="Success test case" title="Success test case" /></p>
+
+<p>And for an error test case:</p>
+
+<p><img src="/images/lambda_error.png" alt="Error test case" title="Error test case" /></p>
+
+<h2 id="lambda_runtime-and-lambda">lambda_runtime and #[lambda]</h2>
+
+<p>Now we can understand the comment about the <code class="highlighter-rouge">#[lambda]</code> macro in the
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">aforementioned Github issue</a>:</p>
+
+<blockquote>
+  <p>Due to how cold/warm starts work on Lambda,
+the naive approach of setting up resources (such as loggers)
+within a #[lambda]-decorated block will cause the logger initializer
+to panic in a warm start.</p>
+</blockquote>
+
+<p>The <code class="highlighter-rouge">#[lambda]</code> macro allows you to write <a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello.rs">simple code</a> like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[lambda]</span>
+<span class="nd">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Value</span><span class="p">,</span> <span class="mi">_</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">Value</span><span class="p">,</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But it is important to note that in this case the function being wrapped
+is treated as the <em>handler function</em> (<a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello-without-macro.rs">here is the relevant code</a>).
+That is, any initialisation should take
+place <em>before</em> the handler function is called, so that it is only run
+once even if there are multiple invocations before the runtime is
+terminated (this is a “warm start”).</p>
+
+<p>This causes problems when new users see the above example, and put
+logger intialisation code, etc. in there directly, which will then fail
+in the cases of warm starts - which might appear as sporadic and
+confusing failures to the developer.</p>
+
+<p>This can be fixed by 
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello-without-macro.rs">separating out the handler invocation</a>,
+just like we did in our earlier code. In this case it could be:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="c">// Put any one-time initialisation code up here</span>
+    <span class="c">// Before lambda::run is called!</span>
+    <span class="k">let</span> <span class="n">func</span> <span class="o">=</span> <span class="nf">handler_fn</span><span class="p">(</span><span class="n">func</span><span class="p">);</span>
+    <span class="nn">lambda</span><span class="p">::</span><span class="nf">run</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
+    <span class="nf">Ok</span><span class="p">(())</span>
+<span class="p">}</span>
+
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">func</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Value</span><span class="p">,</span> <span class="mi">_</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">Value</span><span class="p">,</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="summary">Summary</h2>
+
+<p>I hope it’s clear now how the <code class="highlighter-rouge">#[lambda]</code> macro can cause confusion, and
+how to avoid this issue if you write your own Lambda functions.</p>
+
+<p>This might seem a bit overkill for covering such a simple issue, but as
+Richard Feynman said:</p>
+
+<blockquote>
+  <p>What I cannot create, I do not understand.</p>
+</blockquote>
+
+<p>If you look at the the
+<a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>,
+you’ll see I tried to reduce the binary size by some means. I’d
+originally wanted to write this as 
+a <a href="https://rust-embedded.github.io/book/intro/no-std.html">#[no_std] crate</a>
+but the requirement to make HTTP requests made this too difficult,
+considering the networking required. If you do know how to handle this
+well please create an issue or PR on the repo!</p>
+
+</div>
+
+
+
+
+<script>
+$(window).ready(changeAllPosts(getLang()));
+</script>
+
+   <script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'statisticallyinsignificant'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+    </script>
+
+  <footer>
+    <p class="meta">
+      <span class = "categories">
+    <span class="English">
+        <a href="#en">Permalink</a>
+    </span>
+    <span class="Spanish">
+        <a href="#sp">Permalink</a>
+    </span>
+</span>
+
+      <!-- 
+<span class="byline author vcard"><span class="English">Written by <span class="fn">James McMurray</span></span><span class="Spanish" style="display: none">Escrito por <span class="fn">James McMurray</span></span></span>
+ --> &#9679;
+      
+
+
+ &#9679;
+      
+
+<span class="categories">
+  
+    Rust
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://jamesmcm.github.io/blog/2020/10/24/lambda-runtime/" data-via="" data-counturl="http://jamesmcm.github.io/blog/2020/10/24/lambda-runtime/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+      <div class="English">
+        <a class="basic-alignment left" href="/blog/2020/10/11/programming-projects/" title="Previous Post: What should I program?">&laquo; What should I program?</a>
+</div>
+      <div class="Spanish" style="display: none">
+        <a class="basic-alignment left" href="/blog/2020/10/11/programming-projects/" title="Previous Post: What should I program?">&laquo; What should I program?</a>
+</div>
+      
+      
+    </p>
+  </footer>
+
+
+  
+</article>
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+    <h2><div class="English">Categories</div><div class="Spanish" display="none">Categorías</div></h2>
+<ul display=block>
+    <li><div class="English"><a href="/blog/categories/rust/#en">Rust</a></div><div class="Spanish"><a href="/blog/categories/rust/#sp">Rust</a></div></li>
+    <li><div class="English"><a href="/blog/categories/linux/#en">Linux</a></div><div class="Spanish"><a href="/blog/categories/linux/#sp">Linux</a></div></li>
+    <li><div class="English"><a href="/blog/categories/general/#en">General</a></div><div class="Spanish"><a href="/blog/categories/general/#sp">General</a></div></li>
+    <li><div class="English"><a href="/blog/categories/statistics/#en">ML/Statistics</a></div><div class="Spanish"><a href="/blog/categories/statistics/#sp">ML/Estadística</a></div></li>
+    <li><div class="English"><a href="/blog/categories/languages/#en">Languages</a></div><div class="Spanish"><a href="/blog/categories/languages/#sp">Idiomas</a></div></li>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo">
+
+<p>
+  Copyright &copy; 2020 - James McMurray -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+
+  <script>
+
+
+   
+var titlesp="Writing a simple AWS Lambda Custom Runtime in Rust";
+var titleen="Writing a simple AWS Lambda Custom Runtime in Rust";
+
+//$(window).load(changeAllPosts(getLang()));
+
+
+$(window).load(pageLoad);
+$(window).ready(pageLoad);
+</script>
+
+</body>
+
+</html>

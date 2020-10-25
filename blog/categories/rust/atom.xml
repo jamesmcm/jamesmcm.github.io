@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rust | Statistically Insignificant]]></title>
   <link href="http://jamesmcm.github.io/blog/categories/rust/atom.xml" rel="self"/>
   <link href="http://jamesmcm.github.io/"/>
-  <updated>2020-10-17T16:24:08+02:00</updated>
+  <updated>2020-10-25T14:10:54+01:00</updated>
   <id>http://jamesmcm.github.io/</id>
   <author>
     <name><![CDATA[James McMurray]]></name>
@@ -12,6 +12,250 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Writing a simple AWS Lambda Custom Runtime in Rust]]></title>
+    <link href="http://jamesmcm.github.io/blog/2020/10/24/lambda-runtime/"/>
+    <updated>2020-10-24T17:49:23+02:00</updated>
+    <id>http://jamesmcm.github.io/blog/2020/10/24/lambda-runtime</id>
+    <content type="html"><![CDATA[<p>I was recently reading more about the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime crate</a>
+ and came across <a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">this issue</a> 
+ where it is mentioned that the <code class="highlighter-rouge">#[lambda]</code> procedural macro can be
+ misleading and cause problems if used naively.</p>
+
+<p>In this post we will implement our own simple custom runtime for
+AWS Lambda in Rust, and understand the reasons behind this issue.</p>
+
+<p>The code used in this blog post is available on Github in 
+my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
+
+<!--more-->
+
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+
+<h1 id="aws-lambda">AWS Lambda</h1>
+
+<p><a href="https://aws.amazon.com/lambda/">AWS Lambda</a> is a serverless computing service. I have previously covered
+setting up serverless data pipelines <a href="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">from Excel files on S3</a>, and
+<a href="http://jamesmcm.github.io/blog/2020/08/29/rust-ses/#en">from email attachments with SES and Workmail</a> using Rust and the
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime">lambda_runtime crate</a>.</p>
+
+<h2 id="custom-runtimes">Custom Runtimes</h2>
+
+<p>A <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html">Custom Runtime</a> allows you to run any x86_64 binary as an AWS Lambda
+function, by providing the runtime code to interact with the <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html">AWS Lambda
+Custom Runtime API</a>.</p>
+
+<p>The idea is you first retrieve some of the Lambda function settings
+provided to the executable as environment variables, run any one-time or
+shared initialisation code, and then call the handler function (i.e. the
+function that will be called for each invocation), passing it the AWS
+Lambda event JSON.</p>
+
+<p>In summary, the runtime code should:</p>
+<ol>
+  <li>Read relevant environment variables, in our case only <code class="highlighter-rouge">AWS_LAMBDA_RUNTIME_API</code>
+is necessary since we will include the runtime and handler function together in our final binary.</li>
+  <li>Run any initialisation code - note in our case this could be defined
+either as part of the runtime library crate, or in the application
+code prior to passing the handler function to the Lambda runtime.</li>
+  <li>Loop indefinitely, polling the Lambda Runtime API for new
+invocations and sending these to the handler function - then POST the
+output to either the invocation response or error endpoint.</li>
+</ol>
+
+<p>It’s important to note that a single runtime execution may serve several
+Lambda function invocations if they arrive close together  - this is
+called a <em>warm start</em>. As opposed to a <em>cold start</em> where AWS Lambda has
+to spin up the container and start the runtime. For functions that need
+to always respond with a very low latency, some users even schedule
+dummy invocations (i.e. with a specific Cloudwatch event, etc.)
+to keep the runtime running and ensure warm starts.</p>
+
+<h2 id="lambda-runtime-api">Lambda Runtime API</h2>
+
+<p>The <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-api.html">AWS Lambda Runtime API</a> currently contains only four endpoints:</p>
+
+<ul>
+  <li>Initalization error - for if the initialization steps fail (i.e. doing one-time initializations for global resources, etc.) prior to calling the handler function: POST <code class="highlighter-rouge">/runtime/init/error</code></li>
+  <li>Next invocation - an endpoint from which to GET the invocation event and some metadata (AWS Request ID): GET <code class="highlighter-rouge">/runtime/invocation/next</code></li>
+  <li>Invocation response - an endpoint to POST the successful response of the handler function: POST <code class="highlighter-rouge">/runtime/invocation/${AwsRequestId}/response</code></li>
+  <li>Invocation error - an endpoint to POST the error message of the handler function, if it fails: POST <code class="highlighter-rouge">/runtime/invocation/${AwsRequestId}/error</code></li>
+</ul>
+
+<p>The base URL for each API call is <code class="highlighter-rouge">http://${AWS_LAMBDA_RUNTIME_API}/2018-06-01/</code> - note we do not need TLS.</p>
+
+<p>We need to extract the AWS Request ID from the headers returned in the
+next invocation response. The body of the response is the JSON for the
+triggering event itself (note that the <a href="https://github.com/LegNeato/aws-lambda-events">aws_lambda_events crate</a> has
+templates for deserializing the events from AWS services).</p>
+
+<h2 id="runtime-library">Runtime library</h2>
+
+<p>Using all of the above, we can implement a custom runtime in a very
+small amount of code:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">lambda</span><span class="p">(</span><span class="n">handler</span><span class="p">:</span> <span class="k">fn</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">std</span><span class="p">::</span><span class="nn">result</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span> <span class="nb">String</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c">// Could initialise one-time resources here</span>
+    <span class="c">// If initialisation error, POST to /runtime/init/error</span>
+
+    <span class="k">let</span> <span class="n">aws_lambda_runtime_api</span> <span class="o">=</span> <span class="nn">std</span><span class="p">::</span><span class="nn">env</span><span class="p">::</span><span class="nf">var</span><span class="p">(</span><span class="s">"AWS_LAMBDA_RUNTIME_API"</span><span class="p">)</span><span class="nf">.unwrap</span><span class="p">();</span>
+    <span class="c">// Loop getting new invocation events and passing to handler</span>
+    <span class="k">loop</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="n">invocation</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">get</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+            <span class="s">"http://{}/2018-06-01/runtime/invocation/next"</span><span class="p">,</span>
+            <span class="n">aws_lambda_runtime_api</span>
+        <span class="p">))</span>
+        <span class="nf">.call</span><span class="p">();</span>
+
+	<span class="c">// Extract AWS Request ID for in order to post responses</span>
+        <span class="k">let</span> <span class="n">request_id</span> <span class="o">=</span> <span class="n">invocation</span>
+            <span class="nf">.header</span><span class="p">(</span><span class="s">"Lambda-Runtime-Aws-Request-Id"</span><span class="p">)</span>
+            <span class="nf">.unwrap</span><span class="p">()</span>
+            <span class="nf">.to_string</span><span class="p">();</span>
+
+	<span class="c">// Run the handler function and get the output (note above we</span>
+	<span class="c">// specified this will be a Result&lt;String, String&gt; )</span>
+        <span class="k">let</span> <span class="n">response</span> <span class="o">=</span> <span class="nf">handler</span><span class="p">(</span><span class="n">invocation</span><span class="nf">.into_string</span><span class="p">()</span><span class="nf">.unwrap</span><span class="p">()</span><span class="nf">.as_str</span><span class="p">());</span>
+
+        <span class="k">match</span> <span class="n">response</span> <span class="p">{</span>
+	    <span class="c">// If succeeded post output to response</span>
+            <span class="nf">Ok</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+                <span class="k">let</span> <span class="mi">_</span><span class="n">resp</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">post</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+                    <span class="s">"http://{}/2018-06-01/runtime/invocation/{}/response"</span><span class="p">,</span>
+                    <span class="n">aws_lambda_runtime_api</span><span class="p">,</span> <span class="n">request_id</span>
+                <span class="p">))</span>
+                <span class="nf">.send_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">res</span><span class="p">);</span>
+            <span class="p">}</span>
+
+            <span class="nf">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="k">=&gt;</span> <span class="p">{</span>
+                <span class="c">// If invocation error, POST to /runtime/invocation/AwsRequestId/error</span>
+                <span class="k">let</span> <span class="mi">_</span><span class="n">resp</span> <span class="o">=</span> <span class="nn">ureq</span><span class="p">::</span><span class="nf">post</span><span class="p">(</span><span class="o">&amp;</span><span class="nd">format!</span><span class="p">(</span>
+                    <span class="s">"http://{}/2018-06-01/runtime/invocation/{}/error"</span><span class="p">,</span>
+                    <span class="n">aws_lambda_runtime_api</span><span class="p">,</span> <span class="n">request_id</span>
+                <span class="p">))</span>
+                <span class="nf">.send_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">err</span><span class="nf">.to_string</span><span class="p">());</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In this case we just call <code class="highlighter-rouge">lambda()</code> with a function that takes a <code class="highlighter-rouge">&amp;str</code>
+(which will be the event JSON), and returns a <code class="highlighter-rouge">Result&lt;String, String&gt;</code>.</p>
+
+<p>Note that in practice you would want to support different response and error types
+(perhaps anything that implements Display), and possibly also
+asynchronous handler functions, etc. - this is what the lambda_runtime
+crate does.</p>
+
+<p>This code is available on Github in 
+my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
+
+<h2 id="example-lambda-function">Example Lambda function</h2>
+
+<p>Using the above library crate, a Lambda function might look like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">use</span> <span class="nn">micro_lambda</span><span class="p">::</span><span class="n">lambda</span><span class="p">;</span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c">// Put one-time initialisations (loggers, etc.)</span>
+    <span class="c">// before calling lambda()</span>
+    <span class="nf">lambda</span><span class="p">(</span><span class="n">handler</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="k">fn</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="o">&amp;</span><span class="nb">str</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="nn">std</span><span class="p">::</span><span class="nn">result</span><span class="p">::</span><span class="n">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span> <span class="nb">String</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"{}"</span><span class="p">,</span> <span class="n">event</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">event</span><span class="nf">.contains</span><span class="p">(</span><span class="s">"fail"</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nf">Err</span><span class="p">(</span><span class="s">"ERROR"</span><span class="nf">.to_string</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="nf">Ok</span><span class="p">(</span><span class="s">"SUCCESS"</span><span class="nf">.to_string</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>We can then upload this to AWS Lambda, and verify that it works for a
+successful test case:</p>
+
+<p><img src="/images/lambda_success.png" alt="Success test case" title="Success test case" /></p>
+
+<p>And for an error test case:</p>
+
+<p><img src="/images/lambda_error.png" alt="Error test case" title="Error test case" /></p>
+
+<h2 id="lambda_runtime-and-lambda">lambda_runtime and #[lambda]</h2>
+
+<p>Now we can understand the comment about the <code class="highlighter-rouge">#[lambda]</code> macro in the
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">aforementioned Github issue</a>:</p>
+
+<blockquote>
+  <p>Due to how cold/warm starts work on Lambda,
+the naive approach of setting up resources (such as loggers)
+within a #[lambda]-decorated block will cause the logger initializer
+to panic in a warm start.</p>
+</blockquote>
+
+<p>The <code class="highlighter-rouge">#[lambda]</code> macro allows you to write <a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello.rs">simple code</a> like:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[lambda]</span>
+<span class="nd">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Value</span><span class="p">,</span> <span class="mi">_</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">Value</span><span class="p">,</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>But it is important to note that in this case the function being wrapped
+is treated as the <em>handler function</em> (<a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello-without-macro.rs">here is the relevant code</a>).
+That is, any initialisation should take
+place <em>before</em> the handler function is called, so that it is only run
+once even if there are multiple invocations before the runtime is
+terminated (this is a “warm start”).</p>
+
+<p>This causes problems when new users see the above example, and put
+logger intialisation code, etc. in there directly, which will then fail
+in the cases of warm starts - which might appear as sporadic and
+confusing failures to the developer.</p>
+
+<p>This can be fixed by 
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello-without-macro.rs">separating out the handler invocation</a>,
+just like we did in our earlier code. In this case it could be:</p>
+
+<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[tokio::main]</span>
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="p">(),</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="c">// Put any one-time initialisation code up here</span>
+    <span class="c">// Before lambda::run is called!</span>
+    <span class="k">let</span> <span class="n">func</span> <span class="o">=</span> <span class="nf">handler_fn</span><span class="p">(</span><span class="n">func</span><span class="p">);</span>
+    <span class="nn">lambda</span><span class="p">::</span><span class="nf">run</span><span class="p">(</span><span class="n">func</span><span class="p">)</span><span class="py">.await</span><span class="o">?</span><span class="p">;</span>
+    <span class="nf">Ok</span><span class="p">(())</span>
+<span class="p">}</span>
+
+<span class="k">async</span> <span class="k">fn</span> <span class="nf">func</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Value</span><span class="p">,</span> <span class="mi">_</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="k">-&gt;</span> <span class="n">Result</span><span class="o">&lt;</span><span class="n">Value</span><span class="p">,</span> <span class="n">Error</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nf">Ok</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="summary">Summary</h2>
+
+<p>I hope it’s clear now how the <code class="highlighter-rouge">#[lambda]</code> macro can cause confusion, and
+how to avoid this issue if you write your own Lambda functions.</p>
+
+<p>This might seem a bit overkill for covering such a simple issue, but as
+Richard Feynman said:</p>
+
+<blockquote>
+  <p>What I cannot create, I do not understand.</p>
+</blockquote>
+
+<p>If you look at the the
+<a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>,
+you’ll see I tried to reduce the binary size by some means. I’d
+originally wanted to write this as 
+a <a href="https://rust-embedded.github.io/book/intro/no-std.html">#[no_std] crate</a>
+but the requirement to make HTTP requests made this too difficult,
+considering the networking required. If you do know how to handle this
+well please create an issue or PR on the repo!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[My Rust 2021 roadmap: crates, concision, and community]]></title>
@@ -1498,636 +1742,6 @@ such as TypeScript.</p>
 <p>Many thanks to all of the contributors to the crates used in this
 example, and especially to the maintainers of <a href="https://github.com/awslabs/aws-lambda-rust-runtime">lambda_runtime</a> and <a href="https://github.com/rusoto/rusoto">Rusoto</a>
 whose efforts have made Rust a viable choice in this space.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[An introduction to Data Oriented Design with Rust]]></title>
-    <link href="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/"/>
-    <updated>2020-07-25T11:45:14+02:00</updated>
-    <id>http://jamesmcm.github.io/blog/2020/07/25/intro-dod</id>
-    <content type="html"><![CDATA[<p>In the post we will investigate the main concepts of <a href="https://en.wikipedia.org/wiki/Data-oriented_design">Data-oriented
-Design</a> using Rust.</p>
-
-<p>The source code for this example is <a href="https://github.com/jamesmcm/data-oriented-example">available on Github</a>.</p>
-
-<!--more-->
-
-<h2 id="what-is-data-oriented-design">What is data-oriented design?</h2>
-
-<p>Data-oriented design is an approach to optimising programs by carefully
-considering the memory layout of data structures, and their implications
-for auto-vectorisation and use of the CPU cache. I highly recommend
-watching Mike Acton’s <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">“Data-Oriented Design and C++”</a> talk
-if you haven’t seen it already.</p>
-
-<p>In this post we will cover 4 cases, using <a href="https://docs.rs/criterion/0.3.3/criterion/">criterion</a> for
-benchmarking. The cases are:</p>
-
-<ul>
-  <li>Struct of arrays vs. array of structs</li>
-  <li>The cost of branching inside a hot loop</li>
-  <li>Linked List vs. Vector iteration</li>
-  <li>The cost of dynamic dispatch vs. monomorphisation</li>
-</ul>
-
-<h2 id="struct-of-arrays-vs-array-of-structs">Struct of Arrays vs. Array of Structs</h2>
-
-<p>The <a href="https://en.wikipedia.org/wiki/AoS_and_SoA">Struct of Arrays vs. Array of Structs</a> 
-refers to two contrasting ways of organising entity data to be operated
-over.</p>
-
-<p>For example, imagine we are writing a video game and we would like to
-have a Player struct with the following fields:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Player</span> <span class="p">{</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
-    <span class="n">health</span><span class="p">:</span> <span class="nb">f64</span><span class="p">,</span>
-    <span class="n">location</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
-    <span class="n">velocity</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
-    <span class="n">acceleration</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Then at each frame, we want to update the locations and velocities of all
-Players. We could write something like:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_oop</span><span class="p">(</span><span class="n">players</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Player</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="n">player</span> <span class="n">in</span> <span class="n">players</span><span class="nf">.iter_mut</span><span class="p">()</span> <span class="p">{</span>
-        <span class="n">player</span><span class="py">.location</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">player</span><span class="py">.location</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">player</span><span class="py">.location</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">1</span><span class="p">,</span>
-        <span class="p">);</span>
-        <span class="n">player</span><span class="py">.velocity</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">player</span><span class="py">.acceleration</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">player</span><span class="py">.velocity</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">player</span><span class="py">.acceleration</span><span class="err">.</span><span class="mi">1</span><span class="p">,</span>
-        <span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>This would be the usual object-oriented approach to this problem. The
-issue here is that in memory the structs are stored as follows (assuming
-no field re-ordering i.e. <code class="highlighter-rouge">#[repr(C)]</code>), on a 64-bit architecture each field will be 64
-bits (8 bytes, so each Player is 64 bytes):</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-- Vec&lt;Player&gt;
-name  (pointer to heap)  -- Player 1
-health    
-location0  (tuple split for clarity) 
-location1
-velocity0
-velocity1
-acceleration0
-acceleration1
-name  (pointer to heap)  -- Player 2
-location0    
-location1
-velocity0
-velocity1
-acceleration0
-acceleration1
-...
-</code></pre></div></div>
-
-<p>Note the parts we want to operate on (locations, velocities and
-accelerations) are not stored contiguously across different Players.
-This prevents us from using vector operations to operate on multiple
-players at once (since they cannot be loaded in the same CPU cache
-line, usually ~64 bytes).</p>
-
-<p>In contrast, the data-oriented approach is to design around this
-limitation and optimise for auto-vectorisation. Instead of using a
-struct per Player, we now use one struct for all Players and each Player
-has their values stored at their index in the separate attribute Vectors:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">DOPlayers</span> <span class="p">{</span>
-    <span class="n">names</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">health</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">f64</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">locations</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">velocities</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
-    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Now we can do the same calculation as in the OOP case as follows:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_dop</span><span class="p">(</span><span class="n">world</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">DOPlayers</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">for</span> <span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="p">(</span><span class="n">vel</span><span class="p">,</span> <span class="n">acc</span><span class="p">))</span> <span class="n">in</span> <span class="n">world</span>
-        <span class="py">.locations</span>
-        <span class="nf">.iter_mut</span><span class="p">()</span>
-        <span class="nf">.zip</span><span class="p">(</span><span class="n">world</span><span class="py">.velocities</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.zip</span><span class="p">(</span><span class="n">world</span><span class="py">.acceleration</span><span class="nf">.iter</span><span class="p">()))</span>
-    <span class="p">{</span>
-        <span class="o">*</span><span class="n">pos</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">vel</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">pos</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">vel</span><span class="err">.</span><span class="mi">1</span><span class="p">);</span>
-        <span class="o">*</span><span class="n">vel</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="err">.</span><span class="mi">0</span> <span class="o">+</span> <span class="n">acc</span><span class="err">.</span><span class="mi">0</span><span class="p">,</span> <span class="n">vel</span><span class="err">.</span><span class="mi">1</span> <span class="o">+</span> <span class="n">acc</span><span class="err">.</span><span class="mi">1</span><span class="p">);</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>In this case the memory layout is as follows:</p>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>-- DOPlayers
-name1    -- names
-name2
-...
-health1    -- health
-health2
-...
-location1    -- locations
-location2
-...
-</code></pre></div></div>
-
-<p>The relevant fields are now stored contiguously. Given that each
-location tuple will be 16 bytes, we could now feasibly load 4 location
-tuples on the same cache line to operate on them simultaneously with
-SIMD instructions.</p>
-
-<h3 id="benchmark">Benchmark</h3>
-
-<p>Here are the results of the criterion benchmark for the above code (the
-full code and benchmark code is available <a href="https://github.com/jamesmcm/data-oriented-example">in the Github repo</a>):</p>
-
-<p><img src="/images/soa.svg" alt="AoS vs. SoA benchmark" title="AoS vs. SoA benchmark" /></p>
-
-<p>Overall, we see that the data-oriented approach finishes in half the
-time. This would seem to be due to the data-oriented case operating on
-two Players at a time - we can confirm this by reviewing the compiled
-assembly.</p>
-
-<p>Reviewing the <a href="https://godbolt.org/z/d8bjMb">output on Godbolt</a> we see the following:</p>
-
-<pre><code class="language-asm">// Relevant OOP loop
-.LBB0_2:
-        movupd  xmm0, xmmword ptr [rax + rdx + 32]
-        movupd  xmm1, xmmword ptr [rax + rdx + 48]
-        movupd  xmm2, xmmword ptr [rax + rdx + 64]
-        addpd   xmm0, xmm1
-        movupd  xmmword ptr [rax + rdx + 32], xmm0
-        addpd   xmm2, xmm1
-        movupd  xmmword ptr [rax + rdx + 48], xmm2
-        add     rdx, 80
-        cmp     rcx, rdx
-        jne     .LBB0_2
-
-// ...
-// Relevant DOP loop
-.LBB1_7:
-        movupd  xmm0, xmmword ptr [rcx + rdx - 16]
-        movupd  xmm1, xmmword ptr [rax + rdx - 16]
-        addpd   xmm1, xmm0
-        movupd  xmmword ptr [rcx + rdx - 16], xmm1
-        movupd  xmm0, xmmword ptr [r9 + rdx - 16]
-        movupd  xmm1, xmmword ptr [rax + rdx - 16]
-        addpd   xmm1, xmm0
-        movupd  xmm0, xmmword ptr [rax + rdx]
-        movupd  xmmword ptr [rax + rdx - 16], xmm1
-        add     rdi, 2
-        movupd  xmm1, xmmword ptr [rcx + rdx]
-        addpd   xmm1, xmm0
-        movupd  xmmword ptr [rcx + rdx], xmm1
-        movupd  xmm0, xmmword ptr [rax + rdx]
-        movupd  xmm1, xmmword ptr [r9 + rdx]
-        addpd   xmm1, xmm0
-        movupd  xmmword ptr [rax + rdx], xmm1
-        add     rdx, 32
-        cmp     rsi, rdi
-        jne     .LBB1_7
-        test    r8, r8
-        je      .LBB1_5
-</code></pre>
-
-<p>We can see in the data-oriented case, the loop is unrolled to operate on
-two elements at once - resulting in the 50% speed up overall!</p>
-
-<p><strong>Addendum</strong>: As noted by <a href="https://www.reddit.com/r/rust/comments/hxqwom/an_introduction_to_data_oriented_design_with_rust/fz8lxcq/">/u/five9a2 on Reddit</a>
-the above output is specifically for the default target, which is
-misleading since <code class="highlighter-rouge">cargo bench</code> uses the native target by default (i.e.
-all possible features on your CPU), so our benchmarks are not using the
-above assembly code.</p>
-
-<p>By setting the compiler flag to <code class="highlighter-rouge">-C target-cpu=skylake-avx512</code> to enable 
-Skylake features, we get the <a href="https://godbolt.org/z/PEPdvn">following output</a>:</p>
-
-<pre><code class="language-asm">// OOP loop
-.LBB0_2:
-        vmovupd ymm0, ymmword ptr [rax + rdx + 32]
-        vaddpd  ymm0, ymm0, ymmword ptr [rax + rdx + 48]
-        vmovupd ymmword ptr [rax + rdx + 32], ymm0
-        add     rdx, 80
-        cmp     rcx, rdx
-        jne     .LBB0_2
-
-...
-// DOP loop
-.LBB1_19:
-        vmovupd zmm0, zmmword ptr [rsi + 4*rax - 64]
-        vaddpd  zmm0, zmm0, zmmword ptr [rcx + 4*rax - 64]
-        vmovupd zmmword ptr [rsi + 4*rax - 64], zmm0
-        vmovupd zmm0, zmmword ptr [rcx + 4*rax - 64]
-        vaddpd  zmm0, zmm0, zmmword ptr [r10 + 4*rax - 64]
-        vmovupd zmmword ptr [rcx + 4*rax - 64], zmm0
-        vmovupd zmm0, zmmword ptr [rsi + 4*rax]
-        vaddpd  zmm0, zmm0, zmmword ptr [rcx + 4*rax]
-        vmovupd zmmword ptr [rsi + 4*rax], zmm0
-        vmovupd zmm0, zmmword ptr [rcx + 4*rax]
-        vaddpd  zmm0, zmm0, zmmword ptr [r10 + 4*rax]
-        vmovupd zmmword ptr [rcx + 4*rax], zmm0
-        add     r11, 8
-        add     rax, 32
-        add     rdi, 2
-        jne     .LBB1_19
-        test    r9, r9
-        je      .LBB1_22
-</code></pre>
-
-<p>Here we see the OOP loop making use of the 256-bit ymm registers for the
-position tuple and velocity tuple, and another for the velocity tuple
-and acceleration tuple. This is possible because they are adjacent in
-memory (due to the ordering of the fields). In the DOP loop,
-the 512-bit zmm register is used.</p>
-
-<p>It seems the performance differences comes from the bandwidth between
-cache levels, since the performance is identical for the small examples.
-This can be demonstrated further by removing the extra fields from the
-struct - in this case we see only a 25% performance difference (<a href="https://godbolt.org/z/Th91Wa">godbolt
-link</a>), and this
-corresponds to Player struct now being 384 bits (and so 1/4 of the
-512-bit read/write is unused).</p>
-
-<p>This emphasises how important it is to consider your deployment target,
-and if deploying performance-sensitive code, to consider setting the
-target-cpu explicitly to benefit from all of its features.</p>
-
-<p>It also demonstrates how the ordering of fields can be important to
-performance. By default Rust will re-order fields automatically, but you can set
-<code class="highlighter-rouge">#[repr(C)]</code> to disable this (necessary for C interoperability for
-example).</p>
-
-<h3 id="summary">Summary</h3>
-
-<p>This example demonstrates the importance of considering memory layout
-when aiming for performant code and auto-vectorisation.</p>
-
-<p>Note that the same logic can also apply when working with arrays of
-structs - making your struct smaller will allow you to load more
-elements on the same cache line and possibly lead to autovectorisation.
-<a href="https://github.com/Rene-007/flake_growth/blob/master/src/helpers.rs">Here is an example</a> of
-a crate (which was shared on the <a href="https://www.reddit.com/r/rust/comments/hmqjvs/growing_gold_with_rust/">Rust subreddit</a>) that achieved a 40% performance
-improvement by doing just that.</p>
-
-<p>This particular re-organisation has a direct analogue in database design. A
-major difference between databases aimed at transactional (OLTP)
-workloads and analytical (OLAP) workloads is that the latter tend to use
-columnar-based storage. Just like the case above, this means that
-operations on one column can take advantage of the contiguous storage
-and use vector operations, which tends to be the main access pattern for
-analytical workloads (e.g. calculate the average purchase size across all rows,
-rather than updating and retrieving entire, specific rows).</p>
-
-<p>In the case of analytical databases this is actually a double win, since it also
-applies to the serialisation of the data to disk, where compression can
-now be applied along the column (where the data is guaranteed to be of the
-same type) leading to much better compression ratios.</p>
-
-<p>If you are working on a problem that might benefit from the struct of
-arrays approach, and want to run a quick benchmark, you might be
-interested in the <a href="https://github.com/lumol-org/soa-derive">soa-derive</a>
-crate that will allow you to derive the struct of arrays from your
-struct.</p>
-
-<h2 id="branching-in-a-hot-loop">Branching in a hot loop</h2>
-
-<p>Another optimisation tactic is to avoid branching in any “hot” parts of
-the code (i.e. any part that will be executed many, many times).</p>
-
-<p>Branching can arise in subtle ways, often by trying to use one struct for many
-different cases. For example, we might define some general Node type as follows:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="n">NodeType</span> <span class="p">{</span>
-  <span class="n">Player</span><span class="p">,</span>
-  <span class="n">PhysicsObject</span><span class="p">,</span>
-  <span class="n">Script</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">struct</span> <span class="n">Node</span> <span class="p">{</span>
-<span class="n">node_type</span><span class="p">:</span> <span class="n">NodeType</span><span class="p">,</span>
-<span class="n">position</span><span class="p">:</span> <span class="p">(</span><span class="nb">f64</span><span class="p">,</span> <span class="nb">f64</span><span class="p">),</span>
-<span class="c">// ...</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>And then pattern match on <code class="highlighter-rouge">node_type</code> when we need to operate on a Node.
-The problem comes when we have a <code class="highlighter-rouge">Vec&lt;Node&gt;</code> with tens of thousands of
-elements, which we might need to operate on every frame. By using
-<code class="highlighter-rouge">node.node_type</code> to decide the logic to use, we need to check
-that for every element (since the order of the <code class="highlighter-rouge">node_type</code>’s within the
-<code class="highlighter-rouge">Vec&lt;Node&gt;</code> is unknown).</p>
-
-<p>Not only does this comparison mean we must do an extra operation for
-every element, but it also impedes auto-vectorisation, since our
-relevant nodes (of the same <code class="highlighter-rouge">node_type</code>) may not be stored contiguously.</p>
-
-<p>The data-oriented approach is to split these nodes up by <code class="highlighter-rouge">node_type</code>.
-Ideally creating a separate struct per node type, or at least
-separating them in separate Vectors before the hot loop. This means we
-don’t need to check the <code class="highlighter-rouge">node_type</code> inside the hot loop, and we can take
-advantage of the fact that the nodes we do operate on will be stored in
-contiguous memory.</p>
-
-<h3 id="benchmark-1">Benchmark</h3>
-
-<p>In this benchmark we use the following code:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span>
-    <span class="n">x</span><span class="p">:</span> <span class="nb">i32</span><span class="p">,</span>
-    <span class="n">calc_type</span><span class="p">:</span> <span class="n">CalcType</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="nd">#[derive(Copy,</span> <span class="nd">Clone)]</span>
-<span class="k">pub</span> <span class="k">enum</span> <span class="n">CalcType</span> <span class="p">{</span>
-    <span class="n">Identity</span><span class="p">,</span>
-    <span class="n">Square</span><span class="p">,</span>
-    <span class="n">Cube</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="c">// ...</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_mixed</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">])</span> <span class="k">-&gt;</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span> <span class="p">{</span>
-    <span class="n">x</span><span class="nf">.into_iter</span><span class="p">()</span>
-        <span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="k">match</span> <span class="n">x</span><span class="py">.calc_type</span> <span class="p">{</span>
-            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Identity</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
-            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Square</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
-            <span class="nn">CalcType</span><span class="p">::</span><span class="n">Cube</span> <span class="k">=&gt;</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">,</span>
-        <span class="p">})</span>
-        <span class="nf">.collect</span><span class="p">()</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_separate</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">],</span> <span class="n">y</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">],</span> <span class="n">z</span><span class="p">:</span> <span class="o">&amp;</span><span class="p">[</span><span class="n">Foo</span><span class="p">])</span> <span class="k">-&gt;</span> <span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">,</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
-    <span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="nf">.into_iter</span><span class="p">()</span><span class="nf">.map</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span> <span class="o">*</span> <span class="n">x</span><span class="py">.x</span><span class="p">)</span><span class="nf">.collect</span><span class="p">();</span>
-    <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Comparing the case of a mixed vector of Foos, and separate vector of
-Foos split by <code class="highlighter-rouge">calc_type</code>.</p>
-
-<p>The results of the benchmark are as follows:</p>
-
-<p><img src="/images/innercheck.svg" alt="Loop branch benchmark" title="Loop branch benchmark" /></p>
-
-<p>Overall, we see that the data-oriented approach finishes in about a 
-quarter of the time.</p>
-
-<p>The <a href="https://godbolt.org/z/6ocTx8">output on Godbolt</a> is less clear this
-time, but we can see that there seems to be some unrolling in the
-separate case that isn’t possible in the mixed case due to the need to
-check the <code class="highlighter-rouge">calc_type</code> in that case.</p>
-
-<h3 id="summary-1">Summary</h3>
-
-<p>The concept of moving any instructions you can outside of hot loops
-should be familiar, but this example also demonstrates how it can impact
-vectorisation.</p>
-
-<h2 id="indirection-iteration-in-a-linked-list">Indirection: Iteration in a Linked List</h2>
-
-<p>In this example we will compare iterating through a (doubly) linked list
-vs. a vector. This case is well-known and mentioned in <a href="https://doc.rust-lang.org/beta/std/collections/struct.LinkedList.html">Rust’s
-LinkedList docs</a>,
-in <a href="https://doc.rust-lang.org/beta/std/collections/index.html#use-a-linkedlist-when">Rust’s std::collections docs</a>
-and in <a href="https://rust-unofficial.github.io/too-many-lists/#an-obligatory-public-service-announcement">Learn Rust With Entirely Too Many Linked Lists’ Public Service Announcement</a>.
-The latter Public Service Announcement covers a lot of cases where
-Linked Lists are commonly used, so I recommend reading that if you
-haven’t already. Nevertheless, the proof is in the pudding, so I think
-it’s useful to see a benchmark directly.</p>
-
-<p>A Linked List stores elements <em>indirectly</em>, that is, it stores an
-element and a pointer to the next element. This means that consecutive
-elements in the linked list are <em>not</em> stored in consecutive memory
-locations.</p>
-
-<p>This leads to two issues that impede vectorisation:</p>
-<ul>
-  <li>The elements of the linked list may be stored arbitrarily far apart, so
-we cannot just load a block of memory to the CPU cache to operate on
-them simultaneously.</li>
-  <li>We have to dereference a pointer to get the next element in the list.</li>
-</ul>
-
-<p>For example, we might store a vector of i32s on the heap as follows
-(holding a pointer to the start of the vector, the vector capacity and
-the vector length, on the stack):</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00 1
-0x01 2
-0x02 3
-...
-</code></pre></div></div>
-
-<p>The values are stored contiguously, whereas for a (singly) linked list, we could
-have the following case.</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00 1
-0x01 0x14
-0x0C 3
-0x0D 0
-...
-0x14 2
-0x15 0x0C
-</code></pre></div></div>
-
-<p>Here the values are not stored in contiguous memory (or even necessarily
-in the same order as their pointers maintain in the list).</p>
-
-<h3 id="benchmark-2">Benchmark</h3>
-
-<p>In this case the benchmark is very simple, simply squaring all of the
-elements of a linked list and a vector:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_list</span><span class="p">(</span><span class="n">list</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="n">LinkedList</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">list</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
-        <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span> <span class="o">*</span> <span class="o">*</span><span class="n">x</span><span class="p">;</span>
-    <span class="p">});</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_vec</span><span class="p">(</span><span class="n">list</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">i32</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">list</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="p">{</span>
-        <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="o">*</span><span class="n">x</span> <span class="o">*</span> <span class="o">*</span><span class="n">x</span><span class="p">;</span>
-    <span class="p">});</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>The results are as follows:</p>
-
-<p><img src="/images/linkedlist.svg" alt="LinkedList benchmark" title="LinkedList benchmark" /></p>
-
-<p>Overall, we see that the data-oriented approach finishes in about a
-tenth of the time.</p>
-
-<p>The <a href="https://godbolt.org/z/EzznM1">output on Godbolt</a> shows the
-unrolling in the Vec case that isn’t possible in the LinkedList case.</p>
-
-<h2 id="summary-2">Summary</h2>
-
-<p>This case is well-known and demonstrates the biggest difference of all
-of the benchmarks. Note that here we look only at iteration, and not at
-other operations which could be considered to somewhat favour Linked
-Lists such as insertion, where it avoids the (amortised) cost of vector
-resizing, however as argued in <a href="https://rust-unofficial.github.io/too-many-lists/#i-cant-afford-amortization">Learn Rust With Entirely Too Many Linked
-Lists</a>
-this can be avoided in Vectors too.</p>
-
-<p>Hopefully this will become common knowledge and we’ll see fewer
-interview questions and practice problems based around linked lists and
-indirection, considering only Big O complexity and not real world
-performance.</p>
-
-<h2 id="indirection-dynamic-dispatch-vs-monomorphisation">Indirection: Dynamic Dispatch vs. Monomorphisation</h2>
-
-<p>When writing generic functions (i.e. for any types implementing certain
-Traits), we have the choice between <a href="https://doc.rust-lang.org/book/ch17-02-trait-objects.html">dynamic dispatch</a>
-and monomorphisation.</p>
-
-<p>Dynamic dispatch allows us to work with a mixed
-collection of trait objects, i.e. we can have a <code class="highlighter-rouge">Vec&lt;Box&lt;dyn MyTrait&gt;&gt;</code>
-which can contain references to different types which all implement
-MyTrait. The trait object contains a pointer to the instance of the
-struct itself (implementing MyTrait) and a pointer to the struct’s virtual method table
-(or vtable, a lookup table pointing to the implementation of each method
-of MyTrait). Then when we call a method on one of these trait objects, at
-runtime we work out which implementation of the method to use by
-consulting the vtable.</p>
-
-<p>Note that this implies indirection. Our vector has to be of pointers to
-the struct instances themselves (since the different structs implementing
-MyTrait can differ in size and fields), and we must also
-dereference the pointer in the vtable to find out
-which implementation to call.</p>
-
-<p>Monomorphisation, on the other hand, creates a separate implementation
-of the generic function for each possible type. For example, the
-following code would actually create two separate functions for
-<code class="highlighter-rouge">run_vecs_square()</code> for the <code class="highlighter-rouge">Foo</code> and <code class="highlighter-rouge">Bar</code> types respectively:</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">struct</span> <span class="n">Foo</span> <span class="p">{</span>
-    <span class="n">id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">struct</span> <span class="n">Bar</span> <span class="p">{</span>
-    <span class="n">id</span><span class="p">:</span> <span class="nb">usize</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="k">pub</span> <span class="k">trait</span> <span class="n">MyTrait</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">);</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">MyTrait</span> <span class="k">for</span> <span class="n">Foo</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.id</span> <span class="o">=</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-<span class="k">impl</span> <span class="n">MyTrait</span> <span class="k">for</span> <span class="n">Bar</span> <span class="p">{</span>
-    <span class="k">fn</span> <span class="nf">square_id</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span> <span class="k">self</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">self</span><span class="py">.id</span> <span class="o">=</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span> <span class="o">*</span> <span class="k">self</span><span class="py">.id</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-
-
-<span class="k">pub</span> <span class="k">fn</span> <span class="n">run_vecs_square</span><span class="o">&lt;</span><span class="n">T</span><span class="p">:</span> <span class="n">MyTrait</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">x</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.square_id</span><span class="p">())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>This increases the binary size, but gives us an easy way of generating
-multiple implementations of a function for different types and allows us
-to avoid indirection (i.e. note we can use <code class="highlighter-rouge">Vec&lt;T&gt;</code> and don’t need to
-use <code class="highlighter-rouge">Vec&lt;Box&lt;T&gt;&gt;</code>).</p>
-
-<p>Whereas in the following code, we use dynamic dispatch. There is only
-one implementation of <code class="highlighter-rouge">run_dyn_square</code> but exactly which implementation
-of <code class="highlighter-rouge">square_id()</code> it should call is determined at runtime by consulting
-the trait object’s vtable.</p>
-
-<div class="language-rust highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">pub</span> <span class="k">fn</span> <span class="nf">run_dyn_square</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="o">&amp;</span><span class="k">mut</span> <span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Box</span><span class="o">&lt;</span><span class="n">dyn</span> <span class="n">MyTrait</span><span class="o">&gt;&gt;</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">x</span><span class="nf">.iter_mut</span><span class="p">()</span><span class="nf">.for_each</span><span class="p">(|</span><span class="n">x</span><span class="p">|</span> <span class="n">x</span><span class="nf">.square_id</span><span class="p">())</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>This can be more convenient, as we can create the vector containing
-references to different types with no worry about what the actual types
-are (only that they implement MyTrait), and we don’t inflate the binary
-size. However, we are forced to use indirection, since the underlying
-types could have different sizes, and as we saw with the LinkedList
-example this can have significant implications for auto-vectorisation.</p>
-
-<h3 id="benchmark-3">Benchmark</h3>
-
-<p>Using the example above, the benchmark results are as follows:</p>
-
-<p><img src="/images/dyntrait.svg" alt="Dynamic Dispatch benchmark" title="Dynamic Dispatch benchmark" /></p>
-
-<p>Overall, we see that the monomorphised example finishes in about a
-quarter of the time of the dynamic dispatch one. The monomorphised case
-with indirection (<code class="highlighter-rouge">Vec&lt;Box&lt;T&gt;&gt;</code>) is only slightly faster than the
-dynamic dispatch case which implies that most of the performance gap is
-due to the added indirection impeding vectorisation, whereas the vtable lookup
-itself only adds a small constant overhead.</p>
-
-<p>Unfortunately, in this case <a href="https://godbolt.org/z/46WYaP">Godbolt</a>
-doesn’t include the target functions in the generated output.</p>
-
-<h3 id="summary-3">Summary</h3>
-
-<p>This benchmark showed that the main cost of dynamic dispatch is in
-impeding vectorisation due to the necessary introduction of indirection,
-and that the cost of the lookup in the vtable itself was relatively
-small.</p>
-
-<p>This means that you should definitely consider designing for
-monomorphisation if your methods are doing operations that would greatly
-benefit from vectorisation (such as the mathematical operations above).
-On the other hand, if they are carrying out operations that are not
-vectorised (for example, constructing Strings) then dynamic dispatch may
-have a negligible cost overall.</p>
-
-<p>As always, benchmark your specific use cases and access patterns when
-comparing different possible implementations.</p>
-
-<h2 id="conclusion">Conclusion</h2>
-
-<p>In this article we have seen four cases where considering data layout in
-memory, and the realities and limitations of the CPU cache has lead to
-significant performance improvements.</p>
-
-<p>This only scratches the surface of data-oriented design and optimisation. For example,
-<a href="http://www.catb.org/esr/structure-packing/">structure packing</a>, padding
-and alignment was not covered. The <a href="https://www.dataorienteddesign.com/dodbook/">data-oriented design book</a> by
-Richard Fabian also covers some additional topics.</p>
-
-<p>It is important to note that in all of our examples, we did not modify
-the algorithms we used. All implementations for each case have the same
-Big O complexity, and yet in practice the performance can vary greatly,
-with speedups from 2x-10x available just by optimising for
-vectorisation and other features of modern CPUs.</p>
-
-<p>In summary:</p>
-
-<ul>
-  <li>Favour data structures with less/no indirection and contiguous memory
-(you’ll also have an easier time with the borrow checker!).</li>
-  <li>Avoid branching inside loops.</li>
-  <li>Benchmark your use cases and access patterns.</li>
-  <li>If deploying performance sensitive code, consider targeting the CPU
-features of your destination machine (i.e. <a href="https://rust-lang.github.io/packed_simd/perf-guide/target-feature/rustflags.html">use RUSTFLAGS</a>).</li>
-  <li><a href="https://github.com/bheisler/criterion.rs">Criterion</a> is a great benchmarking tool.</li>
-  <li><a href="https://github.com/gnzlbg/cargo-asm">cargo-asm</a> and <a href="https://godbolt.org/">Godbolt</a> can be used to inspect the generated assembly (and
-LLVM intermediate representation).</li>
-  <li><a href="https://rust-lang.github.io/packed_simd/perf-guide/prof/linux.html">perf</a> and <a href="https://github.com/flamegraph-rs/flamegraph">flamegraph</a> can be used for performance profiling.</li>
-</ul>
 ]]></content>
   </entry>
   
