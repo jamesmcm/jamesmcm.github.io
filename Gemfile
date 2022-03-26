@@ -1,8 +1,8 @@
 source "https://rubygems.org"
 
 group :development do
-  gem 'rake', '~> 11.2'
-  gem 'jekyll', '~> 4.0'
+  gem 'rake', '~> 13.0'
+  gem 'jekyll', '~> 4.2'
   gem 'octopress-hooks', '~> 2.6'
   gem 'octopress-date-format', '~> 3.0'
   gem 'jekyll-sitemap'
@@ -13,6 +13,7 @@ group :development do
   gem 'sass-globbing', '~> 1.1.5'
   gem 'rb-fsevent', '~> 0.10'
   gem 'stringex', '~> 2.8.5'
+  gem "puma" 
 end
 
 gem 'sinatra', '~> 2.0.8'
