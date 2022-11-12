@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>How to fix high CPU usage by the CacheDelete daemon in OS X Catalina</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">How to fix high CPU usage by the CacheDelete daemon in OS X Catalina</h1>
+  <span class="post-date">2020-09-20</span>
+  <hr class="within-post">
+  <p>I recently had an ongoing issue with the <code>deleted</code> CacheDelete daemon
+using huge amounts of CPU time almost constantly. This post covers how I
+fixed it and a few tips for OS X recovery and performance improvements.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<h2 id="deleted-daemon">deleted daemon</h2>
+<p>The problem I had was that the <code>deleted</code> daemon was often taking 90%+ of
+CPU usage on my 2017 Macbook Pro, resulting in massive stuttering when trying to use the
+system.</p>
+<p>Looking up details for the process, I found that <a href="https://apple.stackexchange.com/questions/254810/what-is-the-deleted-daemon-in-macos">the daemon is
+responsible for purging caches</a>
+and had caused issues for others. Unfortunately, on Catalina it is not
+trivial to disable due to the read-only System volume and the built-in
+<a href="https://support.apple.com/en-us/HT204899">System Integrity Protection</a>
+that forbids any changes to system files, even as root.</p>
+<p>By looking at the output of <code>ps</code> we can see that the binaries are stored
+in <code>/System/Library/PrivateFrameworks/CacheDelete.framework/</code>, meanwhile
+the page linked above mentions that the registered applications with the
+daemon are contained in plist files in <code>/System/Library/CacheDelete/</code>.</p>
+<p>In order to fix this issue, we can simply move all of those plist files.
+Then <code>deleted</code> will no longer run. Do <strong>not</strong> remove the <code>deleted</code>
+binary itself or your system will fail to boot (at login if on a system
+with an encrypted disk).</p>
+<h2 id="removing-the-plist-files">Removing the plist files</h2>
+<p>First we need to disable the System Integrity Protection (SIP), this must be
+done in recovery mode. To access recovery mode reboot the Macbook and
+press Cmd+R whilst it is booting up, the screen should flash white and
+take you to a recovery shell with options to reinstall OS X.</p>
+<p>In the menu bar at the top, select <code>Utilities &gt; Terminal</code> to access the
+terminal and then run <code>csrutil disable</code>. You should receive a message
+that the SIP is now disabled. Reboot the machine.</p>
+<p>Log in as usual and open a terminal window. First you must mount the
+System volume as writeable:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo mount</span><span style="color:#bf616a;"> -uw</span><span> /
+</span></code></pre>
+<p>And then move the CacheDelete plist files:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> sudo mv /System/Library/CacheDelete /System/Library/CacheDeleteBackup
+</span></code></pre>
+<p>Now reboot and <code>deleted</code> should no longer run.</p>
+<p>Note if you also moved
+the actual binaries above then the system will no longer boot, this is
+easy to fix (assuming you didn't remove them completely) but involves a
+few extra steps if your hard disk is encrypted.</p>
+<h3 id="mounting-an-encrypted-hard-disk-from-recovery">Mounting an encrypted hard disk from recovery</h3>
+<p>First boot to recover mode and open a terminal as above. Then you need to unlock the encrypted disk.</p>
+<p>Use <code>diskutil apfs list</code> to find the correct volume (check the capacity
+and label), and copy the Logical Volume UUID (it will be something like
+<code>B807C2A0-577F-3DB0-9002-F82B9137696C</code>).</p>
+<p>Then unlock the disk with your disk password (this may be the same as
+your user password):</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> diskutil apfs unlockVolume B807C2A0-577F-3DB0-9002-F82B9137696C
+</span></code></pre>
+<p>Once it is unlocked correctly, you can mount it with diskutil by name,
+e.g.&quot;</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> diskutil mount disk2
+</span></code></pre>
+<p>And then find it mounted in <code>/Volumes/${LABEL}</code>, there you can make any
+necessary fixes and then reboot.</p>
+<h2 id="other-fixes">Other fixes</h2>
+<p>The above steps fixed the issue I had with CacheDelete which was a
+major problem for a few weeks. But I also recommend the following
+improvements.</p>
+<h3 id="disabling-spotlight">Disabling Spotlight</h3>
+<p>Spotlight (the OS X file searcher) indexes all files for rapid
+searching, but this indexing can be CPU and Disk IO intensive and run at
+inopportune times (you may see this as the <code>mds_stores</code> process). Since I never use Spotlight, I just disable it
+completely (I only use <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a>).</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+</span></code></pre>
+<p>Note that you need the SIP disabled to run that.</p>
+<h3 id="disabling-transparency">Disabling transparency</h3>
+<p>Disabling transparency helps to reduce CPU usage by the <code>WindowServer</code>
+process.</p>
+<p>Simply go to the accessibility settings and check Reduce Transparency
+under Display.</p>
+<h2 id="summary">Summary</h2>
+<p>I hope this helps anyone else facing the same issue, it was a huge
+frustration for weeks. I've written this as much for my own reference
+too!</p>
+<p>Hopefully one day we'll be able to use Arch Linux at work too.</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/rust2021/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/foss-government/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

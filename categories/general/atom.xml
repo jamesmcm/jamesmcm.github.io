@@ -1,0 +1,1116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>James McMurray&#x27;s blog - General</title>
+	<subtitle>A technical blog about Rust, Linux and other topics.</subtitle>
+	<link href="https://jamesmcm.github.io/categories/general/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://jamesmcm.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2020-10-11T00:00:00+00:00</updated>
+	<id>https://jamesmcm.github.io/categories/general/atom.xml</id>
+	<entry xml:lang="en">
+		<title>What should I program?</title>
+		<published>2020-10-11T00:00:00+00:00</published>
+		<updated>2020-10-11T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/programming-projects/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/programming-projects/</id>
+		<content type="html">&lt;p&gt;Doing projects is often the best way to get more programming experience
+and learn about new concepts and problem domains. However, a common issue 
+is finding feasible projects of a reasonable scope that can 
+produce something useful in a few weekends.&lt;&#x2F;p&gt;
+&lt;p&gt;In this post I will list some classic project ideas for beginner and
+intermediate programmers (most of which should be achievable in 2-3
+weekends), along with many other project ideas I&#x27;ve had but have never
+had time to implement (and a few which I did).&lt;&#x2F;p&gt;
+&lt;p&gt;There are many long lists of project ideas available on Github, like
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;danistefanovic&#x2F;build-your-own-x&quot;&gt;build-your-own-x&lt;&#x2F;a&gt;
+and &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;aceking007&#x2F;100ProjectsOfCode&quot;&gt;100 Projects of Code&lt;&#x2F;a&gt;
+but these often lack a real description and justification of the
+projects. In this article I will go more in-depth with the different project ideas.&lt;&#x2F;p&gt;
+&lt;p&gt;Within each section the projects are ordered in ascending difficulty &#x2F;
+time investment.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;Opinions expressed are solely my own and do not express the views or opinions of my employer.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;classic-projects&quot;&gt;Classic projects&lt;&#x2F;h1&gt;
+&lt;p&gt;In this section I list some classic project ideas, in ascending order of
+time investment &#x2F; difficulty. I&#x27;d recommend these to all new
+programmers.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;sudoku-solver&quot;&gt;Sudoku solver&lt;&#x2F;h2&gt;
+&lt;p&gt;Since a &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Sudoku&quot;&gt;Sudoku&lt;&#x2F;a&gt; grid is only 9x9, it is feasible to just use Depth First
+Search and check if the grid is still valid at each step (backtracking
+when it isn&#x27;t).&lt;&#x2F;p&gt;
+&lt;p&gt;This approach means this is a very simple problem which can be implemented in
+less than an hour, and could be good experience if you are new to graph
+search algorithms.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;scala-sudoku-solver&#x2F;blob&#x2F;master&#x2F;src&#x2F;main&#x2F;scala&#x2F;sudoku&#x2F;Main.scala&quot;&gt;my implementation in Scala&lt;&#x2F;a&gt; (this was my first Scala
+program).&lt;&#x2F;p&gt;
+&lt;p&gt;To make it more interesting, you could solve it using &lt;a href=&quot;https:&#x2F;&#x2F;www.adrian.idv.hk&#x2F;2019-01-30-simanneal&#x2F;&quot;&gt;simulated annealing&lt;&#x2F;a&gt; or
+&lt;a href=&quot;https:&#x2F;&#x2F;www.researchgate.net&#x2F;publication&#x2F;256087959_Finding_Solutions_to_Sudoku_Puzzles_Using_Human_Intuitive_Heuristics&quot;&gt;other methods&lt;&#x2F;a&gt;.
+Another interesting project using graph search algorithms is &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Maze_solving_algorithm&quot;&gt;maze solving&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tcp-client-server-or-proxy&quot;&gt;TCP client&#x2F;server or proxy&lt;&#x2F;h2&gt;
+&lt;p&gt;Writing a TCP client and server, or a TCP proxy server, will force you
+to work with multithreading or asynchronous programming (or both - see
+&lt;a href=&quot;http:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;2020&#x2F;05&#x2F;06&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;#en&quot;&gt;my previous post on asynchronous programming&lt;&#x2F;a&gt; 
+if you are unsure of the difference).&lt;&#x2F;p&gt;
+&lt;p&gt;I recently wrote a &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;basic_tcp_proxy&quot;&gt;simple synchronous TCP proxy server&lt;&#x2F;a&gt; in Rust for
+use in &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;vopono&quot;&gt;vopono&lt;&#x2F;a&gt; without adding a 
+lot of async dependencies. You could also write a
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;dpohanlon&#x2F;Transfer&quot;&gt;simple file transfer program&lt;&#x2F;a&gt;
+for example.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;chip-8-emulator&quot;&gt;CHIP-8 emulator&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;CHIP-8&quot;&gt;CHIP-8&lt;&#x2F;a&gt; is an interpreted
+programming language, that was used on several microcomputers in the
+late 1970s. &lt;&#x2F;p&gt;
+&lt;p&gt;The language is effectively a high-level instruction set,
+where the opcodes correspond to different instructions from low-level
+mathematical operations to high-level operations like drawing on the
+screen.&lt;&#x2F;p&gt;
+&lt;p&gt;I highly recommend reading 
+&lt;a href=&quot;http:&#x2F;&#x2F;devernay.free.fr&#x2F;hacks&#x2F;chip8&#x2F;C8TECH10.HTM&quot;&gt;Cowgod&#x27;s Chip-8 Technical Reference&lt;&#x2F;a&gt;
+if you choose to do this project. I wrote &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;chip8go&quot;&gt;an implementation in Go&lt;&#x2F;a&gt;
+which includes the documentation of the opcodes and some issues which I hit 
+mentioned in the README.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is my CHIP-8 interpreter running Breakout:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;breakout.png&quot; alt=&quot;My CHIP-8 interpreter running Breakout&quot; title=&quot;My CHIP-8 interpreter running Breakout&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;If you enjoy building an emulator&#x2F;Virtual Machine I&#x27;d also recommend the 
+&lt;a href=&quot;https:&#x2F;&#x2F;adventofcode.com&#x2F;2019&#x2F;day&#x2F;2&quot;&gt;Advent of Code 2019&lt;&#x2F;a&gt; intcode problems
+(starting on day 2) which involve building a VM to execute the intcode instructions.&lt;&#x2F;p&gt;
+&lt;p&gt;Then if you really want a greater challenge you could try implementing a 
+NES or Gameboy emulator (also check out &lt;a href=&quot;https:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;EmuDev&#x2F;&quot;&gt;Reddit&#x27;s &#x2F;r&#x2F;EmuDev&lt;&#x2F;a&gt;). The &lt;a href=&quot;http:&#x2F;&#x2F;wiki.nesdev.com&#x2F;w&#x2F;index.php&#x2F;Nesdev_Wiki&quot;&gt;NesDev Wiki&lt;&#x2F;a&gt;
+is a great resource for the former, combined with &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=nViZg02IMQo&amp;amp;list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf&quot;&gt;OneLoneCoder&#x27;s video series&lt;&#x2F;a&gt;. 
+For the Gameboy the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;gbdev&#x2F;awesome-gbdev&quot;&gt;gbdev community&lt;&#x2F;a&gt; 
+has a lot of comprehensive documentation. Here is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BlueBlazin&#x2F;gbemu&quot;&gt;a Gameboy emulator compiled to WebAssembly&lt;&#x2F;a&gt; for
+example.&lt;&#x2F;p&gt;
+&lt;p&gt;A great advanced project idea would be a SNES emulator compiled to WebAssembly
+that could play peer-to-peer multiplayer over the internet by using
+WebRTC and verifying that both players have the same ROM. The (possibly
+copyrighted) ROM itself would not need to be sent over the network.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;nand2tetris&quot;&gt;Nand2Tetris&lt;&#x2F;h2&gt;
+&lt;p&gt;The &lt;a href=&quot;https:&#x2F;&#x2F;www.nand2tetris.org&#x2F;&quot;&gt;Nand2Tetris course&lt;&#x2F;a&gt; covers everything
+from building an &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Arithmetic_logic_unit&quot;&gt;Arithmetic Logic Unit&lt;&#x2F;a&gt; using a simple Hardware
+Description Language in the &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;learn&#x2F;build-a-computer&quot;&gt;first course&lt;&#x2F;a&gt;, to building an assembler for a
+simple instruction set and a compiler for a simple Java-inspired language
+in the &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;learn&#x2F;nand2tetris2&quot;&gt;second course&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This is the best course I have ever taken, and I wholeheartedly
+recommend it to anyone who hasn&#x27;t completed it already. It is a very
+hands-on and fun computer architecture course with the basics of
+compilers and operating systems development included too. If you do try
+this course, I&#x27;ve uploaded the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;HackKeepUp&quot;&gt;KeepUp game I made for Week 8 to Github&lt;&#x2F;a&gt; so you can try it out.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is my assembled game running on the Hack Virtual Machine:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;hackku.png&quot; alt=&quot;My KeepUp game running in the Hack Virtual Machine&quot; title=&quot;My KeepUp game running in the Hack Virtual Machine&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;If you find the course interesting, for computer architecture projects
+(in addition to the emulator ones mentioned above), you could try
+&lt;a href=&quot;http:&#x2F;&#x2F;www.projectoberon.com&#x2F;&quot;&gt;Project Oberon&lt;&#x2F;a&gt;, for a simpler project
+there is also the &lt;a href=&quot;https:&#x2F;&#x2F;justinmeiners.github.io&#x2F;lc3-vm&#x2F;&quot;&gt;Write your own Virtual Machine&lt;&#x2F;a&gt; tutorial.&lt;&#x2F;p&gt;
+&lt;p&gt;For compilers and programming language development, you might be
+interested in reading &lt;a href=&quot;https:&#x2F;&#x2F;craftinginterpreters.com&#x2F;&quot;&gt;Crafting Interpreters&lt;&#x2F;a&gt;,
+&lt;a href=&quot;https:&#x2F;&#x2F;interpreterbook.com&#x2F;&quot;&gt;Writing an interpreter in Go&lt;&#x2F;a&gt;,
+&lt;a href=&quot;https:&#x2F;&#x2F;compilerbook.com&#x2F;&quot;&gt;Writing a compiler in Go&lt;&#x2F;a&gt; and the 
+&lt;a href=&quot;https:&#x2F;&#x2F;createlang.rs&#x2F;&quot;&gt;Create your own programming language with Rust&lt;&#x2F;a&gt;
+online book.&lt;&#x2F;p&gt;
+&lt;p&gt;For Operating Systems development, the &lt;a href=&quot;https:&#x2F;&#x2F;wiki.osdev.org&#x2F;Expanded_Main_Page&quot;&gt;osdev Wiki&lt;&#x2F;a&gt;
+has a lot of comprehensive resources. There is also the 
+&lt;a href=&quot;https:&#x2F;&#x2F;os.phil-opp.com&#x2F;&quot;&gt;Writing an OS in Rust&lt;&#x2F;a&gt; blog series, and the
+rust-embedded group&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rust-embedded&#x2F;rust-raspberrypi-OS-tutorials&quot;&gt;Rust RaspberryPi OS tutorials&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.amazon.com&#x2F;Code-Language-Computer-Hardware-Software&#x2F;dp&#x2F;0735611319&quot;&gt;Charles Petzold&#x27;s Code&lt;&#x2F;a&gt;
+is a lighter and slightly dated book covering similar areas in computer
+architecture, which I&#x27;d still recommend reading as a companion book and
+some appreciation of the history (just like &lt;a href=&quot;https:&#x2F;&#x2F;www.amazon.com&#x2F;Just-Fun-Story-Accidental-Revolutionary&#x2F;dp&#x2F;0066620732&#x2F;&quot;&gt;Linus Torvald&#x27;s biography&lt;&#x2F;a&gt; is also
+good for a very light read about the history of Linux).&lt;&#x2F;p&gt;
+&lt;p&gt;Finally, since this entry is actually a course, I also wanted to
+recommend other excellent online courses I have completed:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Andrew Ng&#x27;s famous &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;learn&#x2F;machine-learning&quot;&gt;Machine Learning course&lt;&#x2F;a&gt; (even if it is slightly
+dated still using Octave now).&lt;&#x2F;li&gt;
+&lt;li&gt;Stanford&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;online.stanford.edu&#x2F;courses&#x2F;soe-ycs0007-mining-massive-data-sets&quot;&gt;Mining Massive Datasets&lt;&#x2F;a&gt;
+(&lt;a href=&quot;http:&#x2F;&#x2F;www.mmds.org&#x2F;&quot;&gt;and the book here&lt;&#x2F;a&gt;) covering different algorithms for processing large datasets.&lt;&#x2F;li&gt;
+&lt;li&gt;Dan Boneh&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;learn&#x2F;crypto&quot;&gt;Cryptography&lt;&#x2F;a&gt; course
+(&lt;a href=&quot;http:&#x2F;&#x2F;toc.cryptobook.us&#x2F;&quot;&gt;and the book here&lt;&#x2F;a&gt;) - I&#x27;d also recommend completing
+the &lt;a href=&quot;https:&#x2F;&#x2F;cryptopals.com&#x2F;&quot;&gt;cryptopals problems&lt;&#x2F;a&gt; if you find this interesting.&lt;&#x2F;li&gt;
+&lt;li&gt;Stanford&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;specializations&#x2F;algorithms&quot;&gt;Algorithms&lt;&#x2F;a&gt;
+(&lt;a href=&quot;http:&#x2F;&#x2F;www.algorithmsilluminated.org&#x2F;&quot;&gt;and the book here&lt;&#x2F;a&gt;) course covering
+popular algorithms and data structures.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;ray-tracer&quot;&gt;Ray Tracer&lt;&#x2F;h2&gt;
+&lt;p&gt;Implementing a &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Ray_tracing_(graphics)&quot;&gt;Ray Tracer&lt;&#x2F;a&gt; is a great project for producing a visible
+result that you can share with others. I highly recommend &lt;a href=&quot;https:&#x2F;&#x2F;pragprog.com&#x2F;titles&#x2F;jbtracer&#x2F;the-ray-tracer-challenge&#x2F;&quot;&gt;The Ray Tracer Challenge book&lt;&#x2F;a&gt;
+(and don&#x27;t forget &lt;a href=&quot;http:&#x2F;&#x2F;www.raytracerchallenge.com&#x2F;#bonus&quot;&gt;the bonus chapters&lt;&#x2F;a&gt; at the end!).
+The book uses Test-Driven Development and does not prescribe a specific
+programming language.&lt;&#x2F;p&gt;
+&lt;p&gt;I implemented the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;raytracer_challenge_scala&quot;&gt;project in Scala&lt;&#x2F;a&gt;.
+If I were to do it again, I&#x27;d recommend making sure your primitives are
+as fast as possible (i.e. use the appropriate linear algebra libraries)
+to ensure better performance later on. I&#x27;d also recommend implementing
+it such that it can compile to WebAssembly or JavaScript - e.g. with &lt;a href=&quot;https:&#x2F;&#x2F;sotrh.github.io&#x2F;learn-wgpu&#x2F;&quot;&gt;wgpu in Rust&lt;&#x2F;a&gt;
+so that it is easy to show to
+others whilst keeping good performance.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is an example image from my ray tracer implementation based on The Ray Tracer Challenge (the Scala logo model was created in Blender):&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;scala_colour_big.png&quot; alt=&quot;Example image from my Ray Tracer implementation&quot; title=&quot;Example image from my Ray Tracer implementation&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;There is also the &lt;a href=&quot;https:&#x2F;&#x2F;raytracing.github.io&#x2F;&quot;&gt;Ray Tracing in One Weekend series&lt;&#x2F;a&gt;
+for an alternative resource aimed at C++.&lt;&#x2F;p&gt;
+&lt;p&gt;Graphics programming is a very deep rabbit hole. If you find the Ray
+Tracer project interesting, I&#x27;d definitely recommend Bisqwit&#x27;s YouTube channel
+with videos on &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=HQYsFshbkYw&quot;&gt;DOOM-style rendering&lt;&#x2F;a&gt;,
+&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=PahbNFypubE&quot;&gt;Polygon Rasterisation&lt;&#x2F;a&gt; and 
+&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=Nwfm6cpskIM&quot;&gt;Illumination&lt;&#x2F;a&gt; mostly in C
+and C++.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;my-project-ideas&quot;&gt;My project ideas&lt;&#x2F;h1&gt;
+&lt;p&gt;The above project ideas are very popular and almost a rite of passage
+for new programmers now. In this section I will present many different
+project ideas I&#x27;ve had but have not had time to fully implement (or even
+begin!).&lt;&#x2F;p&gt;
+&lt;p&gt;As in the previous section, projects are sorted by approximate difficulty in
+ascending order.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;scrabble-solver&quot;&gt;Scrabble solver&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Scrabble&quot;&gt;Scrabble&lt;&#x2F;a&gt; &#x2F; Words With Friends 
+is a popular word game where you must form the best words from your character
+tiles to score the highest points against your opponent.&lt;&#x2F;p&gt;
+&lt;p&gt;I wrote a simple &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;scala-scrabble-solver&quot;&gt;Scrabble solver in Scala&lt;&#x2F;a&gt;
+which uses a more-or-less brute force approach of scoring every possible
+word, using &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Regular_expression&quot;&gt;regular expressions&lt;&#x2F;a&gt;
+to find possibilities from the word list for each
+possible board position. The main issue is that it can be very slow for
+complicated boards (i.e. near late-game) taking ~3-4 minutes to produce
+the best solution, since it finds all possible moves and then ranks them.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;d really like to re-implement this in Rust so it could be built for
+WebAssembly. Note that in WebAssembly multiple threads are not yet
+supported in most browsers, so the solution would need to be
+single-threaded. This also makes the performance very important and it
+would be necessary to either improve the algorithm if possible (maybe
+some sort of &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Trie&quot;&gt;Trie structure&lt;&#x2F;a&gt; could be used instead of separate
+regular expressions) or use heuristics to discard many positions&#x2F;moves
+so they don&#x27;t all need to be evaluated.&lt;&#x2F;p&gt;
+&lt;p&gt;But remember that the board bonuses can mean that score isn&#x27;t directly
+correlated with word length, which can make it tricky to define a
+heuristic to discard positions&#x2F;moves. Also you may often have the 3rd and 5th
+letter of a word constrained but not the first letter for example, so
+the data structure for the word list would need to account for that.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;crusader-kings-3-save-game-file-analyzer&quot;&gt;Crusader Kings 3 save-game file analyzer&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;store.steampowered.com&#x2F;app&#x2F;1158310&#x2F;Crusader_Kings_III&#x2F;&quot;&gt;Crusader Kings 3&lt;&#x2F;a&gt; 
+is an excellent Grand Strategy game available on GNU&#x2F;Linux. Overall, the
+game is a great improvement to its predecessor, however one feature that
+it lacks is the &amp;quot;Chronicle&amp;quot; which, in Crusader Kings 2, documented the
+history of your dynasty and their rise to power.&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;d be great to build a WebAssembly based tool that could parse CK3
+save game files and show the history of the game (using the title owner
+change dates and their respective dynasties), the trees of different
+characters&#x27; dynasties, and graphs for the number of alive dynasty
+members over time, and other interesting metrics.&lt;&#x2F;p&gt;
+&lt;p&gt;Whilst running the game in debug
+mode - without Ironman mode so achivements are disabled - it is possible
+to export a save game in JSON format that is easy to parse. However,
+for Ironman saves in the normal game (the most common scenario for
+players unlocking achievements) the savegame is serialised in a
+different, binary format.&lt;&#x2F;p&gt;
+&lt;p&gt;The idea would be to first handle deserialising the relevant parts of
+the JSON debug saves to useful structs, and then build this to
+WebAssembly with a frontend framework (e.g. &lt;a href=&quot;https:&#x2F;&#x2F;seed-rs.org&#x2F;&quot;&gt;Seed&lt;&#x2F;a&gt;)
+and some JavaScript (e.g. &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;plotly&#x2F;plotly.js&quot;&gt;plotly.js&lt;&#x2F;a&gt;) 
+to create the visualisations.&lt;&#x2F;p&gt;
+&lt;p&gt;Once something is useful for the debug saves, then a deserialiser for
+the Ironman saves could be created. From my brief analysis of the save
+files, it seems the fields are in the same order as in the debug saves
+and I was already able to extract character IDs, names and faiths for
+example.&lt;&#x2F;p&gt;
+&lt;p&gt;The end result could be something like &lt;a href=&quot;https:&#x2F;&#x2F;rakaly.com&#x2F;eu4&quot;&gt;Rakaly&lt;&#x2F;a&gt;
+(&lt;a href=&quot;https:&#x2F;&#x2F;nickb.dev&#x2F;blog&#x2F;my-bet-on-rust-has-been-vindicated&quot;&gt;also written in Rust&lt;&#x2F;a&gt;,
+note the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rakaly&#x2F;eu4save&quot;&gt;save game analysis crate is FOSS&lt;&#x2F;a&gt;)
+is for Europa Universalis 4 save files
+but focussed on the Chronicle functionality. Rakaly has already dealt
+with the Ironman issue for EU4 saves too, so it is not insurmountable.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;using-an-xbox-one-controller-as-a-midi-synthesizer&quot;&gt;Using an Xbox One controller as a MIDI synthesizer&lt;&#x2F;h2&gt;
+&lt;p&gt;Another interesting project would be to be able to use an Xbox One controller to create
+music with a software &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;MIDI&quot;&gt;MIDI&lt;&#x2F;a&gt; synthesizer.
+I found two repositories on Github doing this already:
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;quotepilgrim&#x2F;midibox360&quot;&gt;midibox360&lt;&#x2F;a&gt; and 
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;maxmechanic&#x2F;xbox-midi-controller&quot;&gt;xbox-midi-controller&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;I tried out midixbox360 but the latency was too high to be usable so I
+wrote my own test in Rust. I have the put the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;xboxone_midi&quot;&gt;test code on Github&lt;&#x2F;a&gt;,
+unfortunately it also has latency issues (though slightly less severe).&lt;&#x2F;p&gt;
+&lt;p&gt;At some point I will try the following steps to improve that:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Using a wired headset to remove any dependency on Bluetooth audio.&lt;&#x2F;li&gt;
+&lt;li&gt;Using the JACK audio system instead of ALSA (and using the &lt;code&gt;jack&lt;&#x2F;code&gt;
+feature in the &lt;code&gt;midir&lt;&#x2F;code&gt; crate)&lt;&#x2F;li&gt;
+&lt;li&gt;Using a different software MIDI synthesizer (so far I only tried
+&lt;a href=&quot;http:&#x2F;&#x2F;timidity.sourceforge.net&#x2F;&quot;&gt;TiMidity++&lt;&#x2F;a&gt; and adjusting the buffer size)&lt;&#x2F;li&gt;
+&lt;li&gt;Using a Linux kernel &lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;Professional_audio#Realtime_kernel&quot;&gt;with realtime patches&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Real-time audio is a complicated domain due to the requirement for such
+low latency in order for it to be usable, but it&#x27;d be great to solve
+these issues at some point.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;alexa-skill-for-reddit-usage&quot;&gt;Alexa skill for Reddit usage&lt;&#x2F;h2&gt;
+&lt;p&gt;As an Echo Dot owner, it&#x27;d be great to write a
+&lt;a href=&quot;https:&#x2F;&#x2F;developer.amazon.com&#x2F;en-US&#x2F;docs&#x2F;alexa&#x2F;custom-skills&#x2F;understanding-custom-skills.html&quot;&gt;Custom Alexa skill&lt;&#x2F;a&gt;
+to read and vote on Reddit stories and comments.&lt;&#x2F;p&gt;
+&lt;p&gt;I investigated this before and wrote a simple Hello World skill in Rust
+and AWS Lambda, using the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;arienmalec&#x2F;alexa_rust&quot;&gt;alexa_rust crate&lt;&#x2F;a&gt; 
+(the tutorial in the crate README is quite comprehensive).
+The Alexa Skill can be hosted in AWS Lambda, and just needs to handle
+the Alexa requests like a state machine, with most of the hard work
+being in &lt;a href=&quot;https:&#x2F;&#x2F;developer.amazon.com&#x2F;en-US&#x2F;docs&#x2F;alexa&#x2F;custom-skills&#x2F;create-the-interaction-model-for-your-skill.html&quot;&gt;defining the interaction model&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;The main issues I noticed when setting up the skill were:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;There is no way to allow free narration to Alexa, so it wouldn&#x27;t be
+possible to post comments (narrated by the user) as far as I know.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Authentication is also tricky, for example, we&#x27;d need the user to
+provide their Reddit API key somehow (and save it). Maybe this is possible in the
+skill configuration in the Alexa app (like how the response Cards appear).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;It&#x27;s also a bit awkward to deploy since you are on the hook for hosting
+costs (although AWS Lambda gives 1 million free requests). It&#x27;s a shame
+there isn&#x27;t some sort of free hosting for FOSS community skills (i.e.
+I&#x27;m not building a skill for my own company&#x2F;service), especially as this
+could be a great tool for accessibility for those with poor eyesight or
+arthritis, etc. that would struggle to use a smartphone or computer.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;alma-docker-support-alma-hub&quot;&gt;ALMA docker support + ALMA Hub&lt;&#x2F;h2&gt;
+&lt;p&gt;As &lt;a href=&quot;http:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;2020&#x2F;09&#x2F;09&#x2F;alma&#x2F;#en&quot;&gt;mentioned in a previous blog post&lt;&#x2F;a&gt;,
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;r-darwish&#x2F;alma&quot;&gt;ALMA&lt;&#x2F;a&gt; is a tool for
+creating persistent LiveUSB installations of Arch Linux, that can be
+configured with &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;arch-i3-usb&quot;&gt;a collection of preset files&lt;&#x2F;a&gt;
+(also see &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;madskjeldgaard&#x2F;arch-linux-computermusic-usb&quot;&gt;this collection&lt;&#x2F;a&gt; 
+aimed at audio production).&lt;&#x2F;p&gt;
+&lt;p&gt;If support were added to install directly to a partition (i.e. not
+formatting the entire disk and installing a bootloader), and it were
+possible to run in Docker then it might be possible to use ALMA as a
+universal Arch Linux installer. &lt;&#x2F;p&gt;
+&lt;p&gt;It would give you the opportunity to try
+out the &amp;quot;meta-distribution&amp;quot; of preset files on a LiveUSB or a VM first
+(as already exists),
+and then install it directly to a disk or partition, even from Windows
+(via Docker).&lt;&#x2F;p&gt;
+&lt;p&gt;There would likely be a lot of permissions issues to resolve and so on,
+but I think this would be a great project and remove the need for a lot
+of simplified Arch Linux based distributions like EndeavourOS, Manjaro,
+etc.&lt;&#x2F;p&gt;
+&lt;p&gt;Eventually the meta-distributions of preset file collections could be
+shared on an &amp;quot;ALMA Hub&amp;quot; website - providing screenshots and summaries of
+the different configurations available.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;linux-cli-hex-editor&quot;&gt;Linux CLI Hex editor&lt;&#x2F;h2&gt;
+&lt;p&gt;Whilst analysing the Crusader Kings 3 save games mentioned above, it was
+a pain not being able to use neovim directly. It is possible to just run
+&lt;code&gt;xxd&lt;&#x2F;code&gt; on the buffer and put neovim in xxd mode, but then searching for
+series of bytes is difficult as it depends on the formatting (i.e. if
+xxd split the line or not).&lt;&#x2F;p&gt;
+&lt;p&gt;Overall I found &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;afrantzis&#x2F;bless&quot;&gt;bless&lt;&#x2F;a&gt; to be the
+best hex editor (&lt;a href=&quot;https:&#x2F;&#x2F;wiki.gnome.org&#x2F;Apps&#x2F;Ghex&quot;&gt;ghex&lt;&#x2F;a&gt; 
+is a close second), but it&#x27;d be great to have something like this on the
+command line, or if possible, as a neovim plugin.&lt;&#x2F;p&gt;
+&lt;p&gt;Mainly it&#x27;d need to be able to:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Show separate panes for bytes and text, with the selected text
+synchronised between them.&lt;&#x2F;li&gt;
+&lt;li&gt;Search backwards and forwards for a series of bytes or ASCII or UTF-8
+text from a given position, and give the offset in bytes from the
+starting position.&lt;&#x2F;li&gt;
+&lt;li&gt;Show UTF-8 decoded text for valid UTF-8 bytes (this should be
+optional), useful for reading UTF-8 encoded strings - note in this
+case several bytes would correspond to one UTF-8 character so the
+interface would need to be adjusted.&lt;&#x2F;li&gt;
+&lt;li&gt;Search by decimal values (converted in to bytes using big-endian or
+little-endian hexadecimal).&lt;&#x2F;li&gt;
+&lt;li&gt;Ability to copy from bytes or text columns.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Bless covers most of those use cases, but I&#x27;d really love to have it
+inside of neovim. I&#x27;ve never written a neovim plugin before so I&#x27;m not sure how
+feasible this would be.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;linux-packet-editor&quot;&gt;Linux packet editor&lt;&#x2F;h2&gt;
+&lt;p&gt;In the olden days, there was a very easy-to-use packet editor on Windows
+called the Winsock Packet Editor (WPE Pro). This made it easy to just
+select an application and analyse or modify its traffic.&lt;&#x2F;p&gt;
+&lt;p&gt;A screenshot of WPE Pro running on Windows XP:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;wpe2.JPG&quot; alt=&quot;WPE Pro running on Windows XP&quot; title=&quot;WPE Pro running on Windows XP&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;d be great to build something similar on Linux for modern systems,
+perhaps using temporary network namespaces and nftables to mark the
+packets and run the namespace connection through a proxy server run by
+the packet editor.&lt;&#x2F;p&gt;
+&lt;p&gt;Things are slightly more complicated nowadays, as almost all connections
+will use TLS, so it is necessary to Man-in-the-Middle these connections
+(see &lt;a href=&quot;https:&#x2F;&#x2F;mitmproxy.org&#x2F;&quot;&gt;mitmproxy&lt;&#x2F;a&gt; for example).&lt;&#x2F;p&gt;
+&lt;p&gt;Note that for memory editing, &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;scanmem&#x2F;scanmem&quot;&gt;scanmem&#x2F;GameConqueror&lt;&#x2F;a&gt;
+exists on Linux, although it is not quite as advanced as CheatEngine.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;command-line-interface-chiptune-tracker&quot;&gt;Command-line Interface Chiptune Tracker&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Chiptune&quot;&gt;Chiptunes&lt;&#x2F;a&gt; are a type of synthesised music
+generated with waveform generators (i.e. an &amp;quot;instrument&amp;quot; in a track might be a sine
+wave, with different notes representing different frequencies). Here is
+a famous example track: &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=9F0_OOv7EPw&quot;&gt;To Norway With Love&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;These are usually created with &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Music_tracker&quot;&gt;music trackers&lt;&#x2F;a&gt;,
+a good example on Linux is &lt;a href=&quot;https:&#x2F;&#x2F;milkytracker.org&#x2F;&quot;&gt;MilkyTracker&lt;&#x2F;a&gt; 
+(I recommend &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=N2s04YYO0Wg&amp;amp;list=PLgQLAgklMBxEuPzQUNKc2xSJu5pXx7xVx&quot;&gt;this tutorial series&lt;&#x2F;a&gt; for getting started).&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;d be great to create a CLI-based music tracker and an open library
+for music tracker development (so it could be extended to WebAssembly
+for web-based trackers, etc.)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;joust-battle-royale&quot;&gt;Joust Battle Royale&lt;&#x2F;h2&gt;
+&lt;p&gt;After completing the &lt;a href=&quot;https:&#x2F;&#x2F;rustwasm.github.io&#x2F;docs&#x2F;book&#x2F;&quot;&gt;Rust WebAssembly tutorial&lt;&#x2F;a&gt; using Conway&#x27;s Game
+Of Life, and the &lt;a href=&quot;https:&#x2F;&#x2F;erwabook.com&#x2F;intro&#x2F;index.html&quot;&gt;Introduction to Rust Web Applications&lt;&#x2F;a&gt; tutorial, I thought
+it&#x27;d be good to try to build a multiplayer browser-based game in WebAssembly.&lt;&#x2F;p&gt;
+&lt;p&gt;Unfortunately time constraints meant I didn&#x27;t get too far, but what I
+implemented &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;joust.rs&quot;&gt;is available on Github here&lt;&#x2F;a&gt;.
+The idea was to implement a Battle Royale version of Joust - with many
+players trying to eliminate eachother and survive as the stage becomes
+smaller.&lt;&#x2F;p&gt;
+&lt;p&gt;Note that real-time multiplayer in the browser is hard, as the browser is
+restricted to websockets and cannot use UDP.&lt;&#x2F;p&gt;
+&lt;p&gt;That said, there are some good examples for inspiration such as
+&lt;a href=&quot;https:&#x2F;&#x2F;cratebeforeattack.com&#x2F;&quot;&gt;Crate Before Attack&lt;&#x2F;a&gt; a Worms-style game
+written in Rust and WebAssembly, and &lt;a href=&quot;https:&#x2F;&#x2F;www.mattkeeter.com&#x2F;projects&#x2F;pont&#x2F;&quot;&gt;Pont&lt;&#x2F;a&gt;
+which is an implementation of the Qwirkle board game in Rust and
+WebAssembly.&lt;&#x2F;p&gt;
+&lt;p&gt;At some point I&#x27;d like to retry this idea, perhaps with a less real-time
+dependent game, as WebAssembly offers a great opportunity for massively
+accessible games - which would work perfectly for games like &lt;a href=&quot;https:&#x2F;&#x2F;store.steampowered.com&#x2F;app&#x2F;945360&#x2F;Among_Us&#x2F;&quot;&gt;Among Us&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;self-hosted-google-keep-alternative&quot;&gt;Self-hosted Google Keep alternative&lt;&#x2F;h2&gt;
+&lt;p&gt;When using &lt;a href=&quot;https:&#x2F;&#x2F;keep.google.com&#x2F;&quot;&gt;Google Keep&lt;&#x2F;a&gt; I often wish I could
+just edit &lt;a href=&quot;https:&#x2F;&#x2F;orgmode.org&#x2F;&quot;&gt;org-mode&lt;&#x2F;a&gt; style markdown and save notes that way.&lt;&#x2F;p&gt;
+&lt;p&gt;The idea here would be to build a web app that opens a markdown editor
+when clicking to edit the notes, which supports the TODO and deadline
+dates styling of org-mode, but has a clean presentation when just
+viewing the notes (like Google Keep).&lt;&#x2F;p&gt;
+&lt;p&gt;Ideally it would also support &lt;a href=&quot;https:&#x2F;&#x2F;pygments.org&#x2F;&quot;&gt;pygments&lt;&#x2F;a&gt; style
+syntax highlighting for code blocks and &lt;a href=&quot;https:&#x2F;&#x2F;www.mathjax.org&#x2F;&quot;&gt;MathJax&lt;&#x2F;a&gt;
+for LaTeX equations support.&lt;&#x2F;p&gt;
+&lt;p&gt;This a nice project as it would be very useful, and is very extensible
+(i.e. later creating an Android app, etc.)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ai-for-democracy-3&quot;&gt;AI for Democracy 3&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;store.steampowered.com&#x2F;app&#x2F;245470&#x2F;Democracy_3&#x2F;&quot;&gt;Democracy 3&lt;&#x2F;a&gt;
+is a political&#x2F;economic management video game where you
+choose social and economic policies to try to win re-election whilst
+balancing the economy and popularity with different demographics.&lt;&#x2F;p&gt;
+&lt;p&gt;The main game view of Democracy 3 showing the relationships between different variables:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;democracy3.jpg&quot; alt=&quot;The main game view of Democracy 3&quot; title=&quot;The main game view of Democracy 3&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The idea here would be to build an AI that can play the game
+successfully, managing the different policy choices 
+(&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Project_Cybersyn&quot;&gt;Project Cybersyn&lt;&#x2F;a&gt; style).&lt;&#x2F;p&gt;
+&lt;p&gt;I investigated this briefly about 5 years ago. All of the equations relating different variables and policies can be
+extracted from the game files - note that many have non-linear
+relationships. &lt;&#x2F;p&gt;
+&lt;p&gt;The main challenges would be:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Building a simulation of the game, using the equations in the game
+files (practically re-implementing the bulk of the game). So that
+different policies can be quickly evaluated.&lt;&#x2F;li&gt;
+&lt;li&gt;Building an AI that can effectively learn and optimise the
+relationships between the directly modifiable variables, intermediate variables
+and the final outcome (i.e. election popularity and budget) without
+knowing the relationships a priori.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Once a fast simulation is possible, at least many different methods
+could be tried for the policy model itself such as 
+&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Q-learning&quot;&gt;Q-learning&lt;&#x2F;a&gt; or
+&lt;a href=&quot;https:&#x2F;&#x2F;deepmind.com&#x2F;research&#x2F;publications&#x2F;playing-atari-deep-reinforcement-learning&quot;&gt;Deep Q-learning&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;For learning more about Artificial Intelligence, I enjoyed Udacity&#x27;s
+&lt;a href=&quot;https:&#x2F;&#x2F;www.udacity.com&#x2F;course&#x2F;ai-artificial-intelligence-nanodegree--nd898&quot;&gt;Artificial Intelligence course&lt;&#x2F;a&gt;
+back when it used to be free to audit, unfortunately it is now stupidly
+expensive, but you might be able to get a similar experience by reading
+&lt;a href=&quot;https:&#x2F;&#x2F;www.amazon.com&#x2F;Artificial-Intelligence-Modern-Approach-3rd&#x2F;dp&#x2F;0136042597&quot;&gt;Peter Norvig&#x27;s Artificial Intelligence: A Modern Approach&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;foss-engine-for-netstorm&quot;&gt;FOSS engine for Netstorm&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;NetStorm:_Islands_At_War&quot;&gt;Netstorm&lt;&#x2F;a&gt; is
+a Real-Time Strategy game released in late 1997. Unlike popular RTS
+games, the game is more similar to Populous in that you only directly 
+control one High Priest and a few other units.&lt;&#x2F;p&gt;
+&lt;p&gt;Most of the gameplay revolves around building a network of bridges from randomly available
+Tetris-style bridge patterns, and tower defences which have different
+ranges and attack patterns. This creates unique puzzle-style competitive
+gameplay when played in multiplayer.&lt;&#x2F;p&gt;
+&lt;p&gt;A screenshot of Netstorm:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;netstorm.png&quot; alt=&quot;Netstorm: Islands At War&quot; title=&quot;Netstorm: Islands At War&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;There is still a &lt;a href=&quot;http:&#x2F;&#x2F;www.netstormhq.net&#x2F;&quot;&gt;popular community&lt;&#x2F;a&gt; based
+around patched versions of the original game. The project idea here
+would be to implement a new engine for the game, that can run natively
+on Linux, requiring the base game assets.&lt;&#x2F;p&gt;
+&lt;p&gt;There are already many popular examples of FOSS game engine
+reimplementations such as &lt;a href=&quot;https:&#x2F;&#x2F;openrct2.org&#x2F;&quot;&gt;OpenRCT2&lt;&#x2F;a&gt; for Rollercoaster Tycoon 2,
+&lt;a href=&quot;https:&#x2F;&#x2F;openxcom.org&#x2F;&quot;&gt;OpenXCOM&lt;&#x2F;a&gt; for X-COM: UFO Defense, and &lt;a href=&quot;http:&#x2F;&#x2F;exult.sourceforge.net&#x2F;&quot;&gt;Exult&lt;&#x2F;a&gt; for Ultima VII.&lt;&#x2F;p&gt;
+&lt;p&gt;A FOSS implementation of the game engine would allow for builds on more
+platforms, server improvements for multiplayer, and mod creation (i.e.
+perhaps a mod for &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=HAh03WuGrsU&quot;&gt;Factorio-style controls&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;If you do choose to investigate this project, I&#x27;d recommend reading
+&lt;a href=&quot;https:&#x2F;&#x2F;mamclain.com&#x2F;?page=Blog_Programing_CPP_Data_Padding_and_Alignment&quot;&gt;this article on reverse engineering in C++&lt;&#x2F;a&gt;
+which mentions NetStorm explicitly, and also to review the source code
+for the incomplete &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;samcday&#x2F;javastorm&quot;&gt;JavaStorm reimplementation&lt;&#x2F;a&gt; and 
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tomjepp&#x2F;NetStormSharp&quot;&gt;NetStormSharp&lt;&#x2F;a&gt; which contains
+code to read the TARC (archive) and SHP (graphics) formats of the game files.&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;d be great to see more advanced games get FOSS engine implementations
+too, such as &lt;a href=&quot;https:&#x2F;&#x2F;vic2.paradoxwikis.com&#x2F;Victoria_2_Wiki&quot;&gt;Victoria 2&lt;&#x2F;a&gt;
+which has a large following, but is not
+available on Linux and still has no sequel in development.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;completed-projects&quot;&gt;Completed projects&lt;&#x2F;h1&gt;
+&lt;p&gt;With all of the unfinished or unimplemented projects mentioned above,
+I&#x27;d also like to mention two projects which started out as interesting
+ideas just like those, but which I did finish and actively maintain.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;s3rename&quot;&gt;s3rename&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;s3rename&quot;&gt;s3rename&lt;&#x2F;a&gt; is a cross-platform CLI tool for mass-renaming S3 keys. The
+idea for this project originally came from having to rename loads of
+keys in an S3 bucket for use with AWS Glue (which requires specific
+syntax for a partition hierarchy).&lt;&#x2F;p&gt;
+&lt;p&gt;At the time I was using a Python script to generate AWS CLI commands, but
+this was very slow to run (since all the AWS CLI commands were
+independent), and it was a pain to modify the script for different
+transformations needed.&lt;&#x2F;p&gt;
+&lt;p&gt;s3rename allows you to use sed-style regexes to define the rename
+operations, and is implemented in Rust with Tokio for asynchronous
+operations so it can process many operations at a time (and is much
+faster than calling the AWS CLI separately).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;vopono&quot;&gt;vopono&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;vopono&quot;&gt;vopono&lt;&#x2F;a&gt; allows you to run
+specific applications via VPN connections
+with temporary network namespaces on Linux. For example,
+you can run Firefox through a VPN
+whilst the rest of your system is unaffected.&lt;&#x2F;p&gt;
+&lt;p&gt;This originally came from a bash script I had for running OpenVPN in a
+network namespace. After porting that to Rust, vopono now has many more
+features including Wireguard support, built-in killswitches for OpenVPN
+and Wireguard, automatic configuration support for many popular VPN
+providers and port forwarding support for running servers and daemons
+inside the VPN whilst still being accessible from the host.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h1&gt;
+&lt;p&gt;I hope the project ideas above inspire you to build something yourself, be it
+a new implementation of a classic project, or something completely new.&lt;&#x2F;p&gt;
+&lt;p&gt;I greatly recommend trying to find something creative and enjoyable which
+can be useful within a few weekends to keep motivation high. For
+example, I personally use &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;vopono&quot;&gt;vopono&lt;&#x2F;a&gt; for all of my VPN usage now, and
+that helped a lot to inspire me to keep improving it and covering more
+use cases.&lt;&#x2F;p&gt;
+&lt;p&gt;If you are an absolute beginner, or still getting comfortable with a new
+programming language, then I do recommend doing some small problems on 
+websites like &lt;a href=&quot;https:&#x2F;&#x2F;leetcode.com&#x2F;&quot;&gt;Leetcode&lt;&#x2F;a&gt;,
+&lt;a href=&quot;http:&#x2F;&#x2F;rosalind.info&#x2F;about&#x2F;&quot;&gt;Project Rosalind&lt;&#x2F;a&gt;,
+&lt;a href=&quot;https:&#x2F;&#x2F;adventofcode.com&#x2F;&quot;&gt;Advent Of Code&lt;&#x2F;a&gt;,
+and &lt;a href=&quot;https:&#x2F;&#x2F;projecteuler.net&#x2F;&quot;&gt;Project Euler&lt;&#x2F;a&gt; for example. However, as
+you get more comfortable with programming, I think it is more rewarding
+to work on larger projects (even if they are still very small in scope
+compared to professional work).&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s worth noting that what is considered as a good beginner
+project has changed over time. In the past, writing your own &lt;a href=&quot;http:&#x2F;&#x2F;wiki.haskell.org&#x2F;Roll_your_own_IRC_bot&quot;&gt;IRC bot&lt;&#x2F;a&gt; 
+(or even client or server) was considered as a rite of passage, but now that the
+popularity of IRC has sadly dwindled, this is less common (perhaps you
+could write a &lt;a href=&quot;https:&#x2F;&#x2F;brendan.abolivier.bzh&#x2F;enter-the-matrix&#x2F;&quot;&gt;Matrix client&lt;&#x2F;a&gt; instead).&lt;&#x2F;p&gt;
+&lt;p&gt;The same is true for email clients, rudimentary web browsers, CLI text
+editors, etc. which don&#x27;t make as great starter projects now due to the
+consolidation of webmail, the increased complexity of modern web pages
+(with Javascript support effectively mandatory), and the development of
+extensive plugin support for popular text editors.&lt;&#x2F;p&gt;
+&lt;p&gt;But the list above is far from comprehensive, for example, there is the
+whole world of embedded development from fully-fledged Single-Board
+Computers like the Raspberry Pi, to microcontrollers like the Arduino.
+The &lt;a href=&quot;https:&#x2F;&#x2F;docs.rust-embedded.org&#x2F;discovery&#x2F;&quot;&gt;Embedded Rust Discovery&lt;&#x2F;a&gt;
+online book introduces embedded programming with the STM32F3DISCOVERY
+board for example. You might also consider writing &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;erikgrinaker&#x2F;toydb&quot;&gt;your own database&lt;&#x2F;a&gt;
+or building &lt;a href=&quot;https:&#x2F;&#x2F;cstack.github.io&#x2F;db_tutorial&#x2F;&quot;&gt;a sqlite clone&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;If you are interested in programming projects like these, I&#x27;d recommed
+joining the &lt;a href=&quot;https:&#x2F;&#x2F;community.onelonecoder.com&#x2F;&quot;&gt;OneLoneCoder community&lt;&#x2F;a&gt; and Discord server,
+which has a channel dedicated to sharing projects with the community
+(often focussed on video games).&lt;&#x2F;p&gt;
+&lt;p&gt;Finally, many of the projects mentioned above depend upon &lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org&#x2F;philosophy&#x2F;free-sw.en.html&quot;&gt;Free Software&lt;&#x2F;a&gt;,
+or at least &lt;a href=&quot;https:&#x2F;&#x2F;fsfe.org&#x2F;freesoftware&#x2F;standards&#x2F;def.en.html&quot;&gt;Open Standards&lt;&#x2F;a&gt;,
+so I&#x27;d highly recommend reading 
+&lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org&#x2F;doc&#x2F;fsfs3-hardcover.pdf&quot;&gt;Free Software, Free Society (PDF)&lt;&#x2F;a&gt;
+about the history and importance of the Free Software movement.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>How to fix high CPU usage by the CacheDelete daemon in OS X Catalina</title>
+		<published>2020-09-20T00:00:00+00:00</published>
+		<updated>2020-09-20T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/catalina-cachedelete/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/catalina-cachedelete/</id>
+		<content type="html">&lt;p&gt;I recently had an ongoing issue with the &lt;code&gt;deleted&lt;&#x2F;code&gt; CacheDelete daemon
+using huge amounts of CPU time almost constantly. This post covers how I
+fixed it and a few tips for OS X recovery and performance improvements.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;Opinions expressed are solely my own and do not express the views or opinions of my employer.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;deleted-daemon&quot;&gt;deleted daemon&lt;&#x2F;h2&gt;
+&lt;p&gt;The problem I had was that the &lt;code&gt;deleted&lt;&#x2F;code&gt; daemon was often taking 90%+ of
+CPU usage on my 2017 Macbook Pro, resulting in massive stuttering when trying to use the
+system.&lt;&#x2F;p&gt;
+&lt;p&gt;Looking up details for the process, I found that &lt;a href=&quot;https:&#x2F;&#x2F;apple.stackexchange.com&#x2F;questions&#x2F;254810&#x2F;what-is-the-deleted-daemon-in-macos&quot;&gt;the daemon is
+responsible for purging caches&lt;&#x2F;a&gt;
+and had caused issues for others. Unfortunately, on Catalina it is not
+trivial to disable due to the read-only System volume and the built-in
+&lt;a href=&quot;https:&#x2F;&#x2F;support.apple.com&#x2F;en-us&#x2F;HT204899&quot;&gt;System Integrity Protection&lt;&#x2F;a&gt;
+that forbids any changes to system files, even as root.&lt;&#x2F;p&gt;
+&lt;p&gt;By looking at the output of &lt;code&gt;ps&lt;&#x2F;code&gt; we can see that the binaries are stored
+in &lt;code&gt;&#x2F;System&#x2F;Library&#x2F;PrivateFrameworks&#x2F;CacheDelete.framework&#x2F;&lt;&#x2F;code&gt;, meanwhile
+the page linked above mentions that the registered applications with the
+daemon are contained in plist files in &lt;code&gt;&#x2F;System&#x2F;Library&#x2F;CacheDelete&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;In order to fix this issue, we can simply move all of those plist files.
+Then &lt;code&gt;deleted&lt;&#x2F;code&gt; will no longer run. Do &lt;strong&gt;not&lt;&#x2F;strong&gt; remove the &lt;code&gt;deleted&lt;&#x2F;code&gt;
+binary itself or your system will fail to boot (at login if on a system
+with an encrypted disk).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;removing-the-plist-files&quot;&gt;Removing the plist files&lt;&#x2F;h2&gt;
+&lt;p&gt;First we need to disable the System Integrity Protection (SIP), this must be
+done in recovery mode. To access recovery mode reboot the Macbook and
+press Cmd+R whilst it is booting up, the screen should flash white and
+take you to a recovery shell with options to reinstall OS X.&lt;&#x2F;p&gt;
+&lt;p&gt;In the menu bar at the top, select &lt;code&gt;Utilities &amp;gt; Terminal&lt;&#x2F;code&gt; to access the
+terminal and then run &lt;code&gt;csrutil disable&lt;&#x2F;code&gt;. You should receive a message
+that the SIP is now disabled. Reboot the machine.&lt;&#x2F;p&gt;
+&lt;p&gt;Log in as usual and open a terminal window. First you must mount the
+System volume as writeable:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo mount&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; -uw&lt;&#x2F;span&gt;&lt;span&gt; &#x2F;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And then move the CacheDelete plist files:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; sudo mv &#x2F;System&#x2F;Library&#x2F;CacheDelete &#x2F;System&#x2F;Library&#x2F;CacheDeleteBackup
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now reboot and &lt;code&gt;deleted&lt;&#x2F;code&gt; should no longer run.&lt;&#x2F;p&gt;
+&lt;p&gt;Note if you also moved
+the actual binaries above then the system will no longer boot, this is
+easy to fix (assuming you didn&#x27;t remove them completely) but involves a
+few extra steps if your hard disk is encrypted.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;mounting-an-encrypted-hard-disk-from-recovery&quot;&gt;Mounting an encrypted hard disk from recovery&lt;&#x2F;h3&gt;
+&lt;p&gt;First boot to recover mode and open a terminal as above. Then you need to unlock the encrypted disk.&lt;&#x2F;p&gt;
+&lt;p&gt;Use &lt;code&gt;diskutil apfs list&lt;&#x2F;code&gt; to find the correct volume (check the capacity
+and label), and copy the Logical Volume UUID (it will be something like
+&lt;code&gt;B807C2A0-577F-3DB0-9002-F82B9137696C&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;Then unlock the disk with your disk password (this may be the same as
+your user password):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; diskutil apfs unlockVolume B807C2A0-577F-3DB0-9002-F82B9137696C
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Once it is unlocked correctly, you can mount it with diskutil by name,
+e.g.&amp;quot;&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; diskutil mount disk2
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And then find it mounted in &lt;code&gt;&#x2F;Volumes&#x2F;${LABEL}&lt;&#x2F;code&gt;, there you can make any
+necessary fixes and then reboot.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;other-fixes&quot;&gt;Other fixes&lt;&#x2F;h2&gt;
+&lt;p&gt;The above steps fixed the issue I had with CacheDelete which was a
+major problem for a few weeks. But I also recommend the following
+improvements.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;disabling-spotlight&quot;&gt;Disabling Spotlight&lt;&#x2F;h3&gt;
+&lt;p&gt;Spotlight (the OS X file searcher) indexes all files for rapid
+searching, but this indexing can be CPU and Disk IO intensive and run at
+inopportune times (you may see this as the &lt;code&gt;mds_stores&lt;&#x2F;code&gt; process). Since I never use Spotlight, I just disable it
+completely (I only use &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BurntSushi&#x2F;ripgrep&quot;&gt;ripgrep&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;sudo launchctl unload -w &#x2F;System&#x2F;Library&#x2F;LaunchDaemons&#x2F;com.apple.metadata.mds.plist
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note that you need the SIP disabled to run that.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;disabling-transparency&quot;&gt;Disabling transparency&lt;&#x2F;h3&gt;
+&lt;p&gt;Disabling transparency helps to reduce CPU usage by the &lt;code&gt;WindowServer&lt;&#x2F;code&gt;
+process.&lt;&#x2F;p&gt;
+&lt;p&gt;Simply go to the accessibility settings and check Reduce Transparency
+under Display.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
+&lt;p&gt;I hope this helps anyone else facing the same issue, it was a huge
+frustration for weeks. I&#x27;ve written this as much for my own reference
+too!&lt;&#x2F;p&gt;
+&lt;p&gt;Hopefully one day we&#x27;ll be able to use Arch Linux at work too.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>A practical introduction to async programming in Rust</title>
+		<published>2020-05-06T00:00:00+00:00</published>
+		<updated>2020-05-06T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/</id>
+		<content type="html">&lt;p&gt;In this post we will explore a brief example of asynchronous programming
+in Rust with the Tokio runtime, demonstrating different execution scenarios. This post is aimed
+at beginners to asynchronous programming.&lt;&#x2F;p&gt;
+&lt;p&gt;The source code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&quot;&gt;available on Github&lt;&#x2F;a&gt;.
+A &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&#x2F;tree&#x2F;async-std&quot;&gt;branch&lt;&#x2F;a&gt; using the async-std runtime is also available (contributed by
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BartMassey&quot;&gt;@BartMassey&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h2 id=&quot;what-is-asynchronous-programming&quot;&gt;What is asynchronous programming?&lt;&#x2F;h2&gt;
+&lt;p&gt;Asynchronous programming allows you to continue carrying out computations
+whilst waiting for results from IO operations
+(often network requests or responses), even on a single OS thread.&lt;&#x2F;p&gt;
+&lt;p&gt;This is achieved via the use of an async runtime which handles the
+assignment of async tasks (i.e. &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Green_threads&quot;&gt;green threads&lt;&#x2F;a&gt;)
+to actual OS threads.&lt;&#x2F;p&gt;
+&lt;p&gt;Unlike OS threads, green threads are not expensive to create and so we
+needn&#x27;t worry about hitting a hard limit. Whereas OS threads need to
+hold their own stack, leading to high memory usage when dealing with
+many threads. On Linux you can check your thread limit per process
+with: &lt;code&gt;cat &#x2F;proc&#x2F;sys&#x2F;kernel&#x2F;threads-max&lt;&#x2F;code&gt;, mine is 127,162.&lt;&#x2F;p&gt;
+&lt;p&gt;This is a significant issue if we need a separate OS
+thread to handle each request on a web server for example, and is the
+origin of the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;C10k_problem&quot;&gt;C10k problem&lt;&#x2F;a&gt;
+- how to handle 10,000 concurrent connections to a web server. &lt;&#x2F;p&gt;
+&lt;p&gt;Early web servers did indeed use a separate OS thread per request, in order to
+handle requests in parallel. The key insight is that those threads spend
+most of their time waiting for network responses, rather than doing any
+computation.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;async-and-await&quot;&gt;Async and await&lt;&#x2F;h3&gt;
+&lt;p&gt;Rust has adopted the
+&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Async&#x2F;await&quot;&gt;async&#x2F;await&lt;&#x2F;a&gt; syntax for
+defining asynchronous code blocks and functions.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;async&lt;&#x2F;code&gt; keyword defines an async code block or function. Specifying
+that it will return a &lt;code&gt;Future&lt;&#x2F;code&gt;, a value that will need to be &lt;code&gt;.await&lt;&#x2F;code&gt;ed
+elsewhere in order to trigger the execution of the task (note the lazy
+execution) and wait for the return value to be available.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;.await&lt;&#x2F;code&gt; keyword (which must be inside an &lt;code&gt;async&lt;&#x2F;code&gt; block&#x2F;function)
+is used to wait asynchronously for an async task to finish, and get the return value.
+Note that while the task itself cannot progress until the &lt;code&gt;Future&lt;&#x2F;code&gt; is ready,
+the actual OS thread can have other tasks assigned to it by the runtime,
+and so continue to do work. &lt;&#x2F;p&gt;
+&lt;p&gt;Effectively the task is informing the
+runtime that at this point it may yield the execution to another task
+(eventually, that other task will also &lt;code&gt;await&lt;&#x2F;code&gt; something, and if the
+Future in this task is ready, execution of this task may continue) -
+this is an implementation of &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Cooperative_multitasking&quot;&gt;co-operative multitasking&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This syntax is very elegant, and allows us to write asynchronous
+programs that maintain a structure similar to simple, synchronous
+programs.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;when-should-i-use-async&quot;&gt;When should I use async?&lt;&#x2F;h2&gt;
+&lt;p&gt;Asynchronous programming is useful when the thread would otherwise just be 
+waiting on IO operations - for example when making network requests or
+responses, reading or writing to disk, or waiting for user input.&lt;&#x2F;p&gt;
+&lt;p&gt;It is not useful if you are always doing computations and there is no
+waiting on IO operations, even if those computations could run in
+parallel - for example in a ray tracer. In this case it would be best to
+parallelise the computations over OS threads directly (taking advantage
+of the multiple cores in your CPU), for example using parallel iterators in the &lt;a href=&quot;https:&#x2F;&#x2F;crates.io&#x2F;crates&#x2F;rayon&quot;&gt;rayon&lt;&#x2F;a&gt;
+crate (or if you want thread-level control, then with the &lt;a href=&quot;https:&#x2F;&#x2F;crates.io&#x2F;crates&#x2F;crossbeam&quot;&gt;crossbeam&lt;&#x2F;a&gt;
+and &lt;a href=&quot;https:&#x2F;&#x2F;crates.io&#x2F;crates&#x2F;threadpool&quot;&gt;threadpool&lt;&#x2F;a&gt; crates). 
+However, remember &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Amdahl%27s_law&quot;&gt;Amdahl&#x27;s Law&lt;&#x2F;a&gt; and consider that
+algorithmic improvements might yield a better return than focusing on 
+parallelisation in this cases.&lt;&#x2F;p&gt;
+&lt;p&gt;It is also not useful if there are no other tasks to do whilst waiting 
+for the IO operations. For example in the &lt;a href=&quot;&#x2F;blog&#x2F;2020&#x2F;04&#x2F;19&#x2F;data-engineering-with-rust-and-aws-lambda&#x2F;#en&quot;&gt;previous blog post&lt;&#x2F;a&gt;, Rusoto
+actually returns a &lt;code&gt;RusotoFuture&lt;&#x2F;code&gt; object when we request the DB
+credentials from AWS Secrets Manager, however in this case one
+invocation of our Lambda function corresponds to one request - there is
+no work to be done whilst waiting for the DB credentials to arrive. So
+we can just program synchronously (fortunately &lt;code&gt;RusotoFuture&lt;&#x2F;code&gt; provides the
+&lt;code&gt;.sync()&lt;&#x2F;code&gt; method to do exactly that).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;example&quot;&gt;Example&lt;&#x2F;h2&gt;
+&lt;p&gt;In this example we will simulate three very slow network requests,
+consisting of three stages:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Connection - an asynchronous delay of 2 seconds&lt;&#x2F;li&gt;
+&lt;li&gt;Waiting for a response - an asynchronous delay of 8 seconds (the delay
+is on the server side)&lt;&#x2F;li&gt;
+&lt;li&gt;Computation - a synchronous delay of 4 seconds (i.e. it has to block
+the current OS thread to do the computation).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;We will use &lt;a href=&quot;https:&#x2F;&#x2F;docs.rs&#x2F;tokio&#x2F;0.2.20&#x2F;tokio&#x2F;&quot;&gt;Tokio&lt;&#x2F;a&gt; as our async
+runtime for this example, as it is currently the most popular.
+The other main alternative is the &lt;a href=&quot;https:&#x2F;&#x2F;docs.rs&#x2F;async-std&#x2F;1.5.0&#x2F;async_std&#x2F;&quot;&gt;async_std&lt;&#x2F;a&gt; runtime
+- code for using this runtime is available in the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&#x2F;tree&#x2F;async-std&quot;&gt;async-std branch of the Github repo&lt;&#x2F;a&gt; (this code
+was contributed by &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BartMassey&quot;&gt;@BartMassey&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;Note that both use the common &lt;a href=&quot;https:&#x2F;&#x2F;docs.rs&#x2F;futures&#x2F;0.3.4&#x2F;futures&#x2F;&quot;&gt;futures&lt;&#x2F;a&gt; crate 
+so you can swap the async runtime whilst keeping mostly the same API.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;server&quot;&gt;Server&lt;&#x2F;h3&gt;
+&lt;p&gt;The server used in this example is adapted from the &lt;a href=&quot;https:&#x2F;&#x2F;tokio.rs&#x2F;docs&#x2F;getting-started&#x2F;echo&#x2F;&quot;&gt;Tokio tutorial&lt;&#x2F;a&gt;.
+It echoes back the bytes received, after a delay of 8 seconds.&lt;&#x2F;p&gt;
+&lt;p&gt;The full adapted code is as follows (and &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&quot;&gt;available in the source code
+for this post&lt;&#x2F;a&gt;):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::stream::StreamExt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::net::TcpListener;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; addr = &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;127.0.0.1:6142&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; listener = TcpListener::bind(addr).await.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;unwrap&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; server = {
+&lt;&#x2F;span&gt;&lt;span&gt;        async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; incoming = listener.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;incoming&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;while let &lt;&#x2F;span&gt;&lt;span&gt;Some(conn) = incoming.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span&gt;().await {
+&lt;&#x2F;span&gt;&lt;span&gt;                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; conn {
+&lt;&#x2F;span&gt;&lt;span&gt;                    Err(e) =&amp;gt; eprintln!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;accept failed = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, e),
+&lt;&#x2F;span&gt;&lt;span&gt;                    Ok(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; sock) =&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;                        tokio::spawn(async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;move &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;                            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; reader, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; writer) = sock.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;split&lt;&#x2F;span&gt;&lt;span&gt;();
+&lt;&#x2F;span&gt;&lt;span&gt;                            tokio::time::delay_for(tokio::time::Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;                            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match &lt;&#x2F;span&gt;&lt;span&gt;tokio::io::copy(&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; reader, &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; writer).await {
+&lt;&#x2F;span&gt;&lt;span&gt;                                Ok(amt) =&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;                                    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;wrote &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; bytes&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, amt);
+&lt;&#x2F;span&gt;&lt;span&gt;                                }
+&lt;&#x2F;span&gt;&lt;span&gt;                                Err(err) =&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;                                    eprintln!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;IO error &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, err);
+&lt;&#x2F;span&gt;&lt;span&gt;                                }
+&lt;&#x2F;span&gt;&lt;span&gt;                            }
+&lt;&#x2F;span&gt;&lt;span&gt;                        });
+&lt;&#x2F;span&gt;&lt;span&gt;                    }
+&lt;&#x2F;span&gt;&lt;span&gt;                }
+&lt;&#x2F;span&gt;&lt;span&gt;            }
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Server running on localhost:6142&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;    server.await;
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;synchronous-requests&quot;&gt;Synchronous requests&lt;&#x2F;h3&gt;
+&lt;p&gt;In the synchronous case, we simply run each request in series, one after
+another. Therefore we would expect a total execution time of &lt;code&gt;3*(2+8+4) = 42&lt;&#x2F;code&gt; seconds to finish all 3 tasks.&lt;&#x2F;p&gt;
+&lt;p&gt;We can visualise this case with a diagram:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;synchronous.svg&quot; alt=&quot;Synchronous execution&quot; title=&quot;Synchronous execution&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;We can implement this using only the standard library:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::io::prelude::*;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::net::TcpStream;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::thread::sleep;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn std::error::Error&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())?;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())?;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())?;
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;label&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;now&lt;&#x2F;span&gt;&lt;span&gt;: std::time::Instant) -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn std::error::Error&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Simulate network delay using thread sleep for 2 seconds
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; started: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(std::time::Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;));
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Write to server - server will echo this back to us with 8 second delay
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; stream = TcpStream::connect(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;127.0.0.1:6142&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;)?;
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;write_all&lt;&#x2F;span&gt;&lt;span&gt;(label.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;as_bytes&lt;&#x2F;span&gt;&lt;span&gt;())?;
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; written: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Read 5 chars we expect (to avoid dealing with EOF, etc.)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; buffer = [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;read_exact&lt;&#x2F;span&gt;&lt;span&gt;(&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; buffer)?;
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;shutdown&lt;&#x2F;span&gt;&lt;span&gt;(std::net::Shutdown::Both)?;
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; read: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Simulate computation work by sleeping actual thread for 4 seconds
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(std::time::Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;));
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; finished: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        std::str::from_utf8(&amp;amp;buffer)?,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Running this (see &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&quot;&gt;the repo for this workspace&lt;&#x2F;a&gt;):&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cargo run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --release --bin&lt;&#x2F;span&gt;&lt;span&gt; server
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cargo run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --release --bin&lt;&#x2F;span&gt;&lt;span&gt; client_synchronous
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 started: 578ns
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 written: 2.000346788s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 read: 10.002177173s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 finished: 14.002328699s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 started: 14.002387112s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 written: 16.002673602s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 read: 24.006071003s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 finished: 28.006204147s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 started: 28.006263855s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 written: 30.00652763s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 read: 38.008234993s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 finished: 42.008389223s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Gives exactly the 42 seconds total execution time that we calculated above.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;synchronous-requests-tokio&quot;&gt;Synchronous requests (Tokio)&lt;&#x2F;h3&gt;
+&lt;p&gt;Note that it is possible to get synchronous behaviour from async
+functions when using Tokio (sometimes unintentionally). Implementing the
+above with Tokio:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::stream::StreamExt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::error::Error;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::thread::sleep;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::join;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::net::TcpStream;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::prelude::*;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Synchronous
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;label&lt;&#x2F;span&gt;&lt;span&gt;: &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;str&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;now&lt;&#x2F;span&gt;&lt;span&gt;: std::time::Instant) -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Simulate network delay using Tokio async delay for 2 seconds
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; started: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;    tokio::time::delay_for(tokio::time::Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)).await;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Write to server - server will echo this back to us with 8 second delay
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; stream = TcpStream::connect(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;127.0.0.1:6142&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;write_all&lt;&#x2F;span&gt;&lt;span&gt;(label.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;as_bytes&lt;&#x2F;span&gt;&lt;span&gt;()).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; written: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Read 5 chars we expect (to avoid dealing with EOF, etc.)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; buffer = [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;];
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;read_exact&lt;&#x2F;span&gt;&lt;span&gt;(&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span&gt; buffer).await?;
+&lt;&#x2F;span&gt;&lt;span&gt;    stream.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;shutdown&lt;&#x2F;span&gt;&lt;span&gt;(std::net::Shutdown::Both)?;
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; read: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        label,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Simulate computation work by sleeping actual thread for 4 seconds
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sleep&lt;&#x2F;span&gt;&lt;span&gt;(std::time::Duration::from_secs(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;));
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(
+&lt;&#x2F;span&gt;&lt;span&gt;        &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;OS Thread &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; - &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt; finished: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#d08770;&quot;&gt;{:?}&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;,
+&lt;&#x2F;span&gt;&lt;span&gt;        std::thread::current().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;id&lt;&#x2F;span&gt;&lt;span&gt;(),
+&lt;&#x2F;span&gt;&lt;span&gt;        std::str::from_utf8(&amp;amp;buffer)?,
+&lt;&#x2F;span&gt;&lt;span&gt;        now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;elapsed&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;    );
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Running this produces the same output as before:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; cargo run&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --release --bin&lt;&#x2F;span&gt;&lt;span&gt; client_async
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 started: 333ns
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 written: 2.001476012s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 read: 10.003284491s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 finished: 14.003404307s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 started: 14.003476979s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 written: 16.005013941s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 read: 24.005471439s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 finished: 28.005575307s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 started: 28.005615372s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 written: 30.007082377s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 read: 38.009223127s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 finished: 42.009349576s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It is the &lt;code&gt;.await&lt;&#x2F;code&gt;ing of the tasks in series which causes this to be
+synchronous. The main function is async, but the use of &lt;code&gt;.await&lt;&#x2F;code&gt; causes
+it to wait for the result of that Future before continuing. There is
+nothing special about the main function compared to other async
+functions in this regard. No other tasks exist at
+that time to yield execution to, causing the execution to be
+synchronous in practice.&lt;&#x2F;p&gt;
+&lt;p&gt;Note the Send + Sync bounds are not required for the above
+implementation (since it runs on only one OS thread),
+but we will need them in the last example. This is also why we clone
+&lt;code&gt;now&lt;&#x2F;code&gt; instead of borrowing it in &lt;code&gt;task()&lt;&#x2F;code&gt; (alternatively we could wrap
+it in an &lt;code&gt;Arc&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;We will use the same &lt;code&gt;async fn task()&lt;&#x2F;code&gt; definition for the following
+examples, where it will be omitted.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;asynchronous-requests-one-os-thread&quot;&gt;Asynchronous requests (one OS thread)&lt;&#x2F;h3&gt;
+&lt;p&gt;In the asynchronous, single OS thread case we start the waiting
+steps (connection and getting the server response) concurrently.
+However, the final computation step will still need to be done in series
+for each task. Therefore we expect a total execution time of
+&lt;code&gt;8+2+(3*4)=22&lt;&#x2F;code&gt; seconds.&lt;&#x2F;p&gt;
+&lt;p&gt;In a diagram:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;asynchronous_single.svg&quot; alt=&quot;Asynchronous execution on a single OS thread&quot; title=&quot;Asynchronous execution on a single OS thread&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Using the same definition of &lt;code&gt;async fn task()&lt;&#x2F;code&gt; as before:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::stream::futures_unordered::FuturesUnordered;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;futures::stream::StreamExt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::error::Error;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::thread::sleep;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;std::time::Instant;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::net::TcpStream;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;tokio::prelude::*;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Asynchronous single-thread
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; futs = FuturesUnordered::new();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()));
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()));
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()));
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;while let &lt;&#x2F;span&gt;&lt;span&gt;Some(_handled) = futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span&gt;().await {}
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Running this gives our expected total execution time of 22 seconds:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 started: 3.994µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 started: 21.174µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 started: 25.511µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 written: 2.002221984s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 written: 2.002406898s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 written: 2.002483563s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 read: 10.003326999s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task3 finished: 14.003478669s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 read: 14.00365763s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task2 finished: 18.00379238s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 read: 18.003951713s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(1) - task1 finished: 22.004094444s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In this case we use a &lt;code&gt;FuturesUnordered&lt;&#x2F;code&gt; collection to allow us to
+repeatedly await the different Futures. However, we never use
+&lt;code&gt;tokio::spawn()&lt;&#x2F;code&gt; so it is only running on the single OS thread
+(as we never allow the creation of more).&lt;&#x2F;p&gt;
+&lt;p&gt;Note that we could use the &lt;code&gt;join!&lt;&#x2F;code&gt; macro here instead of allocating a
+&lt;code&gt;FuturesUnordered&lt;&#x2F;code&gt;, we will see an example of this later. However, that
+is only practical for a small number of Futures.&lt;&#x2F;p&gt;
+&lt;p&gt;We can also force Tokio to only use one thread by putting arguments in
+the attribute for our main function:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;(core_threads = 1, max_threads = 1)]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;...
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;asynchronous-requests-multiple-os-threads&quot;&gt;Asynchronous requests (multiple OS threads)&lt;&#x2F;h3&gt;
+&lt;p&gt;In the case of asynchronous requests across multiple OS threads, we can
+do every step concurrently (and the OS threads could complete other tasks
+when the tasks await). This means that we can do the final computation step in
+parallel on different OS threads.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;asynchronous_multi.svg&quot; alt=&quot;Asynchronous execution on multiple OS threads&quot; title=&quot;Asynchronous execution on multiple OS threads&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Therefore we would expect a total execution time of &lt;code&gt;2+8+4=14&lt;&#x2F;code&gt; seconds
+for all 3 requests. This is the best we can achieve - the same time as
+completing a single request.&lt;&#x2F;p&gt;
+&lt;p&gt;Note that this requires the types we send across threads to be
+thread-safe, i.e. implementing Send or Sync - just as we would if we were
+using OS threads directly.&lt;&#x2F;p&gt;
+&lt;p&gt;The implementation is very similar to the previous example, but instead
+of awaiting on the futures directly, we &lt;code&gt;tokio::spawn&lt;&#x2F;code&gt; the tasks and
+await their handles. This allows Tokio to execute them on different OS
+threads.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let mut&lt;&#x2F;span&gt;&lt;span&gt; futs = FuturesUnordered::new();
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())));
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())));
+&lt;&#x2F;span&gt;&lt;span&gt;    futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;push&lt;&#x2F;span&gt;&lt;span&gt;(tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())));
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;while let &lt;&#x2F;span&gt;&lt;span&gt;Some(_handled) = futs.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;next&lt;&#x2F;span&gt;&lt;span&gt;().await {}
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And we observe the 14 second execution time (note we don&#x27;t care about
+the order of execution):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;OS Thread ThreadId(2) - task1 started: 17.055µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task2 started: 30.227µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(2) - task3 started: 32.513µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(2) - task3 written: 2.001499145s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task1 written: 2.00153689s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(5) - task2 written: 2.001721878s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task3 read: 10.003403756s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(2) - task1 read: 10.003501s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(5) - task2 read: 10.003417328s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task3 finished: 14.003584085s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(2) - task1 finished: 14.003664981s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(5) - task2 finished: 14.003698375s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The different OS Thread IDs demonstrate that the tasks are being
+executed on separate OS threads.&lt;&#x2F;p&gt;
+&lt;p&gt;For completeness, here is the same implementation using the &lt;code&gt;join!&lt;&#x2F;code&gt;
+macro instead of allocating a &lt;code&gt;FuturesUnordered&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;#[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;tokio&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;async &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Asynchronous multi-threaded
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;match &lt;&#x2F;span&gt;&lt;span&gt;join!(
+&lt;&#x2F;span&gt;&lt;span&gt;        tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())),
+&lt;&#x2F;span&gt;&lt;span&gt;        tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;())),
+&lt;&#x2F;span&gt;&lt;span&gt;        tokio::spawn(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()))
+&lt;&#x2F;span&gt;&lt;span&gt;    ) {
+&lt;&#x2F;span&gt;&lt;span&gt;        (x, y, z) =&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;            (x.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;ok&lt;&#x2F;span&gt;&lt;span&gt;(), y.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;ok&lt;&#x2F;span&gt;&lt;span&gt;(), z.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;ok&lt;&#x2F;span&gt;&lt;span&gt;())
+&lt;&#x2F;span&gt;&lt;span&gt;        }
+&lt;&#x2F;span&gt;&lt;span&gt;    };
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This saves the allocation of the &lt;code&gt;FuturesUnordered&lt;&#x2F;code&gt; but it can be
+awkward to work with the tuple of Results that is returned (especially
+for many Futures).&lt;&#x2F;p&gt;
+&lt;h4 id=&quot;how-does-this-differ-from-os-thread-parallelisation&quot;&gt;How does this differ from OS thread parallelisation?&lt;&#x2F;h4&gt;
+&lt;p&gt;You could implement something similar for the synchronous case using OS threads directly, for
+example with the &lt;a href=&quot;https:&#x2F;&#x2F;crates.io&#x2F;crates&#x2F;rayon&quot;&gt;rayon&lt;&#x2F;a&gt; crate mentioned previously.&lt;&#x2F;p&gt;
+&lt;p&gt;However, in this case each request would need its own OS thread, and if
+we had to carry out 10,000 concurrent requests, we might hit the thread
+limit. &lt;&#x2F;p&gt;
+&lt;p&gt;That is, the execution diagram would look like this:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;synchronous_multios.svg&quot; alt=&quot;Synchronous execution on multiple OS threads&quot; title=&quot;Synchronous execution on multiple OS threads&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Note that the OS threads would spend a lot of time just waiting on IO operations,
+unable to start other requests.&lt;&#x2F;p&gt;
+&lt;p&gt;We can modify our first synchronous example above to do this with rayon:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;use &lt;&#x2F;span&gt;&lt;span&gt;rayon::prelude::*;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() -&amp;gt; Result&amp;lt;(), Box&amp;lt;dyn std::error::Error + Send + Sync&amp;gt;&amp;gt; {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; now = Instant::now();
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task1&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task2&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;task3&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;par_iter&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;map&lt;&#x2F;span&gt;&lt;span&gt;(|&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;task&lt;&#x2F;span&gt;&lt;span&gt;(x, now.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;clone&lt;&#x2F;span&gt;&lt;span&gt;()))
+&lt;&#x2F;span&gt;&lt;span&gt;        .collect::&amp;lt;Result&amp;lt;Vec&amp;lt;_&amp;gt;, _&amp;gt;&amp;gt;()?;
+&lt;&#x2F;span&gt;&lt;span&gt;    Ok(())
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And it terminates in 14 seconds as expected (note that each task is
+allocated to one OS thread):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;color:#c0c5ce;&quot;&gt;&lt;code&gt;&lt;span&gt;OS Thread ThreadId(3) - task1 started: 280.871µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(6) - task2 started: 281.03µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(7) - task3 started: 283.838µs
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(6) - task2 written: 2.000605562s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(7) - task3 written: 2.000619598s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task1 written: 2.000679853s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task1 read: 10.002321036s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(6) - task2 read: 10.00233185s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(7) - task3 read: 10.002384653s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(3) - task1 finished: 14.002447762s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(6) - task2 finished: 14.002540969s
+&lt;&#x2F;span&gt;&lt;span&gt;OS Thread ThreadId(7) - task3 finished: 14.002589621s
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;However, this would not be resource-efficient when handling a large
+number of tasks since one task corresponds to one OS thread.&lt;&#x2F;p&gt;
+&lt;p&gt;Whereas in the async case we only need the additional threads during the
+computation step (which is synchronous). This means that we could use a
+fixed OS threadpool size and still benefit from some parallelisation in
+the computation step whilst having guarantees about our resource usage
+(i.e. we can limit the maximum number of OS threads and still be able to
+start new requests).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;I hope this blog post has helped you to better understand when and how
+to apply asynchronous programming in Rust.&lt;&#x2F;p&gt;
+&lt;p&gt;The elegant async&#x2F;await syntax allows for clear and concise asynchronous
+programming. However, it may take some getting used to if you do not
+have prior experience with asynchronous programming.&lt;&#x2F;p&gt;
+&lt;p&gt;These examples also demonstrate the difference between concurrency and
+parallelism. In the asynchronous single OS thread case we are handling
+tasks concurrently, but nothing is running in parallel (i.e. we use only
+one OS thread).&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;current-limitations&quot;&gt;Current Limitations&lt;&#x2F;h3&gt;
+&lt;p&gt;Note that currently you cannot use &lt;a href=&quot;https:&#x2F;&#x2F;rust-lang.github.io&#x2F;async-book&#x2F;07_workarounds&#x2F;06_async_in_traits.html&quot;&gt;async methods in traits&lt;&#x2F;a&gt;, and nor
+can you create &lt;a href=&quot;https:&#x2F;&#x2F;boats.gitlab.io&#x2F;blog&#x2F;post&#x2F;poll-drop&#x2F;&quot;&gt;async destructors&lt;&#x2F;a&gt;. This is a problem if you want a struct
+to make a network request when it is dropped, but you don&#x27;t want to
+block the OS thread whilst it does that - you cannot &lt;code&gt;.await&lt;&#x2F;code&gt; because
+&lt;code&gt;drop()&lt;&#x2F;code&gt; (from &lt;a href=&quot;https:&#x2F;&#x2F;doc.rust-lang.org&#x2F;std&#x2F;ops&#x2F;trait.Drop.html&quot;&gt;Drop&lt;&#x2F;a&gt;) is not async.&lt;&#x2F;p&gt;
+&lt;p&gt;I hit the latter issue in my recent &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;s3rename&quot;&gt;s3rename&lt;&#x2F;a&gt; crate, and am still
+attempting to work around it. See &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;s3rename&#x2F;issues&#x2F;16&quot;&gt;this issue&lt;&#x2F;a&gt; for details.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>First Post</title>
+		<published>2014-08-04T00:00:00+00:00</published>
+		<updated>2014-08-04T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/first/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/first/</id>
+		<content type="html">&lt;p&gt;I&#x27;ve started this blog to save resources which have helped me in learning languages, concepts in statistics, and anything else which I think might help others too.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;I am currently a PhD student in Tübingen, Germany in &amp;quot;Machine Learning for Personalised Medicine&amp;quot;. I&#x27;m particularly interested in models combining genotypic and phenotypic measurements (such as gene expression, or methylation), in addition to the application of causal inference methods to justify causal conclusions from observational data, where possible.&lt;&#x2F;p&gt;
+&lt;p&gt;I also intend to post summaries of my presentations and work here, as part of the &amp;quot;outreach&amp;quot; encouraged in my PhD programme.&lt;&#x2F;p&gt;
+&lt;p&gt;I hope it will be useful to some others too!&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

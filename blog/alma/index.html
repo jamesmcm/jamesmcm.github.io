@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Using ALMA for persistent LiveUSB installations of Arch Linux</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">Using ALMA for persistent LiveUSB installations of Arch Linux</h1>
+  <span class="post-date">2020-09-09</span>
+  <hr class="within-post">
+  <p><a href="https://github.com/r-darwish/alma">ALMA</a> (available as <a href="https://aur.archlinux.org/packages/alma-git/">alma-git on the AUR</a>) is a tool for creating
+persistent LiveUSB installations of Arch Linux. With one command you
+can generate a customised installation on a
+USB stick (or any other removable media) including the packages and 
+config files you want, with full persistence.</p>
+<p>This is very useful for disk recovery and system maintenance, and a
+great tool for all Linux users. Especially with the customisation
+options provided by collections of preset files (such as
+<a href="https://github.com/jamesmcm/arch-i3-usb">arch-i3-usb</a>).</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<h2 id="alma">ALMA</h2>
+<p><a href="https://github.com/r-darwish/alma">ALMA</a> is a tool, written in Rust, to
+automate the installation of Arch Linux to removable media with
+persistent storage (i.e. it is usable as a normal system, booted from
+USB).</p>
+<p>ALMA creates an ext4 partition, installs Arch Linux and sets the locale
+and installs GRUB for you. Full disk encryption is also available with
+the <code>alma -e</code> option, using <a href="https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_an_entire_system">LUKS</a>,
+where you will be prompted for the password.</p>
+<p>Note ALMA is available in the AUR as <a href="https://aur.archlinux.org/packages/alma-git/">alma-git</a>.
+I recommend the git version because there are some significant unreleased changes.</p>
+<p>However, what really makes ALMA powerful is the ability to customise
+your installation with preset files.</p>
+<h2 id="preset-files">Preset files</h2>
+<p>Preset files are <a href="https://en.wikipedia.org/wiki/TOML">TOML files</a> which specify one or more of the
+following:</p>
+<ul>
+<li>A list of Arch Linux packages to install: <code>packages</code></li>
+<li>A list of AUR packages to install (which will be handled by the
+user-specified AUR helper, by default this is <code>yay</code>): <code>aur_packages</code></li>
+<li>A bash script to execute <strong>after</strong> installation of the above packages:
+<code>script</code></li>
+<li>A list of directories (in the directory of preset files) which should
+be mounted when the bash script is run: <code>shared_directories</code></li>
+<li>A list of required environment variables to be used in the script
+(these must be passed to ALMA in the environment): <code>environment_variables</code></li>
+</ul>
+<p>Here is an example for installing <a href="https://github.com/alacritty/alacritty">alacritty</a> and copying its config
+file:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#bf616a;">packages </span><span>= [&quot;</span><span style="color:#a3be8c;">alacritty</span><span>&quot;]
+</span><span style="color:#bf616a;">shared_directories </span><span>= [&quot;</span><span style="color:#a3be8c;">alacritty_config</span><span>&quot;]
+</span><span style="color:#bf616a;">script </span><span>= &quot;&quot;&quot;
+</span><span style="color:#a3be8c;">mkdir -p /home/${ALMA_USER}/.config/alacritty/
+</span><span style="color:#a3be8c;">cp /shared_dirs/alacritty_config/alacritty.yml /home/${ALMA_USER}/.config/alacritty/alacritty.yml
+</span><span style="color:#a3be8c;">chown -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+</span><span style="color:#a3be8c;">chgrp -R ${ALMA_USER} /home/${ALMA_USER}/.config/alacritty
+</span><span>&quot;&quot;&quot;
+</span><span style="color:#bf616a;">environment_variables </span><span>= [&quot;</span><span style="color:#a3be8c;">ALMA_USER</span><span>&quot;]
+</span></code></pre>
+<p>The environment variable <code>ALMA_USER</code> would be the username, created in
+an earlier preset file.</p>
+<p>What makes ALMA so useful is that these preset files are <em>composable</em>.
+They will be executed in alphanumeric order, so you can create a
+collection of preset files for your own customised installation of Arch
+Linux, and then swap out preset files for different package
+configurations, etc. (i.e. for different sizes of removeable media).</p>
+<p>An example of this is my <a href="https://github.com/jamesmcm/arch-i3-usb">arch-i3-usb</a> collection, where I have a
+&quot;minimal&quot; preset collection in <code>/preset</code> and additional preset files in
+<code>/additional</code> for a more comprehensive installation.</p>
+<p>This provides a full installation with i3, thunar, alacritty, neovim,
+fish and firefox ready to use.</p>
+<p><img src="https://jamesmcm.github.io/blog/alma/archqemu.png" alt="arch-i3-usb standard installation running in qemu" title="arch-i3-usb standard installation in qemu" /></p>
+<h3 id="known-issue-package-initialisation">Known issue - package initialisation</h3>
+<p>One known issue is that if you install a package which requires some
+initialisation step (such as setting the Rust toolchain after installing
+rustup) then you can't install dependent packages by the normal preset
+lists because <em>all</em> of the package installation takes place before any
+user scripts are run.</p>
+<p>i.e. the order is:</p>
+<ol>
+<li>All non-AUR packages are installed</li>
+<li>If AUR packages are present in the toml files, yay (or another specified AUR helper) is installed</li>
+<li>All AUR packages are installed.</li>
+<li>Preset scripts are executed according to their filenames in alphanumeric order.</li>
+</ol>
+<p>This means that in cases that need initialisation steps (such as Rust
+packages built from source), you will need to workaround this in the
+preset file. Here is an example for i3status-rust:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#bf616a;">packages </span><span>= [&quot;</span><span style="color:#a3be8c;">i3-wm</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">i3lock</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">i3status</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">dmenu</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">arandr</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">rustup</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">powerline-fonts</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">ttf-font-awesome</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">upower</span><span>&quot;]
+</span><span style="color:#bf616a;">aur_packages </span><span>= [&quot;</span><span style="color:#a3be8c;">autotiling</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">ttf-font-awesome-4</span><span>&quot;]
+</span><span style="color:#bf616a;">shared_directories </span><span>= [&quot;</span><span style="color:#a3be8c;">i3_config</span><span>&quot;]
+</span><span style="color:#bf616a;">script </span><span>= &quot;&quot;&quot;
+</span><span style="color:#a3be8c;">sudo -u ${ALMA_USER} rustup toolchain install nightly
+</span><span style="color:#a3be8c;">sudo -u ${ALMA_USER} rustup default nightly
+</span><span style="color:#a3be8c;">sudo -u ${ALMA_USER} yay -S --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu --useask --removemake --norebuild --noconfirm --answeredit None --answerclean None --mflags --noconfirm i3status-rust-git
+</span><span style="color:#a3be8c;"># ...
+</span><span>&quot;&quot;&quot;
+</span><span style="color:#bf616a;">environment_variables </span><span>= [&quot;</span><span style="color:#a3be8c;">ALMA_USER</span><span>&quot;]
+</span></code></pre>
+<h2 id="near-future-improvements">Near-future improvements</h2>
+<p>There are a number of small improvements that could be made in the
+near-future.</p>
+<h3 id="secureboot-support">SecureBoot support</h3>
+<p>Support for <a href="https://wiki.archlinux.org/index.php/Unified_Extensible_Firmware_Interface/Secure_Boot">SecureBoot</a>
+could be added (probably to ALMA directly since it is a common
+requirement). The main difficulty here is testing, since you need to
+test it on actual hardware, and deal with adding the signed keys to the
+BIOS, etc.</p>
+<h3 id="better-error-handling-and-script-debugging">Better error handling and script debugging</h3>
+<p>At the moment any failure in a user script results in the whole installation
+failing. This could be improved by allowing the user to edit, repeat, or
+skip a failed user script (showing the user the script output).</p>
+<p>A subcommand could also be added allowing the preset developer to lint
+their scripts with <a href="https://github.com/koalaman/shellcheck">shellcheck</a> to catch syntax errors.</p>
+<h3 id="more-preset-examples">More preset examples</h3>
+<p>It would be very useful to add a preset example for loading config files
+from a <a href="https://github.com/twpayne/chezmoi">chezmoi</a> repo (and other
+dotfiles managers) instead of just mounting shared directories.</p>
+<p>It would also be useful to add a preset example for <a href="https://wiki.archlinux.org/index.php/Dm-crypt/Encrypting_a_non-root_file_system">home partition encryption</a>
+(i.e. not the whole disk) and unencrypting on login with polkit, etc. -
+for cases where full disk encryption is not desirable (i.e. on a USB
+with other partitions for general file transfer on FAT32).</p>
+<h2 id="far-future-almahub">Far future: ALMAhub?</h2>
+<p>In the more distant future, it would be great to allow ALMA to install
+to a specified (already existing) partition instead of wiping the disk.
+GRUB installation could also be optional in this case. This, plus an
+option to disable the few LiveUSB optimisations (like storing journal
+log data in memory, no swap, etc.), would allow ALMA to function as an
+installer for normal Arch Linux installations too.</p>
+<p>With these additions, and the composable preset files, one could build a
+repository like the AUR for hosting different collections of preset
+files. So you could browse the repository, choose a configuration that
+appeals to you, install it to LiveUSB to try it out, and then use that
+same LiveUSB to install it to disk if you like it.</p>
+<p>The repository would need to be easily auditable (like the AUR) since
+these preset files can install arbitrary packages and run arbitrary
+commands, so it is clearly a possible security risk (like any custom
+installer for Linux
+distributions).</p>
+<p>Another huge addition would be the ability to run ALMA in a minimal
+Docker container, so it could be run on non-Arch Linux platforms. It
+would be great if it could be run on Windows and Ubuntu so as to
+bootstrap the installation process (i.e. first to LiveUSB, then create
+the necessary partitions on disk from the live environment and install
+to disk from there).</p>
+<p>These are much larger additions, but I think that it would be incredibly
+useful to the Linux community as a whole to be able to share different
+configurations as installations directly. This is especially true for
+newer users, with the ability to try them out as a persistent LiveUSB first.</p>
+<h2 id="summary">Summary</h2>
+<p>Hopefully you will find ALMA as useful as I have, and create a LiveUSB
+installation for future debugging and system recovery.</p>
+<p>If you also find the possible future improvements interesting, please
+share your preset collections, or even contribute to ALMA directly!</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/foss-government/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/vopono/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

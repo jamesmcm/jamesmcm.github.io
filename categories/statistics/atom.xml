@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>James McMurray&#x27;s blog - Statistics</title>
+	<subtitle>A technical blog about Rust, Linux and other topics.</subtitle>
+	<link href="https://jamesmcm.github.io/categories/statistics/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://jamesmcm.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2014-10-24T00:00:00+00:00</updated>
+	<id>https://jamesmcm.github.io/categories/statistics/atom.xml</id>
+	<entry xml:lang="en">
+		<title>The Expectation Maximisation (EM) Algorithm</title>
+		<published>2014-10-24T00:00:00+00:00</published>
+		<updated>2014-10-24T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/em1/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/em1/</id>
+		<content type="html">&lt;p&gt;In this post I will briefly introduce the EM algorithm with two simple examples. The EM algorithm uses an iterative approach to find the Maximum Likelihood estimate for a model with latent variables.&lt;&#x2F;p&gt;
+&lt;p&gt;Note I will not provide a thorough coverage of the mathematics but rather focus on two examples of Gaussian Mixture Models.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;This blog post uses MathJax for rendering the equations and so requires
+JavaScript.&lt;&#x2F;p&gt;
+&lt;script src=&quot;https:&#x2F;&#x2F;polyfill.io&#x2F;v3&#x2F;polyfill.min.js?features=es6&quot;&gt;&lt;&#x2F;script&gt;
+&lt;script id=&quot;MathJax-script&quot; async src=&quot;https:&#x2F;&#x2F;cdn.jsdelivr.net&#x2F;npm&#x2F;mathjax@3&#x2F;es5&#x2F;tex-mml-chtml.js&quot;&gt;&lt;&#x2F;script&gt;
+&lt;h2 id=&quot;general-idea-of-em&quot;&gt;General idea of EM&lt;&#x2F;h2&gt;
+&lt;p&gt;The objective of the EM algorithm is to obtain Maximum Likelihood estimates of the parameters and the values of latent variables, for a model with latent variables. This is achieved by iteratively updating the values of the latent variables (e.g. in this example, our best estimate of which Gaussian the data point came from) given the current estimate of the model parameters, and then updating the parameters of the model (e.g. the parameters of the Gaussians) given the values of the latent variables.&lt;&#x2F;p&gt;
+&lt;p&gt;Note this bootstrap approach makes sense because it is simple to infer missing data given the parameters of the model, and to find the Maximum Likelihood estimates of the parameters for the model, given the data. However note that this can lead to problems with local optima and initialisation.&lt;&#x2F;p&gt;
+&lt;p&gt;The likelihood is defined as follows (i.e. probability of the data given the model), but note we usually cannot marginalise over \(\mathbf{Z}\) directly: &lt;&#x2F;p&gt;
+&lt;p&gt;$$L(\boldsymbol \theta; \mathbf{X} ) = P(\mathbf{X} | \boldsymbol \theta ) = \sum_z P(\mathbf{X}, \mathbf{Z} | \boldsymbol \theta ) $$&lt;&#x2F;p&gt;
+&lt;p&gt;So instead we take this iterative updating approach. We first update our estimate of the expected value of the log-likelihood with respect to the latent variables, \(\mathbf{Z}\), given our current estimate of the model parameters. Then, using this soft assignment, we update our estimates of the parameters.&lt;&#x2F;p&gt;
+&lt;p&gt;Assigning \(\mathbf{Z}\) (i.e. the Gaussian assignments in this example - technically we are calculating the conditional distribution  \(P(\mathbf{Z}|\mathbf{X},\boldsymbol \theta)\) ): &lt;&#x2F;p&gt;
+&lt;p&gt;$$Q(\boldsymbol \theta | \boldsymbol \theta^t ) = \mathbb{E}_{Z|X,\theta^t} \left [ \log ( L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z} )) \right ] $$&lt;&#x2F;p&gt;
+&lt;p&gt;Updating the parameters \(\boldsymbol \theta\):&lt;&#x2F;p&gt;
+&lt;p&gt;$$\boldsymbol \theta ^{t+1} = \arg\max_\theta Q(\boldsymbol \theta | \boldsymbol \theta^t ) $$ &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;application-to-gaussian-mixture-models&quot;&gt;Application to Gaussian Mixture Models&lt;&#x2F;h2&gt;
+&lt;p&gt;Now let&#x27;s apply this to the problem of fitting a Gaussian Mixture Model to data. In general the problem is as follows, we wish to fit \( k \) Gaussians to describe the mixture of data we observe. The data has \( D \) dimensions.&lt;&#x2F;p&gt;
+&lt;p&gt;We have a data matrix \(\mathbf{X}\) of size \(N \times D \), a matrix of assignment probabilities \(\mathbf{Z}\) of size \(N \times k \), a vector of marginal probabilities of assignment to the Gaussians (i.e. the proportion of points that come from this Gaussian) \( \boldsymbol \tau \) which is of size \(k \times 1 \). We also have the parameters of the Gaussians: their means \(\boldsymbol \mu_j\) of each of size \(D \times 1\) and their covariances \(\boldsymbol \Sigma_j \) each of size \( D \times D \). &lt;&#x2F;p&gt;
+&lt;p&gt;For the sake of brevity, we will first consider fitting two Gaussians in a one-dimensional space. This means that \(D=1\), \(k=2\) and that the means, \(\mu_1\) and \(\mu_2\), and the variances, \(\sigma^2_1\) and \(\sigma^2_2\) are all scalars.&lt;&#x2F;p&gt;
+&lt;div class=&quot;caption&quot; style=&quot;display:table;&quot;&gt;
+  &lt;img src=&quot;exgmm1.png&quot; height=&quot;400&quot; style=&quot;block&quot;&gt;    
+  &lt;div&gt;An example of an EM solution to a 1D mixture of 2 Gaussians.&lt;br&gt;A full example is included later.&lt;&#x2F;div&gt;
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;the-likelihood&quot;&gt;The Likelihood&lt;&#x2F;h3&gt;
+&lt;p&gt;In this case we can write the likelihood as follows:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\begin{align}L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z}) &amp;amp;= P(\mathbf{X}, \mathbf{Z} | \boldsymbol \theta) = \prod_{i=1}^n P(Z_i = z_i ) \  \mathcal{N} (x_i | (\mu_j, \sigma^2_j)) \cr
+&amp;amp;= \prod_{i=1}^n \sum_{j=1}^2 \mathbb{I} (z_i = j) \tau_j \   \mathcal{N} (x_i, \mu_j, \sigma^2_j) \end{align}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Or in exponential form (so we can take the log):&lt;&#x2F;p&gt;
+&lt;p&gt;$$\begin{align}L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) = &amp;amp; \exp \left ( \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j)\right . \cr
+&amp;amp; \left . \left [ \log (\tau_j) - \log(\sigma_j )- \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ] \right )\end{align}$$&lt;&#x2F;p&gt;
+&lt;p&gt;Where \(\mathbb{I}(Z_i=j)\) is the indicator function (i.e. returns 1 iff. \(Z_i = j\), else returns 0).&lt;&#x2F;p&gt;
+&lt;p&gt;So the log-likelihood, which we want to maximise is: &lt;&#x2F;p&gt;
+&lt;p&gt;$$\log ( L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) ) = \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j) \left [ \log (\tau_j) - \log(\sigma_j) - \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ]$$&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-expectation-step&quot;&gt;The Expectation step&lt;&#x2F;h3&gt;
+&lt;p&gt;Recall that the Gaussian assignment probabilities are in \(\mathbf{T}\), this is what we wish to return in the E-step. From Bayes Rule:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\mathbf{T}_{j,i}^t  = P(Z_i = j | X_i=x_i, \boldsymbol \theta^t) = \frac{\tau_j^t \ \mathcal{N}(x_i; \mu_j^t, \sigma_j^t)}{\tau_1^t \ \mathcal{N}(x_i; \mu_1^t, \sigma_1^t) + \tau_2^t \ \mathcal{N}(x_i; \mu_2^t, \sigma_2^t) }$$&lt;&#x2F;p&gt;
+&lt;p&gt;This can also be expressed in terms of \(Q\):&lt;&#x2F;p&gt;
+&lt;p&gt;$$\begin{align}Q(\boldsymbol \theta | \theta^t ) &amp;amp;= \mathbb{E} \left [ \log L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z} ) \right ] = \mathbb{E} \left [ \log \prod_{i=1}^n L(\boldsymbol \theta; \mathbf{X}_i, \mathbf{Z}_i ) \right ] \cr
+&amp;amp;= \mathbb{E} \left [ \sum_{i=1}^n \log  L(\boldsymbol \theta; \mathbf{X}\_i, \mathbf{Z}\_i ) \right ] = \sum_{i=1}^n \mathbb{E} \left [  \log  L(\boldsymbol \theta; \mathbf{X}\_i, \mathbf{Z}\_i ) \right ]\end{align}$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$Q(\boldsymbol \theta | \theta^t )= \sum_{i=1}^n \sum_{j=1}^2 \mathbf{T}_{j,i}^t \left [ \log \tau_j - \log ( \sigma_j ) - \frac{1}{2\sigma_j^2} (X_i - \mu_j) - \frac{d}{2} \log(2\pi ) \right ] $$&lt;&#x2F;p&gt;
+&lt;p&gt;But we only need  \(\mathbf{T}\) to compute the updates.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-maximisation-step&quot;&gt;The Maximisation step&lt;&#x2F;h3&gt;
+&lt;p&gt;In this step we update our estimates for all of the parameters.&lt;&#x2F;p&gt;
+&lt;p&gt;First let&#x27;s update our estimates for \(\boldsymbol \tau\), the marginal probabilities for assignment to the Gaussians. Recall that \(\tau_1 + \tau_2 = 1\). The update rule is as follows:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\begin{align}\tau^{t+1} &amp;amp;= \arg\max_{\boldsymbol \tau} Q(\boldsymbol \theta | \boldsymbol \theta^t ) \cr
+&amp;amp;= \arg\max_\tau \left ( \left [ \sum_{i=1}^n \mathbf{T}_{i,1}^t \right ] \log \tau_1 + \left [ \sum_{i=1}^n T_{2,i}^t \right ] \log \tau_2 \right ) \end{align}$$&lt;&#x2F;p&gt;
+&lt;p&gt;This has the same for as the Maximum Likelihood Estimate for the binomial distribution, so the update rule is:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\tau_j^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{j,i}^t }{\sum_{i=1}^n \left ( \mathbf{T}_{1,i}^t + \mathbf{T}_{2,i}^t \right )} = \frac{1}{n} \sum_{i=1}^n  \mathbf{T}_{j,i}^t$$&lt;&#x2F;p&gt;
+&lt;p&gt;We now wish to estimate \(\mu_1\) and \(\sigma_1\):&lt;&#x2F;p&gt;
+&lt;p&gt;$$\begin{align}(\mu_1^{t+1} , \sigma_1^{t+1} ) &amp;amp;= \arg\max_{\mu_1, \sigma_1} Q ( \boldsymbol \theta | \boldsymbol \theta^t) \cr
+&amp;amp;= \arg\max_{\mu_1 , \sigma_1} \sum_{i=1}^n \mathbf{T}_{1,i}^t \left ( - \log(\sigma_1 ) - \frac{1}{2 \sigma_1 ^2 } (x_i-\mu_1)^2 \right )\end{align}$$&lt;&#x2F;p&gt;
+&lt;p&gt;This has the same form as a weighted Maximum Likelihood Estimator for a normal distribution, so the update rules are as follows:&lt;&#x2F;p&gt;
+&lt;p&gt;$$\mu_1^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{1,i}^t X_i}{\sum_{i=1}^n T_{1,i}^t }$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$\sigma_1^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{1,i}^t \left (X_i - \mu_1^{t+1} \right ) ^2}{\sum_{i=1}^n \mathbf{T}_{1,i}^t}$$&lt;&#x2F;p&gt;
+&lt;p&gt;And equally for the second Gaussian (note the updates are independent):&lt;&#x2F;p&gt;
+&lt;p&gt;$$\mu_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t X_i}{\sum_{i=1}^n T_{2,i}^t }$$&lt;&#x2F;p&gt;
+&lt;p&gt;$$\sigma_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t \left (X_i - \mu_2^{t+1} \right ) ^2}{\sum_{i=1}^n \mathbf{T}_{2,i}^t}$$&lt;&#x2F;p&gt;
+&lt;p&gt;We carry out these updates alternately until the log-likelihood converges.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;interactive-example-for-2-clusters-in-1d&quot;&gt;Interactive example for 2 clusters in 1D&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;object data=&quot;em1ex.html&quot; width=&quot;800&quot; height=&quot;600&quot;&gt;Could not load plot.&lt;&#x2F;object&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Slide the slider to change the iteration number (shown in the title).&lt;&#x2F;p&gt;
+&lt;p&gt;The full code is available in &lt;a href=&quot;http:&#x2F;&#x2F;nbviewer.ipython.org&#x2F;github&#x2F;jamesmcm&#x2F;jamesmcm.github.io&#x2F;blob&#x2F;source&#x2F;source&#x2F;notebooks&#x2F;EM1Dfinal.ipynb&quot;&gt;an IPython notebook here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;extension&quot;&gt;Extension&lt;&#x2F;h2&gt;
+&lt;p&gt;This example  can also be extended to larger numbers of dimensions (though using a Gaussian Mixture Model directly in a high dimensional space is unadvisable), and to any number of Gaussians. In this case the variances become covariance matrices and linear algebra is necessary, but the changes are straightforward.&lt;&#x2F;p&gt;
+&lt;p&gt;Here is an example for a mixture of 4 Gaussians in 2D:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;object data=&quot;EM2dtest2.html&quot; width=&quot;800&quot; height=&quot;600&quot;&gt;Could not load plot.&lt;&#x2F;object&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Slide the slider to change the iteration number (shown in the title).&lt;&#x2F;p&gt;
+&lt;p&gt;The code is available in an &lt;a href=&quot;http:&#x2F;&#x2F;nbviewer.ipython.org&#x2F;github&#x2F;jamesmcm&#x2F;jamesmcm.github.io&#x2F;blob&#x2F;source&#x2F;source&#x2F;notebooks&#x2F;EM2dGMMfinal.ipynb&quot;&gt;IPython notebook here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;The EM algorithm is very useful for optimising the parameters of a model with latent variables. Example applications of this, include clustering and hidden Markov models.&lt;&#x2F;p&gt;
+&lt;p&gt;Note however, that it can be prone to overfitting, and good initialisation is critical due to the presence of many local maxima in the likelihood function. Note the algorithm can also be extended to find Maximum A Posteriori estimates instead of Maximum Likelihood estimates.&lt;&#x2F;p&gt;
+&lt;p&gt;One major drawback is that we must choose the cardinality of the latent space (i.e. the number of Gaussians in the mixture, in this example) a priori. There are some Bayesian methods to avoid this, which may be the topic of a future blog post.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;text&quot;&gt;Text&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Chapter 9 of Bishop&#x27;s &lt;it&gt;Pattern Recognition and Machine Learning&lt;&#x2F;it&gt; covers the EM algorithm in detail, including this example.&lt;&#x2F;li&gt;
+&lt;li&gt;Chapter 19.2.2 of Koller and Friedman&#x27;s &lt;it&gt;Probabilistic Graphical Models&lt;&#x2F;it&gt; also covers the EM algorithm with respect to Bayesian networks.&lt;&#x2F;li&gt;
+&lt;li&gt;The &lt;a href=&quot;http:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Expectation%E2%80%93maximization_algorithm&quot;&gt;Wikipedia article&lt;&#x2F;a&gt; also covers this example.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.seanborman.com&#x2F;publications&#x2F;EM_algorithm.pdf&quot;&gt;This article&lt;&#x2F;a&gt; by Sean Borman covers the theoretical justification for the EM algorithm.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;video&quot;&gt;Video&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;The EM algorithm is covered within the &amp;quot;Learning with Incomplete Data&amp;quot; section of &lt;a href=&quot;https:&#x2F;&#x2F;class.coursera.org&#x2F;pgm-2012-002&#x2F;lecture&quot;&gt;Daphne Koller&#x27;s Coursera course on Probabilistic Graphical Models&lt;&#x2F;a&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;The EM algorithm is also covered in &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;watch?v=AnbiNaVp3eQ&amp;amp;list=PLD0F06AA0D2E8FFBA&amp;amp;index=116&quot;&gt;some of MathematicalMonk&#x27;s YouTube videos&lt;&#x2F;a&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;other&quot;&gt;Other&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Many thanks to &lt;a href=&quot;https:&#x2F;&#x2F;jakevdp.github.io&#x2F;blog&#x2F;2013&#x2F;12&#x2F;05&#x2F;static-interactive-widgets&#x2F;&quot;&gt;this blog post&lt;&#x2F;a&gt; for the implementation of static IPython widgets for Javascript.&lt;&#x2F;li&gt;
+&lt;li&gt;Many thanks to &lt;a href=&quot;http:&#x2F;&#x2F;stackoverflow.com&#x2F;a&#x2F;12321306&#x2F;1472461&quot;&gt;this StackOverflow answer&lt;&#x2F;a&gt; for the code to plot confidence intervals for arbitrary 2-dimensional Gaussians.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
+		<title>Introduction to Mendelian Randomization</title>
+		<published>2014-08-17T00:00:00+00:00</published>
+		<updated>2014-08-17T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/mendelian/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/mendelian/</id>
+		<content type="html">&lt;p&gt;Mendelian Randomization is an approach to test for a &lt;strong&gt;causal&lt;&#x2F;strong&gt; effect from &lt;strong&gt;observational&lt;&#x2F;strong&gt; data in the presence of certain &lt;strong&gt;confounding&lt;&#x2F;strong&gt; factors.
+It uses the measured variation of genes (of known function) to &lt;strong&gt;bound&lt;&#x2F;strong&gt; the causal effect of a modifiable exposure (environment) on a phenotype (disease). The fundamental idea is that the genotypes are &lt;strong&gt;randomly assigned&lt;&#x2F;strong&gt; (due to recombination in meiosis under certain assumptions), and this allows them to be used as an &lt;strong&gt;instrumental variable&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;Here is the Directed Acyclic Graph (&lt;strong&gt;DAG&lt;&#x2F;strong&gt;) for the basic set-up. Here &lt;strong&gt;G&lt;&#x2F;strong&gt; is the observed genotype (i.e. the presence of a SNP), &lt;strong&gt;X&lt;&#x2F;strong&gt; is an environmental exposure, &lt;strong&gt;U&lt;&#x2F;strong&gt; is a (possible) unobserved confounder and &lt;strong&gt;Y&lt;&#x2F;strong&gt; is the phenotype (i.e. disease status). This will be explained in detail later.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;simpmr.png&quot; alt=&quot;Simple Mendelian Randomization&quot; title=&quot;Simple Mendelian Randomization&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;&#x2F;h2&gt;
+&lt;p&gt;Mendelian Randomization is a useful technique precisely because it allows for causal inference from &lt;strong&gt;observational data&lt;&#x2F;strong&gt;. &lt;strong&gt;Randomised Control Trials&lt;&#x2F;strong&gt; (RCTs) are the gold standard for causal inference, but is not always ethical or possible to carry out RCTs. For example, we cannot randomly assign a lifetime of heavy smoking (or non-smoking) to groups of individuals. This leads to a need to use observational data, however this requires many &lt;strong&gt;assumptions&lt;&#x2F;strong&gt;. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;instrumental-variables-ivs&quot;&gt;Instrumental Variables (IVs)&lt;&#x2F;h2&gt;
+&lt;p&gt;In the previous &lt;strong&gt;DAG&lt;&#x2F;strong&gt;, &lt;strong&gt;G&lt;&#x2F;strong&gt; is the &lt;strong&gt;instrumental variable&lt;&#x2F;strong&gt; (or instrument), because it affects &lt;strong&gt;Y&lt;&#x2F;strong&gt; only through &lt;strong&gt;X&lt;&#x2F;strong&gt; (that is, exclusively, no other path may exist). Therefore, under certain &lt;strong&gt;assumptions&lt;&#x2F;strong&gt; (to be explained later), if &lt;strong&gt;G&lt;&#x2F;strong&gt; is correlated with &lt;strong&gt;Y&lt;&#x2F;strong&gt; then we can infer the edge &lt;strong&gt;X -&amp;gt; Y&lt;&#x2F;strong&gt; (note that &lt;strong&gt;X&lt;&#x2F;strong&gt; must be correlated with &lt;strong&gt;G&lt;&#x2F;strong&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;Now we will consider an example application of instrumental variables, for a hypothetical investigation of the effect of smoking on lung cancer.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;smoking.png&quot; alt=&quot;Smoking Policy Example&quot; title=&quot;Smoking Policy Example&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;If the &lt;strong&gt;assumptions&lt;&#x2F;strong&gt; of the instrumental variable method are met, then if we observe that an increase in tax leads to a reduction in lung cancer, then one can infer that smoking is a &amp;quot;cause&amp;quot; of lung cancer (though perhaps indirectly, i.e. it&#x27;s not smoking directly that causes cancer but the build-up of tar in the lungs, etc.).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;assumptions-of-the-instrumental-variables-method&quot;&gt;Assumptions of the Instrumental Variables method&lt;&#x2F;h2&gt;
+&lt;p&gt;Assumptions are necessary in all areas of statistics, however it is important to know what assumptions we are making and whether they hold true.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;z-x-must-exist&quot;&gt;Z -&amp;gt; X must exist&lt;&#x2F;h3&gt;
+&lt;p&gt;We must know &lt;strong&gt;a priori&lt;&#x2F;strong&gt; that the causal direction is &lt;strong&gt;Z -&amp;gt; X&lt;&#x2F;strong&gt; and not &lt;strong&gt;X -&amp;gt; Z&lt;&#x2F;strong&gt;. This is what makes the causal structure unique and &lt;strong&gt;identifiable&lt;&#x2F;strong&gt;. Note this does not mean that &lt;strong&gt;Z&lt;&#x2F;strong&gt; has to be the &amp;quot;true&amp;quot; cause of &lt;strong&gt;X&lt;&#x2F;strong&gt;. For example, if &lt;strong&gt;Z&lt;&#x2F;strong&gt; is a SNP, we can choose a SNP in linkage disequilibrium with &lt;strong&gt;Z&lt;&#x2F;strong&gt;, so long as it is independent of all of the other variables, but still correlated with &lt;strong&gt;X&lt;&#x2F;strong&gt;. Note the more correlated that &lt;strong&gt;Z&lt;&#x2F;strong&gt; is with &lt;strong&gt;X&lt;&#x2F;strong&gt;, the better the power will be (i.e. less data required for significant results), if it is not correlated, it cannot be used as an instrumental variable.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;snpld.png&quot; alt=&quot;Z to X must exist&quot; title=&quot;Z to X must exist&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;z-must-be-independent-of-u&quot;&gt;Z must be independent of U&lt;&#x2F;h3&gt;
+&lt;p&gt;No factor can affect both the instrument and the effects. For example, there cannot be a factor that causes both higher tobacco taxes and less cancer (e.g. if we were comparing rates in different cancers between countries, national health awareness could be such a factor).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;noug.png&quot; alt=&quot;Z must be independent of U&quot; title=&quot;Z must be independent of U&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;no-z-y&quot;&gt;No Z -&amp;gt; Y&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;Z&lt;&#x2F;strong&gt; cannot directly affect &lt;strong&gt;Y&lt;&#x2F;strong&gt; (or indirectly, except through &lt;strong&gt;X&lt;&#x2F;strong&gt;). I.e. there cannot exist any other mechanisms through which &lt;strong&gt;Z&lt;&#x2F;strong&gt; affects &lt;strong&gt;Y&lt;&#x2F;strong&gt; (i.e. high tobacco tax increases substance abuse, leading to higher rates of cancer).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;nozy.png&quot; alt=&quot;No Z to Y&quot; title=&quot;No Z to Y&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;faithfulness&quot;&gt;Faithfulness&lt;&#x2F;h3&gt;
+&lt;p&gt;Faithfulness is the assumption that the true underlying DAG will manifest itself in the &lt;strong&gt;observed data&lt;&#x2F;strong&gt; - that is, that the causal effects will not &lt;strong&gt;cancel out&lt;&#x2F;strong&gt;. This is a reasonable assumption, because the contrary would require very specific parameters.&lt;&#x2F;p&gt;
+&lt;p&gt;However, note that if relations are deterministic, the implied conditional independencies of the DAG do not hold true, and the assumption of faithfulness is violated. But we will not concern ourselves with this.&lt;&#x2F;p&gt;
+&lt;p&gt;Also note that, in practice, the &lt;strong&gt;sample size&lt;&#x2F;strong&gt; is very important in testing the significance of the correlations&#x2F;independencies in the data.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;summary-of-assumptions&quot;&gt;Summary of assumptions&lt;&#x2F;h3&gt;
+&lt;p&gt;This DAG summarizes the necessary assumptions for the use of instrumental variables:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;fulldagass.png&quot; alt=&quot;DAG with assumptions&quot; title=&quot;DAG with assumptions&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mendelian-randomization&quot;&gt;Mendelian Randomization&lt;&#x2F;h2&gt;
+&lt;p&gt;The method of Mendelian Randomization was first introduced in: &lt;em&gt;Apolipoprotein E isoforms, serum cholesterol, and cancer.&lt;&#x2F;em&gt;, Katan MB (1986).&lt;&#x2F;p&gt;
+&lt;p&gt;At the time, epidemiologists were wondering whether low serum cholesterol levels increase the risk of cancer. They were known to be correlated, but it could be that latent tumors caused the lower cholesterol levels (i.e. reverse causation), or that both cancer risk and cholesterol levels were affected by another factor, such as diet (i.e. confounding).&lt;&#x2F;p&gt;
+&lt;p&gt;However, Katan noticed that patients with Abetalipoproteinemia (a genetic disease that leads to the inability to absorb cholesterol), did not appear predisposed to cancer, despite the predisposition to lower levels of serum cholesterol.&lt;&#x2F;p&gt;
+&lt;p&gt;This led Katan to the idea of finding a large group of individuals genetically predisposed to lower cholesterol levels. These individuals are assumed to be the same with respect to other possible confounders (social class, etc.) and so the presence of the cholesterol-affecting allele can be used as an instrumental variable - this is &lt;strong&gt;Mendelian Randomization&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;The Apolipoprotein E (&lt;strong&gt;ApoE&lt;&#x2F;strong&gt;) gene was known to affect serum cholesterol, with the &lt;strong&gt;ApoE2&lt;&#x2F;strong&gt; variant being associated with lower levels. Many individuals carry ApoE2 variant and so have &lt;strong&gt;lower serum cholesterol levels&lt;&#x2F;strong&gt; from birth.&lt;&#x2F;p&gt;
+&lt;p&gt;Since genes are &lt;strong&gt;randomly assigned&lt;&#x2F;strong&gt; during meiosis (due to recombination), ApoE2 carriers should not be different from ApoE carriers in any other way (diet, etc.), so there is no confounding via the genome - note these are &lt;strong&gt;assumptions&lt;&#x2F;strong&gt;. It is this which allows the genotype to be used as an instrumental variable in this way (because it is akin to an intervention in a Randomised Control Trial).&lt;&#x2F;p&gt;
+&lt;p&gt;Therefore if low serum cholesterol is really causal for cancer risk, the cancer patients should have more ApoE2 alleles than the controls - if not then the levels would be similar in both groups.&lt;&#x2F;p&gt;
+&lt;p&gt;Katan only provided the suggestion, but the method has since been used for many different analyses with some success, such as the link between blood pressure and stroke risk. However, some conclusions have later been disproved by Randomised Control Trials. To understand why, we must consider the &lt;strong&gt;biological assumptions&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;biological-assumptions&quot;&gt;Biological Assumptions&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;panmixia&quot;&gt;Panmixia&lt;&#x2F;h3&gt;
+&lt;p&gt;Recall the assumption that the genotype is randomly assigned - this implies &lt;strong&gt;panmixia&lt;&#x2F;strong&gt;. That is, there is &lt;strong&gt;no selective breeding&lt;&#x2F;strong&gt; (so random mating). This implies that all recombination of alleles is possible.&lt;&#x2F;p&gt;
+&lt;p&gt;In our DAG, this means that &lt;strong&gt;G&lt;&#x2F;strong&gt; is not influenced by &lt;strong&gt;Y&lt;&#x2F;strong&gt; (or any other variables). However, this assumption is not always entirely accurate, as demonstrated by &lt;strong&gt;Population Stratification&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;population-stratification&quot;&gt;Population Stratification&lt;&#x2F;h3&gt;
+&lt;p&gt;Population Stratification is the &lt;strong&gt;systematic difference&lt;&#x2F;strong&gt; in allele frequencies between subpopulations, due to ancestry. For example, physical separation leads to &lt;strong&gt;non-random mating&lt;&#x2F;strong&gt;. This then leads to different &lt;strong&gt;genetic drift&lt;&#x2F;strong&gt; in different subpopulations (i.e. changes in allele frequency over time due to repeated random sampling).&lt;&#x2F;p&gt;
+&lt;p&gt;This means that the genotype is &lt;strong&gt;not&lt;&#x2F;strong&gt; randomly assigned when considered across different sub-populations, a good example of this is with the difference in rates of lactose intolerance between Northern Europe and Asia.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;canalization&quot;&gt;Canalization&lt;&#x2F;h3&gt;
+&lt;p&gt;Canalization refers to the variation in the &lt;strong&gt;robustness of phenotypes&lt;&#x2F;strong&gt; to changes in the genotype and environment.&lt;&#x2F;p&gt;
+&lt;p&gt;The classic example is Waddington&#x27;s Drosophilia experiment. In the experiment, Drosophilia pupae were exposed to heat shock (i.e. a rapid increase in temperature). Eventually a Cross-veinless phenotype (no cross-veins in wings) was produced. However, by then selectively breeding the resulting flies for this phenotype, it eventually appears without heat shock.&lt;&#x2F;p&gt;
+&lt;p&gt;This led to theory of organisms rolling downhill in to &amp;quot;canals&amp;quot; of the &lt;strong&gt;epigenetic landscape&lt;&#x2F;strong&gt; with development, becoming more robust to variation of the environment. We can think of it like an optimization problem which settles in local minima.&lt;&#x2F;p&gt;
+&lt;p&gt;The exact biological&#x2F;molecular mechanisms of canalization are still unknown. With regards to Mendelian Randomization, it can act as a &lt;strong&gt;confounder&lt;&#x2F;strong&gt; between the genotype, environment and phenotype.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;no-pleiotropy&quot;&gt;No Pleiotropy&lt;&#x2F;h3&gt;
+&lt;p&gt;Pleiotropy is the phenomena whereby one gene can affect many (even seemingly unrelated) phenotypes. Mendelian Randomisation makes the assumption of &lt;strong&gt;no pleiotropy&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;In this case, this means that we assume the genotype is only influencing the phenotype via the considered exposure. I.e. ApoE2 &lt;strong&gt;only&lt;&#x2F;strong&gt; affects serum cholesterol levels, and cannot affect cancer risk by other, unobserved means.&lt;&#x2F;p&gt;
+&lt;p&gt;This is a big assumption, and &lt;strong&gt;prior knowledge&lt;&#x2F;strong&gt; is necessary. If possible, using multiple, independent SNPs which act through the same path, can help to alleviate this issue, because, if they are all consistent then it is unlikely that they would all have other pathways causing the same change in phenotype. But note that they must be independent, and so cannot be in Linkage Disequilibrium.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;the-real-dag&quot;&gt;The real DAG?&lt;&#x2F;h3&gt;
+&lt;p&gt;Considering the above points, perhaps the true underlying DAG looks more like this:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;fulldagbio.png&quot; alt=&quot;Full DAG&quot; title=&quot;Full DAG&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;Instrumental variables&lt;&#x2F;strong&gt; are a method to infer causal relations from &lt;strong&gt;observational data&lt;&#x2F;strong&gt;, given certain &lt;strong&gt;assumptions&lt;&#x2F;strong&gt;. This method is applied in Genetic Epidemiology with &lt;strong&gt;Mendelian Randomisation&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This approach has had some success, but the underlying biology still poses some problems with regards to the necessary assumptions. This leaves us with the following questions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Can we improve the &lt;strong&gt;robustness&lt;&#x2F;strong&gt; of the inference with more measurements of intermediate phenotypes? (such as gene methylation, RNAseq, proteomics measurements, etc.)?&lt;br &#x2F;&gt;
+Some work has been done on this under the name of  multi-step Mendelian Randomisation.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Can we improve identification of appropriate &lt;strong&gt;instruments&lt;&#x2F;strong&gt;? (e.g. as whole genome sequencing makes it easier to identify population stratification)&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+	</entry>
+</feed>

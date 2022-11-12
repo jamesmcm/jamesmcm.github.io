@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>My Rust 2021 roadmap: crates, concision, and community</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">My Rust 2021 roadmap: crates, concision, and community</h1>
+  <span class="post-date">2020-09-24</span>
+  <hr class="within-post">
+  <p>The Rust core team recently released a <a href="https://blog.rust-lang.org/2020/09/03/Planning-2021-Roadmap.html">call for blog posts</a> as part of
+the 2021 roadmap for Rust. In this post I will detail my own experience
+with Rust, and areas I'd like to
+see improved during 2021.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<h2 id="my-background">My background</h2>
+<p>I'm currently a Data Engineer and over the last few months I have
+proposed and started implementing the migration of our serverless data
+ingestion pipelines to Rust. The requirements of these pipelines vary
+but usually involve receiving some external data (e.g. via email or S3, possibly
+via <a href="https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/">SFTP to S3</a>), 
+validating and transforming that data (with AWS Lambda) and loading it to a data
+warehouse.</p>
+<p>I originally proposed switching to Rust due to having deployment issues
+with Python (when depending on native modules, like NumPy) due to
+possible glibc version mismatches as well as the total size of the deployed
+package.</p>
+<p>Rust solves these issues by allowing us to compile a statically linked
+binary with musl, and feature flags allow us to include useful code from
+a shared crate without building in the entire crate and its
+dependencies (for parts we don't need). <a href="https://github.com/ctz/rustls">Rustls</a> also allows us to avoid any OpenSSL-related deployment
+issues.</p>
+<p>Carrying out this proposal has given me direct experience in solving
+business problems in Rust, working with other team members to introduce
+Rust to the team, and deployment in an enterprise environment (although
+the hard parts of deployment are largely handled by other teams).</p>
+<p>I have published two personal programs written in Rust: <a href="https://github.com/jamesmcm/vopono">vopono</a> for
+running specific applications through VPN connections, and <a href="https://github.com/jamesmcm/s3rename">s3rename</a>
+for mass-renaming keys in an S3 bucket. I have also written a few prior
+blog posts on Rust, the most popular being <a href="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/#en">about data-oriented design in Rust</a>
+and <a href="http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en">an introduction to async programming</a>.</p>
+<p>To summarise: As a data engineer, I want to be able to easily test and
+deploy statically linked Rust binaries on various platforms and
+architectures, and interact with popular services and protocols without
+friction.</p>
+<h2 id="considerations">Considerations</h2>
+<p>When working as an engineer in an agile team, sprint velocity and
+speed of delivery is key. Engineers want to use the language and tooling
+that will help them to complete their tasks as quickly as possible,
+without frustration or the need to dig deep in to the implementations of
+dependencies.</p>
+<p>Amongst engineers I have seen two main reasons for push-back against
+Rust deployment:</p>
+<ul>
+<li>
+<p>The language is perceived to be very difficult to write (mostly due to
+lifetimes), low-level and slow to develop in.</p>
+</li>
+<li>
+<p>The language is perceived to be very new, with an immature and
+unstable ecosystem that might be lacking critical functionality and
+could lead to a loss of development time if some dependencies have to
+be created in-house.</p>
+</li>
+</ul>
+<p>These aren't issues that can be solved directly necessarily (especially
+the perception itself), but we can consider how the community can help
+to turn around these perceptions.</p>
+<h3 id="development-speed">Development speed</h3>
+<h4 id="low-level">Low-level?</h4>
+<p>The first misconception is that Rust is a low-level language and that
+the experience might be similar to writing C (i.e. dealing directly with
+malloc, etc.). I think a lot of this comes from Rust often being
+compared to C and C++ implementations in benchmarks, and being more
+strongly adopted in the systems programming community. </p>
+<p>I think this will largely be countered by Rust usage becoming more widespread in other
+domains, such as Web Development with crates like Actix, Rocket, Hyper, etc. on the
+backend and Seed and Yew on the frontend, and Data Engineering with crates
+like ndarray, Serde, Polars, Calamine, Amadeus and Ballista.</p>
+<h4 id="difficult-to-write">Difficult to write?</h4>
+<p>Rust is also often perceived as difficult to write, particularly due to
+the lifetime notation. Here I think a lot of great work has already
+been done with non-lexical lifetimes greatly simplifying the necessary
+notation in many cases, and rust-analyzer providing a fast debug loop
+(along with the ongoing efforts to improve error messages). </p>
+<p>The main thing to note here for the future, in my opinion, is just how much
+language and syntax improvements can help new users and further adoption. I hope Rust
+continues to work on making the code more concise for the developer in
+the majority of use cases. For Rust 2021 and beyond this might include
+<a href="https://github.com/rust-lang/rfcs/pull/2909">assignment with destructuring</a>,
+<a href="https://github.com/rust-lang/rust/issues/44762">auto-dereferencing in operators</a>,
+and <a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a>.</p>
+<h4 id="slower-to-implement">Slower to implement?</h4>
+<p>Related to the above point, Rust is often considered slower to develop
+in (usually when compared to dynamic scripting languages like Python or
+JavaScript). Here I think it's important to note that hitting lots of error messages
+from the compiler or borrow checker during development doesn't
+necessarily mean development is slower - as those errors are probably
+catching lots of issues that might go unnoticed in other languages
+(until you hit an issue in production).</p>
+<p>In German there is a saying &quot;Wenn schon, denn schon.&quot;, which roughly translates
+to &quot;if you're going to do it, do it properly&quot;. This is where I believe Rust
+excels - whilst you might hit a few lifetime and ownership issues during
+the development of your program, in the end you are saved from a whole
+class of bugs and also aren't bound by issues like the <a href="https://en.wikipedia.org/wiki/Global_interpreter_lock">Global Interpreter Lock</a> 
+or the lack of type safety as in simpler scripting languages.</p>
+<p>But it is important to ensure
+that the feedback loop is fast for the developer. Here I think the great
+improvements in rust-analyzer have helped already, and hopefully there
+will be further improvements to compile speeds to make this even faster
+in the future.</p>
+<p>Ultimately with the great tooling available, I think the development
+speed can actually be faster in Rust than Python or Ruby when you
+consider the whole software life cycle including fixing bugs and scaling
+up the system.</p>
+<p>However, development speed is also greatly affected by the availability
+of relevant libraries.</p>
+<h3 id="crates-and-ecosystem">Crates and ecosystem</h3>
+<p>Rust <em>is</em> still a very new language, with the first stable release in
+2015 and more widespread adoption with the release of Rust 2018. This
+leads to a common concern that Rust may be lacking some libraries, and
+so could cost significant developer time compared to languages with a
+larger and more mature ecosystem.</p>
+<p>There are already many excellent crates unique to Rust, such as Serde
+which I miss when working with other languages. The great accessibility
+of cargo, <a href="https://crates.io/">crates.io</a> and <a href="https://docs.rs/">docs.rs</a> also make it easy to discover new crates.</p>
+<p>However, there are still some areas for improvement for the ecosystem as
+a whole. For example, Rusoto is still slightly less user-friendly than
+<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/index.html">boto3</a> (i.e. having to create <code>_Request</code> structs for each client
+request).</p>
+<p>Another example would be the need to provide root CA certificates (i.e. in a
+PEM file) to rustls for use with <a href="https://crates.io/crates/tokio-postgres-rustls">tokio-postgres-rustls</a> for example.
+This is a minor issue, but one that is not necessary in more &quot;batteries-included&quot; libraries in other
+languages (e.g. psycopg2 in Python).</p>
+<p>These are small examples but can impact the learning curve for new
+developers. As a community, I think we should try to create issues for
+any such &quot;paper-cuts&quot; we come across and contribute pull requests where
+possible.</p>
+<p>Documentation is also relevant to this. Overall, Rust has excellent
+documentation with the combination of rustdoc and mdBook being used to
+provide crate documentation and detailed developer and contributor
+guides. Throughout 2021 we should aim to expand existing documentation,
+and ensure that it is accessible for new developers to do so too - for
+example, contributing common use cases to <a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>. 
+Myself, I struggled greatly with Serde's <code>deserialize_with</code> field attribute until looking at examples.</p>
+<p>Hopefully in the future, the establishment of the <a href="https://blog.rust-lang.org/2020/08/18/laying-the-foundation-for-rusts-future.html">Rust foundation</a>
+will eventually be able to provide commercial support to critical projects like
+Rustls, Serde, and Tokio to ensure the crates are maintained and
+improved in the long-term. I think this would help a lot with the adoption
+of Rust in enterprise.</p>
+<p>It'd also be great if Rust support were added to <a href="https://github.com/aws/jsii">jsii</a>
+so Rust could be used with the AWS <a href="https://github.com/aws/aws-cdk">Cloud Development Kit</a> directly.</p>
+<h2 id="other-small-issues">Other small issues</h2>
+<p>There are some other small issues I'd love to see improved during 2021.</p>
+<h3 id="auto-ref-in-pattern-matching">Auto Ref in pattern matching</h3>
+<p>I couldn't find an RFC for this, but it'd great to be able to use a
+static <code>&amp;str</code> when matching on an enum containing a <code>String</code>. i.e. so
+<a href="https://play.rust-lang.org/?version=stable&amp;mode=debug&amp;edition=2018&amp;gist=284089e5b13b5925449574ce2c5e41f2">this would be possible</a>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">enum </span><span>MyEnum {
+</span><span>    WithString(String),
+</span><span>    Other,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> myenum = MyEnum::WithString(&quot;</span><span style="color:#a3be8c;">test</span><span>&quot;.</span><span style="color:#96b5b4;">to_string</span><span>());
+</span><span>    </span><span style="color:#b48ead;">match</span><span> myenum {
+</span><span>        MyEnum::WithString(&quot;</span><span style="color:#a3be8c;">test</span><span>&quot;) =&gt; {println!(&quot;</span><span style="color:#a3be8c;">Was string</span><span>&quot;)},
+</span><span>        _ =&gt; {},
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Currently it is necessary to use a match guard (as far as I know). The
+<a href="https://github.com/rust-lang/rust/issues/42640">closest RFC I could find</a> handles auto deref but not ref. 
+Note that is already implemented.</p>
+<h3 id="blocking-futures-without-an-async-runtime">Blocking Futures without an async runtime</h3>
+<p>At the moment if any crate returns a Future, the developer has to use an
+async runtime even if just to block on the future synchronously - i.e. <a href="https://docs.rs/tokio/0.2.22/tokio/runtime/struct.Runtime.html#method.block_on">tokio's
+block_on</a>.</p>
+<p>It'd be nice if this were built in to the standard library (for the
+blocking, synchronous case only) if possible.</p>
+<h3 id="lifetimes-of-trait-objects-defaults-to-static">Lifetimes of trait objects defaults to 'static</h3>
+<p>I have been caught out a few times by the lifetime of a trait object
+defaulting to <code>'static</code>. Recently, in this <a href="https://github.com/mitsuhiko/dialoguer/pull/81/files#diff-25c234b5525af56f20a73cb80796026bR47">PR to the dialoguer crate</a>.</p>
+<p>Specifically the original struct:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub struct </span><span>Input&lt;</span><span style="color:#b48ead;">&#39;a</span><span>, T&gt; {
+</span><span>    </span><span style="color:#bf616a;">prompt</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">default</span><span>: Option&lt;T&gt;,
+</span><span>    </span><span style="color:#bf616a;">show_default</span><span>: </span><span style="color:#b48ead;">bool</span><span>,
+</span><span>    </span><span style="color:#bf616a;">initial_text</span><span>: Option&lt;String&gt;,
+</span><span>    </span><span style="color:#bf616a;">theme</span><span>: &amp;</span><span style="color:#b48ead;">&#39;a</span><span> dyn Theme,
+</span><span>    </span><span style="color:#bf616a;">permit_empty</span><span>: </span><span style="color:#b48ead;">bool</span><span>,
+</span><span>    </span><span style="color:#bf616a;">validator</span><span>: Option&lt;Box&lt;dyn Fn(&amp;T) -&gt; Option&lt;String&gt;&gt;&gt;,
+</span><span>}
+</span></code></pre>
+<p>Requires that the validator closure has a <code>'static</code> lifetime, not the
+<code>'a</code> of the struct. This can be fixed by specifying the <code>'a</code> lifetime
+explicitly:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    validator: Option&lt;Box&lt;dyn Fn(&amp;T) -&gt; Option&lt;String&gt; + </span><span style="color:#b48ead;">&#39;a</span><span>&gt;&gt;,
+</span></code></pre>
+<p>However, I found the fact that it defaults to <code>'static</code> quite
+unintuitive, this seems to be decided by the
+<a href="https://doc.rust-lang.org/reference/lifetime-elision.html#default-trait-object-lifetimes">default trait object lifetime rules</a>.</p>
+<p>It'd be nice if this could be adjusted similar to the
+<a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a> 
+RFC mentioned above so that if the containing struct has a specified
+lifetime then the trait object would default to that lifetime (the
+developer could always specify <code>'static</code> if required). Perhaps
+this is impractical or undesirable due to other consequences though.</p>
+<h3 id="deref-in-closure-signature">Deref in closure signature</h3>
+<p>Related to the PR mentioned in the previous section, we have a
+<code>Validator&lt;T&gt;</code> that must implement the validate method:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub trait </span><span>Validator&lt;T&gt; {
+</span><span>    </span><span style="color:#b48ead;">type </span><span>Err: Debug + Display;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">validate</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">input</span><span>: &amp;T) -&gt; Result&lt;(), </span><span style="color:#b48ead;">Self::</span><span>Err&gt;;
+</span><span>}
+</span></code></pre>
+<p>However, this means if we want to validate a <code>String</code> we must pass a
+<code>&amp;String</code> to validate. We cannot pass an <code>&amp;str</code>. If <code>T</code> were an <code>&amp;str</code>
+itself then we could use <a href="https://doc.rust-lang.org/beta/std/convert/trait.AsRef.html">AsRef</a>
+to accept a <code>String</code> in the signature, but the other way around doesn't
+seem possible even though in the end the <code>&amp;str</code> and <code>&amp;String</code> are
+equivalent for our purposes. </p>
+<p>That is, we'd like to accept any type which
+<code>T</code> could ref in to, not any type which could ref in to <code>T</code> (which is
+what <code>AsRef&lt;T&gt;</code> provides us). Perhaps there are reasons this isn't
+viable and the type arguments used above should change, but it was a
+frustrating issue to hit as a developer.</p>
+<p>As a side note related to <code>AsRef</code>, it'd be nice to <a href="https://www.reddit.com/r/rust/comments/3ntsbn/whats_the_point_of_asref/cvr5n5f/">introduce the syntax
+mentioned here</a>.</p>
+<h2 id="summary">Summary</h2>
+<p>I've covered a lot of different issues here, but I really wanted to
+emphasise my own experience in introducing Rust to a team and the common
+concerns that come up.</p>
+<p>In summary, during 2021 I'd like to see:</p>
+<ul>
+<li>Rust expand to more domains outside of systems programming (i.e. web
+development and data engineering).</li>
+<li>Further language syntax improvements to keep Rust concise.</li>
+<li>Continued improvements in IDE support (especially outside of VS Code).</li>
+<li>Expanded documentation of common crates and use case examples (i.e.
+<a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>).</li>
+</ul>
+<p>In my opinion, a major part of making this possible is making it easier
+for newer Rust developers to contribute to Rust itself (and major
+crates). For example, I have written about some issues I've had above
+and linked to some related RFCs - but I would have no idea where to
+start with testing implementations to solve any of those issues.</p>
+<p>The <a href="https://forge.rust-lang.org/">Rust Forge</a> is a good start for this,
+but I'd also love to see some worked examples of implementing features
+and bug fixes. For example, <a href="https://github.com/jonhoo">Jon Gjengset</a>'s Crust of Rust series
+has been excellent for covering the basics of the implementations of
+some common Rust concepts, and it'd be great to see more blog posts focussed
+on making improvements to Rust itself (or major crates).</p>
+<p>Other possibilities are to host specific training sessions for new
+contributors like <a href="https://www.youtube.com/watch?v=aS26sqT09Pw">the Veloren project has done</a>,
+or to host community bug-squashing days aimed at new contributors like
+Arch Linux and KDE have done.</p>
+<p>Having a larger pool of contributors would help to alleviate the
+workload on current maintainers, and bring a more diverse range of
+perspectives from different problem domains and platforms.</p>
+<p>Overall, Rust is already in an excellent position with the most
+welcoming community and most comprehensive documentation that I have
+seen in any ecosystem. I look forward to what 2021 will bring!</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/programming-projects/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/catalina-cachedelete/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

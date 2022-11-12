@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Data Ingestion with Rust and AWS Lambda</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">Data Ingestion with Rust and AWS Lambda</h1>
+  <span class="post-date">2020-04-19</span>
+  <hr class="within-post">
+  <p>In this post we will set up a very simple data ingestion process with Rust and AWS Lambda.</p>
+<p>The complete code for this example is <a href="https://github.com/jamesmcm/rust-lambda-test">available on GitHub here</a>.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<p>You should be able to follow along using the AWS Free Tier if you want, but you will need to use a Postgres 11.1+ RDS instance instead of Redshift (unless you qualify for the separate 12-month free trial of Amazon Redshift). AWS Lambda has an Always Free tier option, whereas S3 and RDS have only 12-month free trial options.</p>
+<h2 id="process-requirements">Process Requirements</h2>
+<p>In this process we would like to parse, filter and import an Excel file to our database, on-demand when it is uploaded to S3.</p>
+<p>We can split the problem down in to the following steps:</p>
+<ul>
+<li>Parsing the Excel file and filtering rows - here we will use the <a href="https://crates.io/crates/calamine">calamine</a> and <a href="https://crates.io/crates/serde">Serde</a> crates, note we need to handle possible parsing errors.</li>
+<li>Serialising the data to a CSV - we will use the <a href="https://crates.io/crates/csv">csv crate</a> with <a href="https://crates.io/crates/serde">Serde</a>.</li>
+<li>Uploading the CSV to S3 - we will use the <a href="https://crates.io/crates/rusoto">rusoto crate</a> for interacting with AWS.</li>
+<li>Getting database credentials from AWS Secrets Manager - we will use the rusoto crate.</li>
+<li>Triggering the COPY from S3 in the Redshift/RDS instance - we will use the <a href="https://crates.io/crates/postgres">postgres crate</a> and <a href="https://crates.io/crates/openssl">OpenSSL</a>.</li>
+<li>Running this process in AWS Lambda and handling the events received - we will use the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime</a> and <a href="https://crates.io/crates/aws_lambda_events">aws_lambda_events</a> crates.</li>
+<li>Cross-compiling and deploying the process - we need to build for the <code>x86_64-unknown-linux-musl</code> target so the binary will run on Amazon Linux.</li>
+</ul>
+<h2 id="why-rust">Why Rust?</h2>
+<p>One could argue that Python is more suitable for this task, since pandas can parse Excel files and write to a CSV directly (using boto3 to interact with AWS). However there are a few reasons why I think Rust is better suited to this sort of serverless computing:</p>
+<ul>
+<li>
+<p>With Rust we can deploy a statically linked binary - i.e. we don't have any dependency on the runtime environment. In Python we would have to handle deploying the dependent pip packages with the Lambda artefact, for NumPy this is not trivial since it has compiled dependencies which would need to be cross-compiled or built on Amazon Linux (i.e. with CodeBuild) - Lambda Layers can automate this for popular dependencies, but it's still more work than a static binary (and results in a larger artefact to deploy too).</p>
+</li>
+<li>
+<p>With Rust we get full type checking and static typing, in this case our example is simple serialisation and de-serialisation. However, if we were to do much more processing of the de-serialised data, it would be very useful to have all of that being type checked to avoid possible runtime errors.</p>
+</li>
+<li>
+<p>Rust gives us greater control of performance, and the lambda_runtime crate allows us to use Tokio for asynchronous operations. With serverless computing we are paying by execution time (and memory usage with respect to the size of the instance) so better performance can directly lead to cost savings.</p>
+</li>
+<li>
+<p>Rust offers a better, modern development experience. With rust-analyzer you can have immediate type-checking directly in your IDE/text editor. Unit testing is built-in and easy to use in the same source file. Automatic generation of documentation is built-in with rustdoc. You also don't need to deal with setting up virtual environments for dependencies.</p>
+</li>
+</ul>
+<h2 id="implementation">Implementation</h2>
+<p>We will follow the steps outlined above, starting with parsing the Excel file, which can be tested independently.</p>
+<h3 id="parsing-the-excel-file-with-calamine">Parsing the Excel file with Calamine</h3>
+<p>The Excel file we want to parse has the following structure in the <code>data</code> worksheet:</p>
+<table><thead><tr><th>location</th><th>metric</th><th>value</th><th>date</th></tr></thead><tbody>
+<tr><td>UK</td><td>conversion_rate</td><td>0</td><td>2020-02-01</td></tr>
+<tr><td>ES</td><td>conversion_rate</td><td>0.634</td><td>2020-02-01</td></tr>
+<tr><td>DE</td><td>conversion_rate</td><td>#N/A</td><td>2020-02-01</td></tr>
+<tr><td>FR</td><td>conversion_rate</td><td>#N/A</td><td>2020-02-01</td></tr>
+<tr><td>UK</td><td>conversion_rate</td><td>0.723</td><td>2020-01-31</td></tr>
+</tbody></table>
+<p>We only want to import rows which have the same date as the first row in the Excel file.</p>
+<p>Note the possibility of #N/A and invalid values which we will need to handle.</p>
+<p>This file will be uploaded to <code>s3://input-bucket-name/label/filename.xlsx</code> where the label allows multiple files to be uploaded (with different locations in each file).</p>
+<p>See <a href="https://github.com/jamesmcm/rust-lambda-test">the Github repo</a> for a test example.</p>
+<h4 id="reading-the-excel-file">Reading the Excel file</h4>
+<p>First let's write a test that will read an example of our Excel file to a buffer and create a calamine::Xlsx object from it. We do it like this (rather than using calamine's <code>open_workbook()</code> function to read directly from a file) so we can maintain the same interface when reading the Excel file from S3 directly.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>calamine::{Reader, Xlsx};
+</span><span>
+</span><span>##[</span><span style="color:#bf616a;">cfg</span><span>(test)]
+</span><span style="color:#b48ead;">mod </span><span>tests {
+</span><span>    </span><span style="color:#b48ead;">use super</span><span>::*;
+</span><span>    </span><span style="color:#b48ead;">use </span><span>std::fs::File;
+</span><span>    </span><span style="color:#b48ead;">use </span><span>std::io::Write;
+</span><span>    </span><span style="color:#b48ead;">use </span><span>std::path::PathBuf;
+</span><span>
+</span><span>    #[</span><span style="color:#bf616a;">test</span><span>]
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">test_local</span><span>() {
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> buffer: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; = Vec::new();
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> f = File::open(
+</span><span>            PathBuf::from(env!(&quot;</span><span style="color:#a3be8c;">CARGO_MANIFEST_DIR</span><span>&quot;)).</span><span style="color:#96b5b4;">join</span><span>(PathBuf::from(
+</span><span>                &quot;</span><span style="color:#a3be8c;">tests/test_excel.xlsx</span><span>&quot;,
+</span><span>            )),
+</span><span>        )
+</span><span>        .</span><span style="color:#96b5b4;">ok</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        f.</span><span style="color:#96b5b4;">read_to_end</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buffer).</span><span style="color:#96b5b4;">ok</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">let</span><span> excel = </span><span style="color:#b48ead;">match </span><span>Xlsx::new(Cursor::new(buffer)) {
+</span><span>            Ok(x) =&gt; x,
+</span><span>            Err(x) =&gt; panic!(&quot;</span><span style="color:#a3be8c;">{:?}</span><span>&quot;, x),
+</span><span>        };
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// ...
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Here we use the <code>CARGO_MANIFEST_DIR</code> environment variable to get a relative path when we run <code>cargo test</code>.</p>
+<p>If you create an example Excel file, this test should pass. This provides us with a calamine::Xlsx object we can use to call our parsing function.</p>
+<h4 id="parsing-the-excel-file">Parsing the Excel file</h4>
+<p>We will implement the following function:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">excel_to_csv_string</span><span>(
+</span><span>    </span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">excel</span><span>: Xlsx&lt;Cursor&lt;Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt;&gt;&gt;,
+</span><span>) -&gt; Result&lt;(String, HashSet&lt;String&gt;, chrono::NaiveDate), Box&lt;dyn std::error::Error&gt;&gt;
+</span></code></pre>
+<p>Which will return a (Result of a) tuple of the CSV as a String, a HashSet of all found locations (for use in deleting existing rows before the database insertion), and the date of the first row that we used as the date of the file (also for use in the database insertion and logging).</p>
+<p>Note the Xlsx object we pass is based on a Cursor in a Vec of u8 bytes - exactly what we generated above (and what we will later receive when reading the file on S3 with rusoto).</p>
+<p>To do this, we will use calamine::RangeDeserializerBuilder, in our case since the Excel file has headers, we will use the <code>with_headers()</code> method and pass it a slice of static strings.</p>
+<p>Let's first define the columns and the struct that we will deserialise the rows into:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>serde::{Deserialize, Serialize};
+</span><span>
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">COLUMNS</span><span>: [&amp;</span><span style="color:#b48ead;">str</span><span>; </span><span style="color:#d08770;">4</span><span>] = [&quot;</span><span style="color:#a3be8c;">location</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">metric</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">value</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">date</span><span>&quot;];
+</span><span>
+</span><span>##[</span><span style="color:#bf616a;">derive</span><span>(Serialize, Deserialize, Debug)]
+</span><span style="color:#b48ead;">struct </span><span>RawExcelRow {
+</span><span>    </span><span style="color:#bf616a;">location</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">metric</span><span>: String,
+</span><span>    #[</span><span style="color:#bf616a;">serde</span><span>(deserialize_with = &quot;</span><span style="color:#a3be8c;">de_opt_f64</span><span>&quot;)]
+</span><span>    </span><span style="color:#bf616a;">value</span><span>: Option&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;,
+</span><span>    #[</span><span style="color:#bf616a;">serde</span><span>(deserialize_with = &quot;</span><span style="color:#a3be8c;">de_date</span><span>&quot;)]
+</span><span>    </span><span style="color:#bf616a;">date</span><span>: chrono::NaiveDate,
+</span><span>}
+</span></code></pre>
+<p>Our columns array corresponds to the headers in the Excel file (you could probably read these dynamically, but in our case we have a fixed schema anyway).</p>
+<p>The RawExcelRow is the struct we will deserialise each row to. Note the <code>deserialize_with</code> field attributes set for the <code>value</code> and <code>date</code> fields. We will need to implement both of these.</p>
+<p>The custom deserialiser for <code>value</code> is required so that we when the field fails to parse we replace the field value with None (rather than skipping the entire row, as we would if we handled the Error later when filtering rows).</p>
+<p>This is implemented as follows (note we also explicitly cast integers, for the case of 0 or 1):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">de_opt_f64</span><span>&lt;</span><span style="color:#b48ead;">&#39;de</span><span>, D&gt;(</span><span style="color:#bf616a;">deserializer</span><span>: D) -&gt; Result&lt;Option&lt;</span><span style="color:#b48ead;">f64</span><span>&gt;, </span><span style="color:#b48ead;">D::</span><span>Error&gt;
+</span><span style="color:#b48ead;">where
+</span><span>    D: serde::Deserializer&lt;</span><span style="color:#b48ead;">&#39;de</span><span>&gt;,
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> data_type = calamine::DataType::deserialize(deserializer);
+</span><span>    </span><span style="color:#b48ead;">match</span><span> data_type {
+</span><span>        Ok(calamine::DataType::Error(_)) =&gt; Ok(None),
+</span><span>        Ok(calamine::DataType::Float(f)) =&gt; Ok(Some(f)),
+</span><span>        Ok(calamine::DataType::Int(i)) =&gt; Ok(Some(i as </span><span style="color:#b48ead;">f64</span><span>)),
+</span><span>        _ =&gt; Ok(None),
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>For <code>date</code> the custom deserialiser is required since Excel stores dates as the number of days since January 1st 1900 (starting from 1).</p>
+<p>Calamine has a function to do this conversion for us, but it won't automatically apply it when trying to deserialise to a chrono::NaiveDate (I created <a href="https://github.com/tafia/calamine/issues/168">this issue</a> regarding this). </p>
+<p>So we simply call Calamine's <code>as_date()</code> conversion function explicitly:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">de_date</span><span>&lt;</span><span style="color:#b48ead;">&#39;de</span><span>, D&gt;(</span><span style="color:#bf616a;">deserializer</span><span>: D) -&gt; Result&lt;chrono::NaiveDate, </span><span style="color:#b48ead;">D::</span><span>Error&gt;
+</span><span style="color:#b48ead;">where
+</span><span>    D: serde::Deserializer&lt;</span><span style="color:#b48ead;">&#39;de</span><span>&gt;,
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> data_type = calamine::DataType::deserialize(deserializer);
+</span><span>    </span><span style="color:#b48ead;">match</span><span> data_type {
+</span><span>        Ok(x) =&gt; x.</span><span style="color:#96b5b4;">as_date</span><span>().</span><span style="color:#96b5b4;">ok_or</span><span>(serde::de::Error::custom(&quot;</span><span style="color:#a3be8c;">Invalid Date</span><span>&quot;)),
+</span><span>        Err(x) =&gt; Err(x),
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>With this in place we can implement the deserialisation step:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#65737e;">// ...
+</span><span style="color:#b48ead;">use </span><span>calamine::{RangeDeserializerBuilder, Reader, Xlsx};
+</span><span style="color:#b48ead;">use </span><span>csv::Writer;
+</span><span style="color:#b48ead;">use </span><span>std::collections::HashSet;
+</span><span style="color:#b48ead;">use </span><span>std::error::Error;
+</span><span style="color:#b48ead;">use </span><span>std::io::Cursor;
+</span><span style="color:#b48ead;">use </span><span>std::io::Read;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">excel_to_csv_string</span><span>(
+</span><span>    </span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">excel</span><span>: Xlsx&lt;Cursor&lt;Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt;&gt;&gt;,
+</span><span>) -&gt; Result&lt;(String, HashSet&lt;String&gt;, chrono::NaiveDate), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> range = excel
+</span><span>        .</span><span style="color:#96b5b4;">worksheet_range</span><span>(&quot;</span><span style="color:#a3be8c;">data</span><span>&quot;)
+</span><span>        .</span><span style="color:#96b5b4;">ok_or</span><span>(calamine::Error::Msg(&quot;</span><span style="color:#a3be8c;">Cannot find data worksheet</span><span>&quot;))??;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> iter_result =
+</span><span>        RangeDeserializerBuilder::with_headers(&amp;</span><span style="color:#d08770;">COLUMNS</span><span>).from_range::&lt;_, RawExcelRow&gt;(&amp;range)?;
+</span><span>
+</span><span>  </span><span style="color:#65737e;">// ...
+</span></code></pre>
+<p>Note the double <code>??</code> on the line <code>.ok_or(calamine::Error::Msg(&quot;Cannot find data worksheet&quot;))??;</code> - this is used since
+the <code>.worksheet_range()</code> method returns an <code>Option&lt;Result&lt;Range&lt;DataType&gt;, XlsxError&gt;&gt;</code> (<a href="https://docs.rs/calamine/0.16.1/calamine/struct.Xlsx.html#method.worksheet_range">see docs</a>), 
+and we convert the Option to a Result using <code>.ok_or()</code> (<a href="https://doc.rust-lang.org/std/option/enum.Option.html#method.ok_or">see docs</a>) to convert the
+None case to a <code>calamine::Error</code> (and the Some case to Ok). The double <code>??</code> unwraps both of these
+errors to give us the <code>Range&lt;DataType&gt;</code>.</p>
+<p>We start by getting the range for the <code>data</code> worksheet, and then we deserialise it to <code>RawExcelRow</code>s, giving us an Iterator over <code>RawExcelRow</code>s. With this iterator we can apply row-level filtering (or other transformations), as we serialise to CSV.</p>
+<h4 id="serialisation-to-csv">Serialisation to CSV</h4>
+<p>We serialise the first row, and copy the date from it to filter the further rows (remember we want to filter only for rows which have the same date as the first row in the file).</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#65737e;">// ...
+</span><span>    </span><span style="color:#65737e;">// Use date of first row as date for file
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> wtr = Writer::from_writer(vec![]);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> locations: HashSet&lt;String&gt; = HashSet::new();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> first_row = iter_result.</span><span style="color:#96b5b4;">next</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>()?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> canonical_date = first_row.date.</span><span style="color:#96b5b4;">clone</span><span>();
+</span><span>    locations.</span><span style="color:#96b5b4;">insert</span><span>(first_row.location.</span><span style="color:#96b5b4;">clone</span><span>());
+</span><span>    wtr.</span><span style="color:#96b5b4;">serialize</span><span>(first_row)?;
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Canonical date: </span><span style="color:#d08770;">{:?}</span><span>&quot;, canonical_date);
+</span><span>    </span><span style="color:#65737e;">// ...
+</span></code></pre>
+<p>We then serialise all rows where the date is equal to the date of the first row (<code>canonical_date</code>), and add their <code>location</code> to the <code>locations</code> HashSet.</p>
+<p>Finally, we convert the Writer object to a String, and return that, along with the <code>locations</code> HashSet and the <code>canonical_date</code>.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#65737e;">// ...
+</span><span>    </span><span style="color:#b48ead;">for </span><span>(index, row) in iter_result.</span><span style="color:#96b5b4;">enumerate</span><span>() {
+</span><span>        </span><span style="color:#b48ead;">match</span><span> row {
+</span><span>            Ok(row) =&gt; {
+</span><span>                </span><span style="color:#b48ead;">if</span><span> row.date == canonical_date {
+</span><span>                    locations.</span><span style="color:#96b5b4;">insert</span><span>(row.location.</span><span style="color:#96b5b4;">clone</span><span>());
+</span><span>                    wtr.</span><span style="color:#96b5b4;">serialize</span><span>(row)?;
+</span><span>                }
+</span><span>            }
+</span><span>            Err(row) =&gt; println!(&quot;</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">: </span><span style="color:#d08770;">{:?}</span><span>&quot;, index, row),
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> data = String::from_utf8(wtr.</span><span style="color:#96b5b4;">into_inner</span><span>()?)?;
+</span><span>
+</span><span>    Ok((data, locations, canonical_date))
+</span><span>}
+</span></code></pre>
+<p>We can now test calling this function in our <code>test_local()</code> test, adding the following lines:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>        </span><span style="color:#65737e;">// ...
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(data, locations, canonical_date) = </span><span style="color:#b48ead;">match </span><span style="color:#96b5b4;">excel_to_csv_string</span><span>(excel) {
+</span><span>            Ok(x) =&gt; x,
+</span><span>            Err(x) =&gt; panic!(&quot;</span><span style="color:#a3be8c;">{:?}</span><span>&quot;, x),
+</span><span>        };
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">locations: </span><span style="color:#d08770;">{:?}</span><span>&quot;, locations);
+</span><span>        println!(&quot;</span><span style="color:#a3be8c;">canonical date: </span><span style="color:#d08770;">{:?}</span><span>&quot;, canonical_date);
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> file = File::create(
+</span><span>            PathBuf::from(env!(&quot;</span><span style="color:#a3be8c;">CARGO_MANIFEST_DIR</span><span>&quot;)).</span><span style="color:#96b5b4;">join</span><span>(PathBuf::from(&quot;</span><span style="color:#a3be8c;">tests/test_output.csv</span><span>&quot;)),
+</span><span>        )
+</span><span>        .</span><span style="color:#96b5b4;">ok</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        file.</span><span style="color:#96b5b4;">write_all</span><span>(data.</span><span style="color:#96b5b4;">as_bytes</span><span>()).</span><span style="color:#96b5b4;">ok</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        assert_eq!(</span><span style="color:#d08770;">true</span><span>, </span><span style="color:#d08770;">true</span><span>);
+</span><span>    }
+</span></code></pre>
+<p>This test should pass, and write the CSV to <code>test_output.csv</code>.</p>
+<h3 id="uploading-the-csv-to-s3">Uploading the CSV to S3</h3>
+<p>We can upload the CSV to S3 using the rusoto_s3 crate.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>rusoto_core::Region;
+</span><span style="color:#b48ead;">use </span><span>rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, </span><span style="color:#d08770;">S3</span><span>};
+</span><span style="color:#65737e;">// ...
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">OUTPUT_BUCKET</span><span>: &amp;</span><span style="color:#b48ead;">str </span><span>= &quot;</span><span style="color:#a3be8c;">output-bucket-name</span><span>&quot;;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">upload_csv_to_s3</span><span>(
+</span><span>    </span><span style="color:#bf616a;">data</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">label</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">canonical_date</span><span>: &amp;chrono::NaiveDate,
+</span><span>) -&gt; Result&lt;(String), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> outputkey = format!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">output/</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">_</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">.csv</span><span>&quot;,
+</span><span>        label,
+</span><span>        canonical_date.</span><span style="color:#96b5b4;">format</span><span>(&quot;</span><span style="color:#a3be8c;">%Y-%m-%d</span><span>&quot;).</span><span style="color:#96b5b4;">to_string</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Write CSV to S3
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3_client = S3Client::new(Region::EuWest1);
+</span><span>    s3_client
+</span><span>        .</span><span style="color:#96b5b4;">put_object</span><span>(PutObjectRequest {
+</span><span>            bucket: String::from(</span><span style="color:#d08770;">OUTPUT_BUCKET</span><span>),
+</span><span>            key: outputkey.</span><span style="color:#96b5b4;">clone</span><span>(),
+</span><span>            body: Some(data.</span><span style="color:#96b5b4;">into_bytes</span><span>().</span><span style="color:#96b5b4;">into</span><span>()),
+</span><span>            ..Default::default()
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">sync</span><span>()?;
+</span><span>
+</span><span>    Ok(outputkey)
+</span><span>}
+</span></code></pre>
+<p>Remember to set the correct region for your use case. In this case we use the default credentials provider, so your AWS credentials will also need to be available (i.e. in <code>~/.aws/credentials</code>) or via the runtime environment.</p>
+<p>Note that here we consume our CSV String since we don't need it again. We also return the outputkey so we can use it later when triggering the load to the database.</p>
+<p>We will get the <code>label</code> value from the path of the input file on S3 when the Lambda function is triggered. This allows for different files to be uploaded for the same day (i.e. splitting files by location).</p>
+<p>Also note the call to <code>.sync()</code> since the result is a RusotoFuture object.</p>
+<h3 id="getting-database-credentials-from-aws-secrets-manager">Getting database credentials from AWS Secrets Manager</h3>
+<p>In order to connect to our database and trigger the load from S3, we first need to get the credentials.</p>
+<p>Using AWS Secrets Manager is a best practice, since it allows you to easily rotate credentials whilst storing and sharing them securely. </p>
+<p>We will use the rusoto_secretsmanager crate to retrieve our credentials.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>rusoto_core::Region;
+</span><span style="color:#b48ead;">use </span><span>rusoto_secretsmanager::{GetSecretValueRequest, SecretsManager, SecretsManagerClient};
+</span><span style="color:#b48ead;">use </span><span>serde::Deserialize;
+</span><span style="color:#b48ead;">use </span><span>serde::Serialize;
+</span><span style="color:#65737e;">// ...
+</span><span>##[</span><span style="color:#bf616a;">allow</span><span>(non_snake_case)]
+</span><span>##[</span><span style="color:#bf616a;">derive</span><span>(Serialize, Deserialize, Debug)]
+</span><span style="color:#b48ead;">struct </span><span>DBCredentials {
+</span><span>    </span><span style="color:#bf616a;">username</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">password</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">engine</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">host</span><span>: String,
+</span><span>    </span><span style="color:#bf616a;">port</span><span>: </span><span style="color:#b48ead;">u32</span><span>,
+</span><span>    </span><span style="color:#bf616a;">dbClusterIdentifier</span><span>: String,
+</span><span>}
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">get_db_credentials</span><span>() -&gt; Result&lt;DBCredentials, Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> sm_client = SecretsManagerClient::new(Region::EuWest1);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> secret = sm_client
+</span><span>        .</span><span style="color:#96b5b4;">get_secret_value</span><span>(GetSecretValueRequest {
+</span><span>            secret_id: &quot;</span><span style="color:#a3be8c;">db_credentials_secret</span><span>&quot;.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>            version_id: None,
+</span><span>            version_stage: None,
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">sync</span><span>()?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> credentials: DBCredentials = serde_json::from_str(&amp;secret.secret_string.</span><span style="color:#96b5b4;">unwrap</span><span>())?;
+</span><span>
+</span><span>    Ok(credentials)
+</span><span>}
+</span></code></pre>
+<p>Note here we have hardcoded the secret name <code>db_credentials_secret</code> and the AWS region.</p>
+<p>We use the <code>serde_json</code> crate to deserialise the JSON returned from Secrets Manager into a DBCredentials struct we can use directly.</p>
+<h3 id="load-the-csv-to-the-database">Load the CSV to the database</h3>
+<h4 id="connecting-to-the-database">Connecting to the database</h4>
+<p>Here we assume connecting to a Redshift cluster with SSL enabled. The requirement for SSL complicates things, here we will use OpenSSL.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>openssl::ssl::{SslConnector, SslMethod};
+</span><span style="color:#b48ead;">use </span><span>postgres::Client;
+</span><span style="color:#b48ead;">use </span><span>postgres_openssl::MakeTlsConnector;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">load_to_db</span><span>(
+</span><span>    </span><span style="color:#bf616a;">outputkey</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">canonical_date</span><span>: &amp;chrono::NaiveDate,
+</span><span>    </span><span style="color:#bf616a;">locations</span><span>: &amp;HashSet&lt;String&gt;,
+</span><span>) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> builder = SslConnector::builder(SslMethod::tls())?;
+</span><span>    builder.</span><span style="color:#96b5b4;">set_ca_file</span><span>(&quot;</span><span style="color:#a3be8c;">redshift-ssl-ca-cert.pem</span><span>&quot;)?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> connector = MakeTlsConnector::new(builder.</span><span style="color:#96b5b4;">build</span><span>());
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> credentials = </span><span style="color:#96b5b4;">get_db_credentials</span><span>()?;
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> client = Client::connect(
+</span><span>        format!(
+</span><span>            &quot;</span><span style="color:#a3be8c;">host=</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> port=</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> dbname=</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> user=</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> password=</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> sslmode=require</span><span>&quot;,
+</span><span>            credentials.host,
+</span><span>            credentials.port,
+</span><span>            &quot;</span><span style="color:#a3be8c;">dbname</span><span>&quot;,
+</span><span>            credentials.username,
+</span><span>            credentials.password
+</span><span>        )
+</span><span>        .</span><span style="color:#96b5b4;">as_str</span><span>(),
+</span><span>        connector,
+</span><span>    )?;
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// ...
+</span></code></pre>
+<p>Note we have hardcoded the database name <code>dbname</code>.</p>
+<p>The Redshift SSL CA certificate is available from AWS at <a href="https://s3.amazonaws.com/redshift-downloads/redshift-ssl-ca-cert.pem">https://s3.amazonaws.com/redshift-downloads/redshift-ssl-ca-cert.pem</a></p>
+<p>This file should be in the root directory of the crate to work with the above code, and we will also need to add it to the artefact we upload to AWS Lambda.</p>
+<p>Note in order to get this to cross-compile, we need to enable the <code>vendored</code> feature in the openssl crate, i.e. in Cargo.toml:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[dependencies]
+</span><span style="color:#bf616a;">postgres </span><span>= &quot;</span><span style="color:#a3be8c;">0.17.2</span><span>&quot;
+</span><span style="color:#bf616a;">postgres-openssl </span><span>= &quot;</span><span style="color:#a3be8c;">0.3.0</span><span>&quot;
+</span><span style="color:#bf616a;">openssl </span><span>= {</span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.10.28</span><span>&quot;, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">vendored</span><span>&quot;]}
+</span></code></pre>
+<h4 id="loading-the-data">Loading the data</h4>
+<p>Now we have a working connection with SSL, we can load the data from S3. Continuing the above code:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#65737e;">// ...
+</span><span>    </span><span style="color:#b48ead;">let</span><span> locations_vec: Vec&lt;String&gt; = locations
+</span><span>        .</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">cloned</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">x</span><span>| format!(&quot;</span><span style="color:#a3be8c;">&#39;</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">&#39;</span><span>&quot;, x))
+</span><span>        .</span><span style="color:#96b5b4;">collect</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> target_table = &quot;</span><span style="color:#a3be8c;">test_table</span><span>&quot;;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> location_string = &amp;locations_vec.</span><span style="color:#96b5b4;">join</span><span>(&quot;</span><span style="color:#a3be8c;">,</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> truncate_query = format!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">DELETE FROM public.</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> WHERE date = &#39;</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">&#39; AND location IN (</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">);</span><span>&quot;,
+</span><span>        target_table,
+</span><span>        canonical_date.</span><span style="color:#96b5b4;">format</span><span>(&quot;</span><span style="color:#a3be8c;">%Y-%m-%d</span><span>&quot;).</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>        location_string
+</span><span>    );
+</span><span>    </span><span style="color:#b48ead;">let</span><span> colstr = &amp;</span><span style="color:#d08770;">COLUMNS</span><span>.</span><span style="color:#96b5b4;">join</span><span>(&quot;</span><span style="color:#a3be8c;">,</span><span>&quot;);
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{}</span><span>&quot;, truncate_query);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> copy_query = format!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">COPY public.</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> (</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">) from
+</span><span style="color:#a3be8c;">                 &#39;s3://</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">/</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">&#39;
+</span><span style="color:#a3be8c;">                  iam_role &#39;arn:aws:iam::YOUR_ROLE_HERE&#39;
+</span><span style="color:#a3be8c;">                  FORMAT CSV
+</span><span style="color:#a3be8c;">                  EMPTYASNULL
+</span><span style="color:#a3be8c;">                  BLANKSASNULL
+</span><span style="color:#a3be8c;">                  IGNOREHEADER 1
+</span><span style="color:#a3be8c;">                  IGNOREBLANKLINES
+</span><span style="color:#a3be8c;">                  ;</span><span>&quot;,
+</span><span>        target_table, colstr, </span><span style="color:#d08770;">OUTPUT_BUCKET</span><span>, outputkey
+</span><span>    );
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, client.</span><span style="color:#96b5b4;">execute</span><span>(truncate_query.</span><span style="color:#96b5b4;">as_str</span><span>(), &amp;[]));
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, client.</span><span style="color:#96b5b4;">execute</span><span>(copy_query.</span><span style="color:#96b5b4;">as_str</span><span>(), &amp;[]));
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>We have hardcoded the table name as <code>test_table</code>. We first delete from the table all rows which have the same date for each of the locations that we will insert. Then we trigger the load from S3 with the <code>COPY</code> statement.</p>
+<p>Note you will need to use an appropriate IAM role in that statement.</p>
+<h3 id="running-on-aws-lambda">Running on AWS Lambda</h3>
+<p>We are now able to run the entire process locally, with a local Excel file, however in order to deploy it to AWS Lambda we need to make a few changes.</p>
+<h4 id="loading-the-input-excel-from-s3">Loading the input Excel from S3</h4>
+<p>First of all, we need to be able to load the input Excel from S3. Specifically: given an S3 key, return the calamine::Xlsx object.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>calamine::{RangeDeserializerBuilder, Reader, Xlsx};
+</span><span style="color:#b48ead;">use </span><span>rusoto_core::Region;
+</span><span style="color:#b48ead;">use </span><span>rusoto_s3::{GetObjectRequest, PutObjectRequest, S3Client, </span><span style="color:#d08770;">S3</span><span>};
+</span><span style="color:#b48ead;">use </span><span>std::io::Cursor;
+</span><span style="color:#b48ead;">use </span><span>std::io::Read;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">get_excel_from_s3</span><span>(
+</span><span>    </span><span style="color:#bf616a;">bucket</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">key</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>) -&gt; Result&lt;Xlsx&lt;Cursor&lt;Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt;&gt;&gt;, Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> buffer: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; = Vec::new();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3_client = S3Client::new(Region::EuWest1);
+</span><span>
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Reading bucket: </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">, key: </span><span style="color:#d08770;">{}</span><span>&quot;, bucket, key);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3file = s3_client
+</span><span>        .</span><span style="color:#96b5b4;">get_object</span><span>(GetObjectRequest {
+</span><span>            bucket: bucket.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>            key: key.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>            ..Default::default()
+</span><span>        })
+</span><span>        .</span><span style="color:#96b5b4;">sync</span><span>()?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> _file = s3file
+</span><span>        .body
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">into_blocking_read</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">read_to_end</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buffer)?;
+</span><span>    Ok(Xlsx::new(Cursor::new(buffer))?)
+</span><span>}
+</span></code></pre>
+<p>This will return us the <code>Xlsx&lt;Cursor&lt;Vec&lt;u8&gt;&gt;</code> object that we want.</p>
+<h4 id="bringing-it-all-together">Bringing it all together</h4>
+<p>We now need to write the function that will call all of the above functions to run the process.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>calamine::{RangeDeserializerBuilder, Reader, Xlsx};
+</span><span style="color:#65737e;">// ...
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">INPUT_BUCKET</span><span>: &amp;</span><span style="color:#b48ead;">str </span><span>= &quot;</span><span style="color:#a3be8c;">input-bucket-name</span><span>&quot;;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">handle_excel</span><span>(</span><span style="color:#bf616a;">key</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> label = key.</span><span style="color:#96b5b4;">split</span><span>(&quot;</span><span style="color:#a3be8c;">/</span><span>&quot;).</span><span style="color:#96b5b4;">nth</span><span>(</span><span style="color:#d08770;">1</span><span>).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> excel: Xlsx&lt;_&gt; = </span><span style="color:#96b5b4;">get_excel_from_s3</span><span>(</span><span style="color:#d08770;">INPUT_BUCKET</span><span>, &amp;key)?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let </span><span>(data, locations, canonical_date) = </span><span style="color:#96b5b4;">excel_to_csv_string</span><span>(excel)?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> outputkey = </span><span style="color:#96b5b4;">upload_csv_to_s3</span><span>(data, label, &amp;canonical_date)?;
+</span><span>
+</span><span>    </span><span style="color:#96b5b4;">load_to_db</span><span>(&amp;outputkey, &amp;canonical_date, &amp;locations)?;
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>Remember the input file will be of the form: <code>s3://input-bucket-name/label/filename.xlsx</code></p>
+<h4 id="adding-the-lambda-handler">Adding the lambda handler</h4>
+<p>Finally we need to add the functions which will be the entry point for the Lambda function:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>lambda_runtime::error::HandlerError;
+</span><span style="color:#b48ead;">use </span><span>percent_encoding::percent_decode_str;
+</span><span style="color:#65737e;">// ...
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+</span><span>    lambda_runtime::lambda!(my_handler);
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">my_handler</span><span>(
+</span><span>    </span><span style="color:#bf616a;">e</span><span>: aws_lambda_events::event::s3::S3Event,
+</span><span>    </span><span style="color:#bf616a;">_c</span><span>: lambda_runtime::Context,
+</span><span>) -&gt; Result&lt;(), HandlerError&gt; {
+</span><span>    println!(&quot;</span><span style="color:#d08770;">{:?}</span><span>&quot;, e);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> decodedkey = </span><span style="color:#96b5b4;">percent_decode_str</span><span>(&amp;(e.records[</span><span style="color:#d08770;">0</span><span>].s3.object.key.</span><span style="color:#96b5b4;">as_ref</span><span>()).</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>        .</span><span style="color:#96b5b4;">decode_utf8</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match </span><span style="color:#96b5b4;">handle_excel</span><span>(&amp;decodedkey) {
+</span><span>        Ok(_) =&gt; (),
+</span><span>        Err(error) =&gt; {
+</span><span>            panic!(&quot;</span><span style="color:#a3be8c;">Error: {:?}</span><span>&quot;, error);
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>The events the Lambda will receive will come from S3 directly (i.e. forwarding PutObject events to this Lambda from the S3 bucket properties).</p>
+<p>We use <code>aws_lambda_events</code> to get a template for this event, from which we extract the S3 key of the file uploaded which has triggered the function.</p>
+<p>Note the use of the <code>percent_encoding</code> crate to decode the URL-encoded key we receive in the event itself.</p>
+<p>The code for this example is <a href="https://github.com/jamesmcm/rust-lambda-test">available on GitHub here</a>.</p>
+<h3 id="deployment">Deployment</h3>
+<p>To deploy the function, we follow the instructions on <a href="https://aws.amazon.com/blogs/opensource/rust-runtime-for-aws-lambda/">the AWS blog about the Rust runtime</a>.</p>
+<p>We first need to edit Cargo.toml to set the binary name to <code>bootstrap</code>:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[[bin]]
+</span><span style="color:#bf616a;">name </span><span>= &quot;</span><span style="color:#a3be8c;">bootstrap</span><span>&quot;
+</span><span style="color:#bf616a;">path </span><span>= &quot;</span><span style="color:#a3be8c;">src/main.rs</span><span>&quot;
+</span></code></pre>
+<h4 id="os-x-cross-compilation">OS X cross-compilation</h4>
+<p>If you are building on OS X you need to cross-compile the binary, as per the instructions in the blog post.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">rustup</span><span> target add x86_64-unknown-linux-musl
+</span><span style="color:#bf616a;">brew</span><span> install filosottile/musl-cross/musl-cross
+</span><span style="color:#bf616a;">mkdir</span><span> .cargo
+</span><span style="color:#96b5b4;">echo </span><span>&#39;</span><span style="color:#a3be8c;">[target.x86_64-unknown-linux-musl]
+</span><span style="color:#a3be8c;">linker = &quot;x86_64-linux-musl-gcc&quot;</span><span>&#39; &gt; .cargo/config
+</span><span style="color:#bf616a;">ln -s</span><span> /usr/local/bin/x86_64-linux-musl-gcc /usr/local/bin/musl-gcc
+</span></code></pre>
+<p>Note the installation of musl-cross took almost 2 hours on my machine.</p>
+<h4 id="build-zip-artefact">Build zip artefact</h4>
+<p>Remember to add the Redshift CA certificate to the zip archive:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">cargo</span><span> build</span><span style="color:#bf616a;"> --release --target</span><span> x86_64-unknown-linux-musl
+</span><span style="color:#bf616a;">zip -j</span><span> rust.zip ./target/x86_64-unknown-linux-musl/release/bootstrap ./redshift-ssl-ca-cert.pem
+</span></code></pre>
+<h4 id="upload-to-aws">Upload to AWS</h4>
+<p>Create a new Lambda function with a Custom runtime, and then upload the zip file.</p>
+<p>Note if your Redshift cluster (or RDS instance) is behind a VPC you will need to add the Lambda function to the same VPC. See <a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html">the documentation</a> for more details. </p>
+<p>Then add the S3 trigger to the Lambda function (and you can test the function using the S3 event template).</p>
+<h2 id="future-improvements">Future Improvements</h2>
+<h3 id="rustls">RusTLS</h3>
+<p>The dependency on OpenSSL can make it difficult to cross-compile, so it would be nice to use a pure Rust TLS library.</p>
+<p>A good candidate would be <a href="https://crates.io/crates/rustls">RustTLS</a>, and the <a href="https://crates.io/crates/tokio-postgres-rustls">tokio-postgres-rustls</a> crate apparently adds support for this to the postgres crate. </p>
+<p>I tried <a href="https://crates.io/crates/native-tls">native-tls</a> which has built-in support in the postgres crate, but hit <a href="https://github.com/sfackler/rust-native-tls/issues/132">this issue when building on OS X</a>, and this utlimately uses OpenSSL on Linux anyway.</p>
+<h3 id="apache-arrow-flatbuffers">Apache Arrow + FlatBuffers</h3>
+<p>It would be great if we could deserialise directly (via Calamine and Serde) from the rows of the Excel file to a columnar form in memory such as an Apache Arrow <a href="https://arrow.apache.org/docs/r/reference/RecordBatch.html">RecordBatch</a> or <a href="https://arrow.apache.org/docs/cpp/tables.html">Table</a> (rather than deserialising to our <code>RawExcelRow</code> structs). This would allow us to use <a href="https://github.com/apache/arrow/tree/master/rust/datafusion">DataFusion</a> to query the loaded data.</p>
+<p>Ideally we could also apply transformations to the data column-wise, and add or remove columns, transitioning between different defined schemas. So we could have a data manipulation tool as powerful as pandas, but with statically defined schemas where the interactions can be verified at compile time.</p>
+<p>This could then be saved to disk in the Apache Arrow format without serialisation, or rapidly serialised to columnar formats such as Parquet (which is also well-suited for loading to a columnar database).</p>
+<p>Unfortunately, even though <a href="https://github.com/apache/arrow/tree/master/rust">Arrow does have a Rust implementation</a>, it doesn't seem this direct deserialisation with Serde is possible at the moment (although I am not very familiar with Apache Arrow, nor with Serde's internals).</p>
+<p>An alternative could be to deserialise to an <a href="https://docs.rs/ndarray/0.13.1/ndarray/">ndarray</a>, however <a href="https://github.com/rust-ndarray/ndarray/issues/771">support for Arrow is still in progress</a>.</p>
+<p><a href="https://google.github.io/flatbuffers/">FlatBuffers</a> (used for Arrow's Table) <a href="https://github.com/google/flatbuffers/issues/5132">also has an issue open for Serde serialisation</a>.</p>
+<p>If you have any ideas for how to achieve this direct deserialisation with Serde please add a comment here in Disqus or as a <a href="https://github.com/jamesmcm/rust-lambda-test">Github issue</a>.</p>
+<h3 id="compressed-parquet-output">Compressed Parquet output</h3>
+<p>As mentioned above, it'd be great to be able to write a columnar format such as Parquet directly for loading to Redshift.</p>
+<p>Unfortunately it seems serialising to Parquet is not currently supported in Serde, although the <a href="https://github.com/constellation-rs/amadeus">Amadeus</a> crate apparently supports reading Parquet.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Thanks for reading this blog post, I hope this toy example is useful, and that Rust adoption will continue to grow in serverless computing.</p>
+<p>If you questions or comments, or notice any issues in the examples, please create an issue on <a href="https://github.com/jamesmcm/rust-lambda-test">the Github repo</a> or leave a comment here in Disqus.</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/em1/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

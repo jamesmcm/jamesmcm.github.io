@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>James McMurray: Blog</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+
+    <div class="blog-content">
+    <div class="posts">
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;my-first-clippy-lint&#x2F;">My First Clippy Lint</a>
+            </h1>
+            <span class="post-date">2022-03-26</span>
+            <div class="post__summary">
+                <p>Recently I wrote my first <a href="https://github.com/rust-lang/rust-clippy">Clippy</a> lint. It was much easier to
+implement and test than I had expected. In this post I'll review the
+process of creating or contributing to a Clippy lint, the implementation itself and
+how this reflects Rust's values of empowerment.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;my-first-clippy-lint&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;lambda-runtime&#x2F;">Writing a simple AWS Lambda Custom Runtime in Rust</a>
+            </h1>
+            <span class="post-date">2020-10-24</span>
+            <div class="post__summary">
+                <p>I was recently reading more about the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime crate</a>
+and came across <a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">this issue</a> 
+where it is mentioned that the <code>#[lambda]</code> procedural macro can be
+misleading and cause problems if used naively.</p>
+<p>In this post we will implement our own simple custom runtime for
+AWS Lambda in Rust, and understand the reasons behind this issue.</p>
+<p>The code used in this blog post is available on Github in 
+my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;lambda-runtime&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;">What should I program?</a>
+            </h1>
+            <span class="post-date">2020-10-11</span>
+            <div class="post__summary">
+                <p>Doing projects is often the best way to get more programming experience
+and learn about new concepts and problem domains. However, a common issue 
+is finding feasible projects of a reasonable scope that can 
+produce something useful in a few weekends.</p>
+<p>In this post I will list some classic project ideas for beginner and
+intermediate programmers (most of which should be achievable in 2-3
+weekends), along with many other project ideas I've had but have never
+had time to implement (and a few which I did).</p>
+<p>There are many long lists of project ideas available on Github, like
+<a href="https://github.com/danistefanovic/build-your-own-x">build-your-own-x</a>
+and <a href="https://github.com/aceking007/100ProjectsOfCode">100 Projects of Code</a>
+but these often lack a real description and justification of the
+projects. In this article I will go more in-depth with the different project ideas.</p>
+<p>Within each section the projects are ordered in ascending difficulty /
+time investment.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;programming-projects&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust2021&#x2F;">My Rust 2021 roadmap: crates, concision, and community</a>
+            </h1>
+            <span class="post-date">2020-09-24</span>
+            <div class="post__summary">
+                <p>The Rust core team recently released a <a href="https://blog.rust-lang.org/2020/09/03/Planning-2021-Roadmap.html">call for blog posts</a> as part of
+the 2021 roadmap for Rust. In this post I will detail my own experience
+with Rust, and areas I'd like to
+see improved during 2021.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust2021&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;catalina-cachedelete&#x2F;">How to fix high CPU usage by the CacheDelete daemon in OS X Catalina</a>
+            </h1>
+            <span class="post-date">2020-09-20</span>
+            <div class="post__summary">
+                <p>I recently had an ongoing issue with the <code>deleted</code> CacheDelete daemon
+using huge amounts of CPU time almost constantly. This post covers how I
+fixed it and a few tips for OS X recovery and performance improvements.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;catalina-cachedelete&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;foss-government&#x2F;">Why governments should adopt and invest in FOSS</a>
+            </h1>
+            <span class="post-date">2020-09-12</span>
+            <div class="post__summary">
+                <p>This post covers why I believe local and national governments should
+adopt and invest in <a href="https://www.gnu.org/philosophy/free-sw.en.html">Free and Open Source Software</a> (FOSS).</p>
+<p>This has been in the news recently due to the city of Munich renewing 
+it's <a href="https://www.zdnet.com/article/linux-not-windows-why-munich-is-shifting-back-from-microsoft-to-open-source-again/">LiMux Linux distribution</a>
+thanks to an agreement between the local SDP and Green politicians, and
+the efforts of the <a href="https://publiccode.eu/">Public Money, Public Code</a> campaign.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;foss-government&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;alma&#x2F;">Using ALMA for persistent LiveUSB installations of Arch Linux</a>
+            </h1>
+            <span class="post-date">2020-09-09</span>
+            <div class="post__summary">
+                <p><a href="https://github.com/r-darwish/alma">ALMA</a> (available as <a href="https://aur.archlinux.org/packages/alma-git/">alma-git on the AUR</a>) is a tool for creating
+persistent LiveUSB installations of Arch Linux. With one command you
+can generate a customised installation on a
+USB stick (or any other removable media) including the packages and 
+config files you want, with full persistence.</p>
+<p>This is very useful for disk recovery and system maintenance, and a
+great tool for all Linux users. Especially with the customisation
+options provided by collections of preset files (such as
+<a href="https://github.com/jamesmcm/arch-i3-usb">arch-i3-usb</a>).</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;alma&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;vopono&#x2F;">Retrospective of my first useful Rust project</a>
+            </h1>
+            <span class="post-date">2020-09-05</span>
+            <div class="post__summary">
+                <p>This post is a retrospective of my first &quot;useful&quot; Rust project. <a href="https://github.com/jamesmcm/vopono">vopono</a> 
+is a Linux program to launch applications in temporary network
+namespaces (managed by vopono), in order to run specific applications
+through VPN connections, without affecting the rest of your system.</p>
+<p>vopono is <a href="https://github.com/jamesmcm/vopono">available on Github</a> (and in the <a href="https://aur.archlinux.org/packages/vopono/">AUR on Arch Linux</a>) and
+licensed under the GPLv3 license (<a href="https://www.gnu.org/philosophy/pragmatic.html">see reasoning here</a>).</p>
+<p>We'll consider the motivation and background to creating vopono, the
+upsides and downsides of writing it in Rust (and existing issues), and
+some points about starting new side projects in general. I hope this
+helps new Rust programmers starting their own first projects, or for
+other programmers to consider using Rust.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;vopono&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust-ses&#x2F;">Serverless Data Ingestion with Rust and AWS SES</a>
+            </h1>
+            <span class="post-date">2020-08-29</span>
+            <div class="post__summary">
+                <p>In this post we will set up a simple, serverless data ingestion pipeline using Rust,
+AWS Lambda and AWS SES with Workmail. </p>
+<p>We will handle multiple types of
+AWS events with one Lambda function, parse received emails
+with the mailparse crate, and send email with SES and the lettre crate.</p>
+<p>The complete code for this example is <a href="https://github.com/jamesmcm/rust_ses_example">available on GitHub here</a>.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust-ses&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;intro-dod&#x2F;">An introduction to Data Oriented Design with Rust</a>
+            </h1>
+            <span class="post-date">2020-07-25</span>
+            <div class="post__summary">
+                <p>In the post we will investigate the main concepts of <a href="https://en.wikipedia.org/wiki/Data-oriented_design">Data-oriented
+Design</a> using Rust.</p>
+<p>The source code for this example is <a href="https://github.com/jamesmcm/data-oriented-example">available on Github</a>.</p>
+
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;intro-dod&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+
+    <nav class="pagination">
+        
+        <a class="top" href="#top">Back to top</a>
+        
+            <a class="next" href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;page&#x2F;2&#x2F;">Older ›</a>
+        
+    </nav>
+    </div>
+
+    <aside class="sidebar">
+    
+    <section>
+	    <h2 class="capitalize">categories</h2>
+	    <ul display="block">
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;general&#x2F;>General (4)</a></li>
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;languages&#x2F;>Languages (1)</a></li>
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;linux&#x2F;>Linux (2)</a></li>
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;rust&#x2F;>Rust (7)</a></li>
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;statistics&#x2F;>Statistics (2)</a></li>
+		
+	    </ul>
+    </section>
+    
+    </aside>
+
+    </div>
+
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

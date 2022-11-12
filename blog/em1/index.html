@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>The Expectation Maximisation (EM) Algorithm</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">The Expectation Maximisation (EM) Algorithm</h1>
+  <span class="post-date">2014-10-24</span>
+  <hr class="within-post">
+  <p>In this post I will briefly introduce the EM algorithm with two simple examples. The EM algorithm uses an iterative approach to find the Maximum Likelihood estimate for a model with latent variables.</p>
+<p>Note I will not provide a thorough coverage of the mathematics but rather focus on two examples of Gaussian Mixture Models.</p>
+<span id="continue-reading"></span>
+<p>This blog post uses MathJax for rendering the equations and so requires
+JavaScript.</p>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<h2 id="general-idea-of-em">General idea of EM</h2>
+<p>The objective of the EM algorithm is to obtain Maximum Likelihood estimates of the parameters and the values of latent variables, for a model with latent variables. This is achieved by iteratively updating the values of the latent variables (e.g. in this example, our best estimate of which Gaussian the data point came from) given the current estimate of the model parameters, and then updating the parameters of the model (e.g. the parameters of the Gaussians) given the values of the latent variables.</p>
+<p>Note this bootstrap approach makes sense because it is simple to infer missing data given the parameters of the model, and to find the Maximum Likelihood estimates of the parameters for the model, given the data. However note that this can lead to problems with local optima and initialisation.</p>
+<p>The likelihood is defined as follows (i.e. probability of the data given the model), but note we usually cannot marginalise over \(\mathbf{Z}\) directly: </p>
+<p>$$L(\boldsymbol \theta; \mathbf{X} ) = P(\mathbf{X} | \boldsymbol \theta ) = \sum_z P(\mathbf{X}, \mathbf{Z} | \boldsymbol \theta ) $$</p>
+<p>So instead we take this iterative updating approach. We first update our estimate of the expected value of the log-likelihood with respect to the latent variables, \(\mathbf{Z}\), given our current estimate of the model parameters. Then, using this soft assignment, we update our estimates of the parameters.</p>
+<p>Assigning \(\mathbf{Z}\) (i.e. the Gaussian assignments in this example - technically we are calculating the conditional distribution  \(P(\mathbf{Z}|\mathbf{X},\boldsymbol \theta)\) ): </p>
+<p>$$Q(\boldsymbol \theta | \boldsymbol \theta^t ) = \mathbb{E}_{Z|X,\theta^t} \left [ \log ( L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z} )) \right ] $$</p>
+<p>Updating the parameters \(\boldsymbol \theta\):</p>
+<p>$$\boldsymbol \theta ^{t+1} = \arg\max_\theta Q(\boldsymbol \theta | \boldsymbol \theta^t ) $$ </p>
+<h2 id="application-to-gaussian-mixture-models">Application to Gaussian Mixture Models</h2>
+<p>Now let's apply this to the problem of fitting a Gaussian Mixture Model to data. In general the problem is as follows, we wish to fit \( k \) Gaussians to describe the mixture of data we observe. The data has \( D \) dimensions.</p>
+<p>We have a data matrix \(\mathbf{X}\) of size \(N \times D \), a matrix of assignment probabilities \(\mathbf{Z}\) of size \(N \times k \), a vector of marginal probabilities of assignment to the Gaussians (i.e. the proportion of points that come from this Gaussian) \( \boldsymbol \tau \) which is of size \(k \times 1 \). We also have the parameters of the Gaussians: their means \(\boldsymbol \mu_j\) of each of size \(D \times 1\) and their covariances \(\boldsymbol \Sigma_j \) each of size \( D \times D \). </p>
+<p>For the sake of brevity, we will first consider fitting two Gaussians in a one-dimensional space. This means that \(D=1\), \(k=2\) and that the means, \(\mu_1\) and \(\mu_2\), and the variances, \(\sigma^2_1\) and \(\sigma^2_2\) are all scalars.</p>
+<div class="caption" style="display:table;">
+  <img src="exgmm1.png" height="400" style="block">    
+  <div>An example of an EM solution to a 1D mixture of 2 Gaussians.<br>A full example is included later.</div>
+</div>
+<h3 id="the-likelihood">The Likelihood</h3>
+<p>In this case we can write the likelihood as follows:</p>
+<p>$$\begin{align}L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z}) &amp;= P(\mathbf{X}, \mathbf{Z} | \boldsymbol \theta) = \prod_{i=1}^n P(Z_i = z_i ) \  \mathcal{N} (x_i | (\mu_j, \sigma^2_j)) \cr
+&amp;= \prod_{i=1}^n \sum_{j=1}^2 \mathbb{I} (z_i = j) \tau_j \   \mathcal{N} (x_i, \mu_j, \sigma^2_j) \end{align}$$</p>
+<p>Or in exponential form (so we can take the log):</p>
+<p>$$\begin{align}L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) = &amp; \exp \left ( \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j)\right . \cr
+&amp; \left . \left [ \log (\tau_j) - \log(\sigma_j )- \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ] \right )\end{align}$$</p>
+<p>Where \(\mathbb{I}(Z_i=j)\) is the indicator function (i.e. returns 1 iff. \(Z_i = j\), else returns 0).</p>
+<p>So the log-likelihood, which we want to maximise is: </p>
+<p>$$\log ( L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) ) = \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j) \left [ \log (\tau_j) - \log(\sigma_j) - \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ]$$</p>
+<h3 id="the-expectation-step">The Expectation step</h3>
+<p>Recall that the Gaussian assignment probabilities are in \(\mathbf{T}\), this is what we wish to return in the E-step. From Bayes Rule:</p>
+<p>$$\mathbf{T}_{j,i}^t  = P(Z_i = j | X_i=x_i, \boldsymbol \theta^t) = \frac{\tau_j^t \ \mathcal{N}(x_i; \mu_j^t, \sigma_j^t)}{\tau_1^t \ \mathcal{N}(x_i; \mu_1^t, \sigma_1^t) + \tau_2^t \ \mathcal{N}(x_i; \mu_2^t, \sigma_2^t) }$$</p>
+<p>This can also be expressed in terms of \(Q\):</p>
+<p>$$\begin{align}Q(\boldsymbol \theta | \theta^t ) &amp;= \mathbb{E} \left [ \log L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z} ) \right ] = \mathbb{E} \left [ \log \prod_{i=1}^n L(\boldsymbol \theta; \mathbf{X}_i, \mathbf{Z}_i ) \right ] \cr
+&amp;= \mathbb{E} \left [ \sum_{i=1}^n \log  L(\boldsymbol \theta; \mathbf{X}\_i, \mathbf{Z}\_i ) \right ] = \sum_{i=1}^n \mathbb{E} \left [  \log  L(\boldsymbol \theta; \mathbf{X}\_i, \mathbf{Z}\_i ) \right ]\end{align}$$</p>
+<p>$$Q(\boldsymbol \theta | \theta^t )= \sum_{i=1}^n \sum_{j=1}^2 \mathbf{T}_{j,i}^t \left [ \log \tau_j - \log ( \sigma_j ) - \frac{1}{2\sigma_j^2} (X_i - \mu_j) - \frac{d}{2} \log(2\pi ) \right ] $$</p>
+<p>But we only need  \(\mathbf{T}\) to compute the updates.</p>
+<h3 id="the-maximisation-step">The Maximisation step</h3>
+<p>In this step we update our estimates for all of the parameters.</p>
+<p>First let's update our estimates for \(\boldsymbol \tau\), the marginal probabilities for assignment to the Gaussians. Recall that \(\tau_1 + \tau_2 = 1\). The update rule is as follows:</p>
+<p>$$\begin{align}\tau^{t+1} &amp;= \arg\max_{\boldsymbol \tau} Q(\boldsymbol \theta | \boldsymbol \theta^t ) \cr
+&amp;= \arg\max_\tau \left ( \left [ \sum_{i=1}^n \mathbf{T}_{i,1}^t \right ] \log \tau_1 + \left [ \sum_{i=1}^n T_{2,i}^t \right ] \log \tau_2 \right ) \end{align}$$</p>
+<p>This has the same for as the Maximum Likelihood Estimate for the binomial distribution, so the update rule is:</p>
+<p>$$\tau_j^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{j,i}^t }{\sum_{i=1}^n \left ( \mathbf{T}_{1,i}^t + \mathbf{T}_{2,i}^t \right )} = \frac{1}{n} \sum_{i=1}^n  \mathbf{T}_{j,i}^t$$</p>
+<p>We now wish to estimate \(\mu_1\) and \(\sigma_1\):</p>
+<p>$$\begin{align}(\mu_1^{t+1} , \sigma_1^{t+1} ) &amp;= \arg\max_{\mu_1, \sigma_1} Q ( \boldsymbol \theta | \boldsymbol \theta^t) \cr
+&amp;= \arg\max_{\mu_1 , \sigma_1} \sum_{i=1}^n \mathbf{T}_{1,i}^t \left ( - \log(\sigma_1 ) - \frac{1}{2 \sigma_1 ^2 } (x_i-\mu_1)^2 \right )\end{align}$$</p>
+<p>This has the same form as a weighted Maximum Likelihood Estimator for a normal distribution, so the update rules are as follows:</p>
+<p>$$\mu_1^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{1,i}^t X_i}{\sum_{i=1}^n T_{1,i}^t }$$</p>
+<p>$$\sigma_1^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{1,i}^t \left (X_i - \mu_1^{t+1} \right ) ^2}{\sum_{i=1}^n \mathbf{T}_{1,i}^t}$$</p>
+<p>And equally for the second Gaussian (note the updates are independent):</p>
+<p>$$\mu_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t X_i}{\sum_{i=1}^n T_{2,i}^t }$$</p>
+<p>$$\sigma_2^{t+1} = \frac{\sum_{i=1}^n \mathbf{T}_{2,i}^t \left (X_i - \mu_2^{t+1} \right ) ^2}{\sum_{i=1}^n \mathbf{T}_{2,i}^t}$$</p>
+<p>We carry out these updates alternately until the log-likelihood converges.</p>
+<h2 id="interactive-example-for-2-clusters-in-1d">Interactive example for 2 clusters in 1D</h2>
+<p><object data="em1ex.html" width="800" height="600">Could not load plot.</object></p>
+<p>Slide the slider to change the iteration number (shown in the title).</p>
+<p>The full code is available in <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM1Dfinal.ipynb">an IPython notebook here</a>.</p>
+<h2 id="extension">Extension</h2>
+<p>This example  can also be extended to larger numbers of dimensions (though using a Gaussian Mixture Model directly in a high dimensional space is unadvisable), and to any number of Gaussians. In this case the variances become covariance matrices and linear algebra is necessary, but the changes are straightforward.</p>
+<p>Here is an example for a mixture of 4 Gaussians in 2D:</p>
+<p><object data="EM2dtest2.html" width="800" height="600">Could not load plot.</object></p>
+<p>Slide the slider to change the iteration number (shown in the title).</p>
+<p>The code is available in an <a href="http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM2dGMMfinal.ipynb">IPython notebook here</a>.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The EM algorithm is very useful for optimising the parameters of a model with latent variables. Example applications of this, include clustering and hidden Markov models.</p>
+<p>Note however, that it can be prone to overfitting, and good initialisation is critical due to the presence of many local maxima in the likelihood function. Note the algorithm can also be extended to find Maximum A Posteriori estimates instead of Maximum Likelihood estimates.</p>
+<p>One major drawback is that we must choose the cardinality of the latent space (i.e. the number of Gaussians in the mixture, in this example) a priori. There are some Bayesian methods to avoid this, which may be the topic of a future blog post.</p>
+<h2 id="resources">Resources</h2>
+<h3 id="text">Text</h3>
+<ul>
+<li>Chapter 9 of Bishop's <it>Pattern Recognition and Machine Learning</it> covers the EM algorithm in detail, including this example.</li>
+<li>Chapter 19.2.2 of Koller and Friedman's <it>Probabilistic Graphical Models</it> also covers the EM algorithm with respect to Bayesian networks.</li>
+<li>The <a href="http://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm">Wikipedia article</a> also covers this example.</li>
+<li><a href="http://www.seanborman.com/publications/EM_algorithm.pdf">This article</a> by Sean Borman covers the theoretical justification for the EM algorithm.</li>
+</ul>
+<h3 id="video">Video</h3>
+<ul>
+<li>The EM algorithm is covered within the &quot;Learning with Incomplete Data&quot; section of <a href="https://class.coursera.org/pgm-2012-002/lecture">Daphne Koller's Coursera course on Probabilistic Graphical Models</a>.</li>
+<li>The EM algorithm is also covered in <a href="https://www.youtube.com/watch?v=AnbiNaVp3eQ&amp;list=PLD0F06AA0D2E8FFBA&amp;index=116">some of MathematicalMonk's YouTube videos</a>.</li>
+</ul>
+<h3 id="other">Other</h3>
+<ul>
+<li>Many thanks to <a href="https://jakevdp.github.io/blog/2013/12/05/static-interactive-widgets/">this blog post</a> for the implementation of static IPython widgets for Javascript.</li>
+<li>Many thanks to <a href="http://stackoverflow.com/a/12321306/1472461">this StackOverflow answer</a> for the code to plot confidence intervals for arbitrary 2-dimensional Gaussians.</li>
+</ul>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/data-engineering-with-rust-and-aws-lambda/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/spresource/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

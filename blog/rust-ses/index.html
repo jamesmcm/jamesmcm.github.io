@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Serverless Data Ingestion with Rust and AWS SES</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">Serverless Data Ingestion with Rust and AWS SES</h1>
+  <span class="post-date">2020-08-29</span>
+  <hr class="within-post">
+  <p>In this post we will set up a simple, serverless data ingestion pipeline using Rust,
+AWS Lambda and AWS SES with Workmail. </p>
+<p>We will handle multiple types of
+AWS events with one Lambda function, parse received emails
+with the mailparse crate, and send email with SES and the lettre crate.</p>
+<p>The complete code for this example is <a href="https://github.com/jamesmcm/rust_ses_example">available on GitHub here</a>.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<p>You can follow along using the AWS Free Tier, in this case all resources
+are within the AWS Free Tier (at least for new users). Note the Workmail
+free trial is only for 30 days (but will only cost $4 a month for one
+user after that).</p>
+<h2 id="process-requirements">Process Requirements</h2>
+<p>In this process we would like to send an email to a recipient, prompting
+them to send us some CSV data as an attachment. When we receive that
+email we need to parse the attachment, validate its contents, save the
+parsed content in S3 (if we are able to parse it) and email the
+recipient with either a confirmation of success, or a list of
+encountered errors (either in deserialization of the attachment or
+validation) and their file for reference.</p>
+<p>Note that in <a href="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">a previous post</a> 
+I dealt with creating a Lambda based
+pipeline for parsing Excel files and loading the resulting CSV to Redshift. There are a
+few differences and things to note in this process:</p>
+<ul>
+<li>We will use <a href="https://crates.io/crates/rustls">rustls</a> not OpenSSL (so it is easier to statically link
+with musl) - in this case, we only need to select that feature in
+Rusoto.</li>
+<li>The Rusoto API <a href="https://users.rust-lang.org/t/rusoto-how-to-make-sync-calls/41317">no longer provides the .sync() method</a>, so we must instantiate
+an async runtime to block on the Future returned.</li>
+<li>I am still using the crates.io version of the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime</a>
+crate (currently v0.2.1), so we do not have complete async support (the Github master branch version <em>does</em>
+allow you to just use async functions directly!)</li>
+<li>Here we will deal with parsing MIME-formatted emails.</li>
+</ul>
+<p>Note that the reasoning for using Rust is the same - mainly that we
+can deploy a statically linked binary with musl, and we can easily share Rust code
+between different Lambda functions via crates with feature gates, so we can
+include only what we need - helping to control binary size.</p>
+<p>Overall, we can break this process down in to the following steps:</p>
+<ul>
+<li>Parsing a received email (we will set up Workmail to save all emails
+directly to an S3 bucket, and trigger our Lambda function with the S3
+CreateObject event).</li>
+<li>Deserializing and validating the attached CSV file.</li>
+<li>Reading and writing a file to an S3 bucket.</li>
+<li>Sending an email with an attachment (this is harder than it sounds,
+since we have to use SES's SendRawEmail API)</li>
+</ul>
+<h2 id="implementation">Implementation</h2>
+<p>We will follow the order of the steps above (i.e. handling the receipt
+of emails first, and then sending emails). First we need to set up our
+AWS resources.</p>
+<h3 id="aws-resources">AWS resources</h3>
+<p>Create an AWS Workmail organisation (note this will charge $4 a month
+after 30 days) in the <a href="https://eu-west-1.console.aws.amazon.com/workmail/home">Workmail console</a>. 
+We only need the default user and domain. Now in the SES console in
+<code>Email Receiving &gt; Rule Sets</code>, edit the <code>INBOUND_MAIL</code> Rule Set, and
+edit the existing rule to write to an S3 bucket (create a bucket if you
+don't have one). You can also specify specific recipients for which to
+apply the rule.</p>
+<p>Note the same effect can be achieved by setting a rule in the Workmail
+organisation to <a href="https://docs.aws.amazon.com/workmail/latest/adminguide/lambda.html">trigger a Lambda directly</a>, we would then need to use
+the <code>GetRawMessageContent</code> call in the Workmail Message Flow API with the message ID in the event. Since it's
+useful to have an archive of all received emails on S3, we use the S3
+trigger approach here.</p>
+<h3 id="mime-format">MIME format</h3>
+<p>You can now test sending an email to the domain you created (and a
+specific recipient if you set the rule to be specific). You should see a
+file created like the following, containing the MIME-formatted message:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>MIME-Version: 1.0
+</span><span>From: SENDER NAME &lt;SENDER_EMAIL@gmail.com&gt;
+</span><span>Date: Sat, 8 Aug 2020 22:54:58 +0200
+</span><span>Message-ID: &lt;CAMJE-1uq35qGwMeMvryzpLXuN4htOHTDHt4kiLD-7K97XwFE7A@mail.gmail.com&gt;
+</span><span>Subject: testmail
+</span><span>To: test@testses.awsapps.com
+</span><span>Content-Type: multipart/alternative; boundary=&quot;000000000000d2fb5805ac63efb8&quot;
+</span><span>
+</span><span>--000000000000d2fb5805ac63efb8
+</span><span>Content-Type: text/plain; charset=&quot;UTF-8&quot;
+</span><span>
+</span><span>testbody
+</span><span>
+</span><span>--000000000000d2fb5805ac63efb8
+</span><span>Content-Type: text/html; charset=&quot;UTF-8&quot;
+</span><span>
+</span><span>&lt;div dir=&quot;ltr&quot;&gt;testbody&lt;/div&gt;
+</span><span>
+</span><span>--000000000000d2fb5805ac63efb8--
+</span></code></pre>
+<p>In this case <code>testses</code> was the Workmail domain, and the email was sent
+via Gmail (in practice, there are a load of DKIM headers, etc. prior to
+this part - but we will not use those).</p>
+<p>The MIME format consists of many headers (containing some of the most
+relevant information such as sender address, message ID, subject and
+recipient), and a body split up in to parts. Each part is terminated
+with a boundary separator: <code>--000000000000d2fb5805ac63efb8</code> in the above case
+(note this is specified where the multipart begins).</p>
+<p>In the above case we can see the email
+contains both a plaintext and HTML version. The body is
+<code>multipart/alternative</code> so that the client knows it should choose
+between the two parts. If it were <code>multipart/mixed</code> then the client
+would show both parts, in this case effectively duplicating the body for
+the reader. You can read about the <a href="https://en.wikipedia.org/wiki/MIME">MIME specification</a>
+in detail but we won't need much more than this for our purposes.</p>
+<p>The most important thing to note is that multiparts can be nested
+(as different multiparts will have different boundary strings). If we
+send an email with a simple plaintext attachment we see the following:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>Content-Type: multipart/mixed; boundary=&quot;00000000000025ab0605ac643145&quot;
+</span><span>
+</span><span>--00000000000025ab0605ac643145
+</span><span>Content-Type: multipart/alternative; boundary=&quot;00000000000025ab0305ac643143&quot;
+</span><span>
+</span><span>--00000000000025ab0305ac643143
+</span><span>Content-Type: text/plain; charset=&quot;UTF-8&quot;
+</span><span>
+</span><span>attachtest body
+</span><span>
+</span><span>--00000000000025ab0305ac643143
+</span><span>Content-Type: text/html; charset=&quot;UTF-8&quot;
+</span><span>
+</span><span>&lt;div dir=&quot;ltr&quot;&gt;attachtest body&lt;/div&gt;
+</span><span>
+</span><span>--00000000000025ab0305ac643143--
+</span><span>--00000000000025ab0605ac643145
+</span><span>Content-Type: text/plain; charset=&quot;US-ASCII&quot;; name=&quot;test_attachment.txt&quot;
+</span><span>Content-Disposition: attachment; filename=&quot;test_attachment.txt&quot;
+</span><span>Content-Transfer-Encoding: base64
+</span><span>Content-ID: &lt;f_kdm5n1pg0&gt;
+</span><span>X-Attachment-Id: f_kdm5n1pg0
+</span><span>
+</span><span>cGxhaW50ZXh0Cgo=
+</span><span>--00000000000025ab0605ac643145--
+</span></code></pre>
+<p>We have the first multipart which is mixed and contains:</p>
+<ul>
+<li>A nested multipart for the actual body, this is an alternative multipart so
+the client chooses between showing the HTML email or the plaintext
+email.</li>
+<li>A single part which is the plaintext attachment, encoded in base64.</li>
+</ul>
+<p>So the client will choose to display either the HTML or plaintext body, and always
+include the attachment.</p>
+<p>Already we can start to imagine how we could parse this. Fortunately
+there are already crates to do this! In this post we will use the
+<a href="https://crates.io/crates/mailparse">mailparse crate</a>.</p>
+<h3 id="reading-received-emails-with-mailparse">Reading received emails with mailparse</h3>
+<p>We use the <a href="https://docs.rs/mailparse/0.13.0/mailparse/fn.parse_mail.html">parse_mail function</a>
+to parse the MIME message (from bytes) in to a usable struct, and
+extract the attachment body and attachment filename for the first
+attachment:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span> </span><span style="color:#b48ead;">let</span><span> cap = </span><span style="color:#96b5b4;">parse_mail</span><span>(&amp;file)?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> attachment = cap
+</span><span>        .subparts
+</span><span>        .</span><span style="color:#96b5b4;">into_iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">find</span><span>(|</span><span style="color:#bf616a;">x</span><span>| x.</span><span style="color:#96b5b4;">get_content_disposition</span><span>().disposition == mailparse::DispositionType::Attachment)
+</span><span>        .</span><span style="color:#96b5b4;">expect</span><span>(&quot;</span><span style="color:#a3be8c;">No attachment</span><span>&quot;);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> attachment_name = attachment
+</span><span>        .</span><span style="color:#96b5b4;">get_content_disposition</span><span>()
+</span><span>        .params
+</span><span>        .</span><span style="color:#96b5b4;">get</span><span>(&quot;</span><span style="color:#a3be8c;">filename</span><span>&quot;)
+</span><span>        .</span><span style="color:#96b5b4;">expect</span><span>(&quot;</span><span style="color:#a3be8c;">No filename</span><span>&quot;)
+</span><span>        .</span><span style="color:#96b5b4;">to_string</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> attachment = attachment.</span><span style="color:#96b5b4;">get_body</span><span>()?;
+</span></code></pre>
+<p>This gives us the first attachment as a <code>String</code>. Note if we were not dealing
+with a plaintext format, i.e. we had a zipped file, etc., we would use
+<code>get_body_raw()</code> to get a <code>Vec&lt;u8&gt;</code> of bytes. This already handles
+the base64 decoding for us in both cases!</p>
+<h3 id="deserializing-and-validating-the-csv">Deserializing and validating the CSV</h3>
+<p>In our case we expect one attachment, which will be a CSV file. If we
+have any errors reading the file we want to return these to the sender.
+For this simple example, we have a CSV with three fields:</p>
+<ul>
+<li>A positive ID number (i.e. <code>u32</code>)</li>
+<li>A start date</li>
+<li>An end date</li>
+</ul>
+<p>We will use the <a href="https://crates.io/crates/chrono">chrono crate</a> to deserialize the dates,
+and the <a href="https://crates.io/crates/csv">csv crate</a> with <a href="https://crates.io/crates/serde">Serde</a>
+to do the overall deserialization.</p>
+<p>We set up for deserialization (and serialization for the dates for
+later, so we maintain the same format) as follows:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">derive</span><span>(Debug, Deserialize, Serialize, PartialEq)]
+</span><span style="color:#b48ead;">pub struct </span><span>Entry {
+</span><span>    #[</span><span style="color:#bf616a;">serde</span><span>(alias = &quot;</span><span style="color:#a3be8c;">ID</span><span>&quot;)]
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">id</span><span>: </span><span style="color:#b48ead;">u32</span><span>,
+</span><span>    #[</span><span style="color:#bf616a;">serde</span><span>(deserialize_with = &quot;</span><span style="color:#a3be8c;">de_datetime</span><span>&quot;, serialize_with = &quot;</span><span style="color:#a3be8c;">se_datetime</span><span>&quot;)]
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">start_date</span><span>: NaiveDateTime,
+</span><span>    #[</span><span style="color:#bf616a;">serde</span><span>(deserialize_with = &quot;</span><span style="color:#a3be8c;">de_datetime</span><span>&quot;, serialize_with = &quot;</span><span style="color:#a3be8c;">se_datetime</span><span>&quot;)]
+</span><span>    </span><span style="color:#b48ead;">pub </span><span style="color:#bf616a;">end_date</span><span>: NaiveDateTime,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">de_datetime</span><span>&lt;</span><span style="color:#b48ead;">&#39;de</span><span>, D&gt;(</span><span style="color:#bf616a;">deserializer</span><span>: D) -&gt; Result&lt;NaiveDateTime, </span><span style="color:#b48ead;">D::</span><span>Error&gt;
+</span><span style="color:#b48ead;">where
+</span><span>    D: serde::Deserializer&lt;</span><span style="color:#b48ead;">&#39;de</span><span>&gt;,
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s = String::deserialize(deserializer)?;
+</span><span>    </span><span style="color:#b48ead;">match </span><span>NaiveDateTime::parse_from_str(&amp;s, &quot;</span><span style="color:#a3be8c;">%Y-%m-%d %H:%M:%S</span><span>&quot;) {
+</span><span>        Ok(x) =&gt; Ok(x),
+</span><span>        Err(x) =&gt; Err(serde::de::Error::custom(x)),
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">se_datetime</span><span>&lt;S&gt;(</span><span style="color:#bf616a;">dt</span><span>: &amp;NaiveDateTime, </span><span style="color:#bf616a;">serializer</span><span>: S) -&gt; Result&lt;</span><span style="color:#b48ead;">S::</span><span>Ok, </span><span style="color:#b48ead;">S::</span><span>Error&gt;
+</span><span style="color:#b48ead;">where
+</span><span>    S: serde::Serializer,
+</span><span>{
+</span><span>    </span><span style="color:#b48ead;">let</span><span> t = dt.</span><span style="color:#96b5b4;">format</span><span>(&quot;</span><span style="color:#a3be8c;">%Y-%m-%d %H:%M:%S</span><span>&quot;).</span><span style="color:#96b5b4;">to_string</span><span>();
+</span><span>    serializer.</span><span style="color:#96b5b4;">collect_str</span><span>(&amp;t)
+</span><span>}
+</span></code></pre>
+<p>We specify the deserialization and serialization functions for the dates
+so that we can specify the format to match the original input. Note the
+alias attribute means we can deserialize from either &quot;ID&quot; or &quot;id&quot;, see
+<a href="https://serde.rs/field-attrs.html">the Serde field attributes for more details</a>.</p>
+<p>Then to deserialize we use:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">deserialize_csv</span><span>(</span><span style="color:#bf616a;">attachment</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; (Vec&lt;Entry&gt;, Vec&lt;csv::Error&gt;) {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> rdr = csv::Reader::from_reader(Cursor::new(attachment.</span><span style="color:#96b5b4;">trim</span><span>()));
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> records: Vec&lt;Entry&gt; = Vec::with_capacity(</span><span style="color:#d08770;">16</span><span>);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> de_errors: Vec&lt;csv::Error&gt; = Vec::new();
+</span><span>    </span><span style="color:#b48ead;">for</span><span> result in rdr.</span><span style="color:#96b5b4;">deserialize</span><span>() {
+</span><span>        </span><span style="color:#b48ead;">match</span><span> result {
+</span><span>            Ok(record) =&gt; {
+</span><span>                records.</span><span style="color:#96b5b4;">push</span><span>(record);
+</span><span>            }
+</span><span>            Err(error) =&gt; de_errors.</span><span style="color:#96b5b4;">push</span><span>(error),
+</span><span>        }
+</span><span>    }
+</span><span>
+</span><span>    (records, de_errors)
+</span><span>}
+</span></code></pre>
+<p>Note we put any errors in to the <code>de_errors</code> Vec, so if there are any,
+we can later parse them to return to the sender.</p>
+<p>We validate the records with the following functions, passing in a
+reference to the <code>Vec&lt;Entry&gt;</code> from above (since we can choose our error
+type here, we use <code>anyhow::Error</code> for simplicity):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">validate_record</span><span>(</span><span style="color:#bf616a;">r</span><span>: &amp;Entry) -&gt; Result&lt;()&gt; {
+</span><span>    </span><span style="color:#b48ead;">if</span><span> r.start_date &gt; r.end_date {
+</span><span>        Err(anyhow!(
+</span><span>            &quot;</span><span style="color:#a3be8c;">Start date after end date for entry: {}, {}, {}</span><span>&quot;,
+</span><span>            r.id,
+</span><span>            r.start_date,
+</span><span>            r.end_date
+</span><span>        ))
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        Ok(())
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">validate_all_records</span><span>(</span><span style="color:#bf616a;">records</span><span>: &amp;[Entry]) -&gt; Vec&lt;anyhow::Error&gt; {
+</span><span>    records
+</span><span>        .</span><span style="color:#96b5b4;">iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">x</span><span>| </span><span style="color:#96b5b4;">validate_record</span><span>(x))
+</span><span>        .</span><span style="color:#96b5b4;">filter_map</span><span>(|</span><span style="color:#bf616a;">x</span><span>| x.</span><span style="color:#96b5b4;">err</span><span>())
+</span><span>        .</span><span style="color:#96b5b4;">collect</span><span>()
+</span><span>}
+</span></code></pre>
+<p>We can use the above Vectors of errors to generate an error email if
+there are any errors present. But first we need to deal with sending an
+email with SES.</p>
+<h3 id="sending-an-email">Sending an email</h3>
+<p>To send an email with SES, there are two options:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/ses/latest/APIReference/API_SendEmail.html">SendEmail</a> for sending emails without attachments. This is easy-to-use but unfortunately we need to send attachments.</li>
+<li><a href="https://docs.aws.amazon.com/ses/latest/APIReference/API_SendRawEmail.html">SendRawEmail</a> for sending a raw MIME email, including attachments.</li>
+</ul>
+<p>So we will use <a href="https://rusoto.github.io/rusoto/rusoto_ses/struct.SendRawEmailRequest.html">SendRawEmailRequest</a> in Rusoto
+to send MIME emails. But first of all we need to construct our MIME
+email. To do this, we will use the <a href="https://crates.io/crates/lettre">lettre crate</a>,
+specifically the <a href="https://docs.rs/lettre/0.10.0-alpha.1/lettre/message/struct.MessageBuilder.html">MessageBuilder</a>
+in the current alpha version (note we use the 0.10 alpha in order to
+use rustls).</p>
+<p>By default SES will be in <a href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html">Sandbox mode</a>. This means you must
+verify the email addresses that you want to send to (and from) in the
+SES console.</p>
+<p>The full code is available in 
+<a href="https://github.com/jamesmcm/rust_ses_example/blob/master/src/email.rs">the Github repo</a>.
+Here is an excerpt showing how to handle adding the attachment part
+if necessary:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#65737e;">// Set headers from arguments
+</span><span>    </span><span style="color:#b48ead;">let</span><span> email = Message::builder()
+</span><span>        .</span><span style="color:#96b5b4;">to</span><span>(recipient.</span><span style="color:#96b5b4;">parse</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>        .</span><span style="color:#96b5b4;">from</span><span>(</span><span style="color:#b48ead;">crate</span><span>::</span><span style="color:#d08770;">FROM</span><span>.</span><span style="color:#96b5b4;">parse</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>())
+</span><span>        .</span><span style="color:#96b5b4;">subject</span><span>(subject);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Deal with text and HTML body - omitted here
+</span><span>    </span><span style="color:#65737e;">// let mpart =  ...
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Add attachment if present
+</span><span>    </span><span style="color:#b48ead;">let</span><span> mpart = </span><span style="color:#b48ead;">if let </span><span>Some(attachment) = attachment {
+</span><span>        mpart.</span><span style="color:#96b5b4;">singlepart</span><span>(
+</span><span>            SinglePart::base64()
+</span><span>                .</span><span style="color:#96b5b4;">header</span><span>(header::ContentType(attachment.mime.</span><span style="color:#96b5b4;">parse</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>()))
+</span><span>                .</span><span style="color:#96b5b4;">header</span><span>(lettre::message::header::ContentDisposition {
+</span><span>                    disposition: DispositionType::Attachment,
+</span><span>                    parameters: vec![DispositionParam::Filename(
+</span><span>                        Charset::Us_Ascii,
+</span><span>                        None,
+</span><span>                        attachment.name.</span><span style="color:#96b5b4;">as_bytes</span><span>().</span><span style="color:#96b5b4;">to_vec</span><span>(), </span><span style="color:#65737e;">// the bytes of the filename
+</span><span>                    )],
+</span><span>                })
+</span><span>                .</span><span style="color:#96b5b4;">body</span><span>(attachment.attachment),
+</span><span>        )
+</span><span>    } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>        mpart
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> email = email.</span><span style="color:#96b5b4;">multipart</span><span>(mpart)?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> msg_string = email.</span><span style="color:#96b5b4;">formatted</span><span>();
+</span></code></pre>
+<p>Note that we don't need to base64 encode the attachment ourselves,
+lettre will do this for us.</p>
+<p>Then we make the request with Rusoto, note that we must base64 encode
+our message in the request in the <code>RawMessage</code> struct! Also note that we
+need to block on the Future returned from <code>send_raw_email()</code>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    </span><span style="color:#b48ead;">let</span><span> raw_message = rusoto_ses::RawMessage {
+</span><span>        data: bytes::Bytes::from(base64::encode(msg_string)),
+</span><span>    };
+</span><span>    </span><span style="color:#b48ead;">let</span><span> request = rusoto_ses::SendRawEmailRequest {
+</span><span>        configuration_set_name: None,
+</span><span>        destinations: None,
+</span><span>        from_arn: None,
+</span><span>        raw_message,
+</span><span>        return_path_arn: None,
+</span><span>        source: None,
+</span><span>        source_arn: None,
+</span><span>        tags: None,
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> fut = ses_client.</span><span style="color:#96b5b4;">send_raw_email</span><span>(request);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> response = rt.</span><span style="color:#96b5b4;">block_on</span><span>(fut)?;
+</span><span>    info!(&quot;</span><span style="color:#a3be8c;">Email sent: {:?}</span><span>&quot;, response);
+</span></code></pre>
+<p>Now we can receive and send emails, and parse and validate the CSV
+attachments, we only need to put it together for the Lambda function.</p>
+<h3 id="s3">S3</h3>
+<p>First we need to be able to read and write objects to S3, in order to
+write the CSV we receive after validation, and read it when we send the
+prompt email triggered with a Cloudwatch event.</p>
+<p>This is simple to achieve with Rusoto, but note we need to block on the
+returned futures just as in the SES case:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">get_file_from_s3</span><span>(
+</span><span>    </span><span style="color:#bf616a;">bucket</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">key</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">s3_client</span><span>: &amp;S3Client,
+</span><span>    </span><span style="color:#bf616a;">rt</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>tokio::runtime::Runtime,
+</span><span>) -&gt; Result&lt;Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt;&gt; {
+</span><span>    info!(&quot;</span><span style="color:#a3be8c;">Reading bucket: {}, key: {}</span><span>&quot;, bucket, key);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3file_fut = s3_client.</span><span style="color:#96b5b4;">get_object</span><span>(GetObjectRequest {
+</span><span>        bucket: bucket.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>        key: key.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>        ..Default::default()
+</span><span>    });
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3file = rt.</span><span style="color:#96b5b4;">block_on</span><span>(s3file_fut)?;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> buffer: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt; = Vec::new();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> _file = s3file
+</span><span>        .body
+</span><span>        .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">into_blocking_read</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">read_to_end</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buffer)?;
+</span><span>    Ok(buffer)
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">write_file_to_s3</span><span>(
+</span><span>    </span><span style="color:#bf616a;">file</span><span>: Vec&lt;</span><span style="color:#b48ead;">u8</span><span>&gt;,
+</span><span>    </span><span style="color:#bf616a;">bucket</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">key</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>,
+</span><span>    </span><span style="color:#bf616a;">s3_client</span><span>: &amp;S3Client,
+</span><span>    </span><span style="color:#bf616a;">rt</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>tokio::runtime::Runtime,
+</span><span>) -&gt; Result&lt;()&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> fut = s3_client.</span><span style="color:#96b5b4;">put_object</span><span>(PutObjectRequest {
+</span><span>        bucket: bucket.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>        key: key.</span><span style="color:#96b5b4;">to_string</span><span>(),
+</span><span>        body: Some(file.</span><span style="color:#96b5b4;">into</span><span>()),
+</span><span>        ..Default::default()
+</span><span>    });
+</span><span>    </span><span style="color:#b48ead;">let</span><span> _response = rt.</span><span style="color:#96b5b4;">block_on</span><span>(fut)?;
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>Now we can actually operate on the S3 event the Lambda function will
+receive as a trigger for received emails (by extracting the S3 key from
+the event and reading it).</p>
+<h3 id="aws-events-and-lambda">AWS events and Lambda</h3>
+<p>We will use the <a href="https://crates.io/crates/aws_lambda_events">aws_lambda_events</a>
+crate for deserializing the events we receive. In this case we want to
+handle two different events - the Cloudwatch event from a fixed time
+trigger to send a prompt email, and the S3 event from received emails
+(being written to S3 via the SES/Workmail inbound mail rule).</p>
+<p>We can do this by using the untagged Serde attribute and our own enum,
+acting as a wrapper over the possibilities:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">derive</span><span>(Serialize, Deserialize, Debug)]
+</span><span>#[</span><span style="color:#bf616a;">serde</span><span>(untagged)]
+</span><span style="color:#b48ead;">enum </span><span>EventEnum {
+</span><span>    S3Event(aws_lambda_events::event::s3::S3Event),
+</span><span>    CloudWatchEvent(aws_lambda_events::event::cloudwatch_events::CloudWatchEvent),
+</span><span>}
+</span></code></pre>
+<p>See the <a href="https://serde.rs/enum-representations.html">Serde enum representations docs</a>
+for more details and handling other possibilities.</p>
+<p>Then we can deserialize to <code>EventEnum</code> in our handler function:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;()&gt; {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> builder = pretty_env_logger::formatted_timed_builder();
+</span><span>    builder.</span><span style="color:#96b5b4;">filter_level</span><span>(log::LevelFilter::Debug);
+</span><span>    builder.</span><span style="color:#96b5b4;">init</span><span>();
+</span><span>    lambda_runtime::lambda!(my_handler);
+</span><span>
+</span><span>    Ok(())
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">my_handler</span><span>(</span><span style="color:#bf616a;">e</span><span>: EventEnum, </span><span style="color:#bf616a;">_c</span><span>: lambda_runtime::Context) -&gt; Result&lt;(), HandlerError&gt; {
+</span><span>    </span><span style="color:#65737e;">// Create clients here once since we will use them in all cases
+</span><span>    </span><span style="color:#b48ead;">let</span><span> s3_client = S3Client::new(Region::EuWest1);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> ses_client = SesClient::new(Region::EuWest1);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> rt = tokio::runtime::Runtime::new().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match</span><span> e {
+</span><span>    </span><span style="color:#65737e;">// Match on different events here...
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h3 id="deployment">Deployment</h3>
+<p>Now we are ready to deploy our Lambda function. In order to use Rustls
+and the Tokio's <code>block_on</code> method we should set the following features in our dependencies in
+<code>Cargo.toml</code>:</p>
+<pre data-lang="toml" style="background-color:#2b303b;color:#c0c5ce;" class="language-toml "><code class="language-toml" data-lang="toml"><span style="color:#bf616a;">rusoto_core </span><span>= {</span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.44</span><span>&quot;, </span><span style="color:#bf616a;">default_features </span><span>= </span><span style="color:#d08770;">false</span><span>, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">rustls</span><span>&quot;]}
+</span><span style="color:#bf616a;">rusoto_s3 </span><span>= {</span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.44</span><span>&quot;, </span><span style="color:#bf616a;">default_features </span><span>= </span><span style="color:#d08770;">false</span><span>, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">rustls</span><span>&quot;]}
+</span><span style="color:#bf616a;">rusoto_ses </span><span>= {</span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.44</span><span>&quot;, </span><span style="color:#bf616a;">default_features </span><span>= </span><span style="color:#d08770;">false</span><span>, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">rustls</span><span>&quot;]}
+</span><span style="color:#bf616a;">lettre </span><span>= { </span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.10.0-alpha.0</span><span>&quot;, </span><span style="color:#bf616a;">default_features </span><span>= </span><span style="color:#d08770;">false</span><span>, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">rustls-tls</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">builder</span><span>&quot;] }
+</span><span style="color:#bf616a;">tokio </span><span>= {</span><span style="color:#bf616a;">version </span><span>= &quot;</span><span style="color:#a3be8c;">0.2</span><span>&quot;, </span><span style="color:#bf616a;">default_features </span><span>= </span><span style="color:#d08770;">false</span><span>, </span><span style="color:#bf616a;">features </span><span>= [&quot;</span><span style="color:#a3be8c;">blocking</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">rt-threaded</span><span>&quot;]}
+</span></code></pre>
+<p>Now we can compile with the musl target (here I assume a GNU/Linux platform,
+for OS X you <a href="https://hackernoon.com/cross-compiling-rust-on-macos-to-run-as-a-unikernel-ff1w3ypi">will need to install musl-cross</a>).</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>$ cargo build --release --target=x86_64-unknown-linux-musl
+</span></code></pre>
+<p>And then zip up the resulting binary, to upload it in the AWS Lambda
+console:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>$ zip bootstrap.zip ./target/x86_64-unknown-linux-musl/release/bootstrap
+</span></code></pre>
+<p>Upload this zip file to the Lambda console and add the S3 trigger for
+the bucket set in the Inbound rule, then add a Cloudwatch trigger on a
+schedule for sending the prompt email.</p>
+<h2 id="summary">Summary</h2>
+<p>In this post we have seen how to build a simple serverless data pipeline
+in Rust, based around ingesting and sending data via email.</p>
+<p>Note that we use <a href="https://crates.io/crates/lambda_runtime">lambda_runtime</a> v0.2.1 in the above code. Soon v0.3
+will release which will allow us to use async functions directly. I
+think even in v0.2.1 there is a way of passing the Tokio runtime in the
+handler Context so we wouldn't need to pass it manually, but I didn't
+investigate it much since the new changes will be stable very soon (see
+<a href="https://github.com/awslabs/aws-lambda-rust-runtime/pull/111">this PR for example</a>).</p>
+<p>We used the alpha version of the new <a href="https://crates.io/crates/lettre/0.10.0-alpha.1">lettre</a>
+release so that we could use <a href="https://crates.io/crates/rustls">rustls</a> everywhere. In the
+future the new API will change and hopefully become more ergonomic like
+v0.9.3.</p>
+<h3 id="possible-improvements">Possible Improvements</h3>
+<p>If we were to extend this example, a simple task would be to handle zip
+file attachments with the <a href="https://crates.io/crates/zip">zip</a> crate. We
+could also send responses as actual email replies using the <code>In-Reply-To</code>
+and <code>References</code> headers, this would help to ensure the sent emails are
+appropriately viewable in the recipient's client (i.e. otherwise Gmail
+might thread our new messages with older ones since they share the same
+Subject).</p>
+<p>We should also better handle the case where we receive no attachment, or
+multiple attachments. This could be handled elegantly by moving the
+error email sending outside of the <code>handle_email()</code> function and adding
+custom error types for these different cases. So in the case of any
+error we could send an appropriate notification email.</p>
+<p>It would also be good to deploy the Lambda function with the <a href="https://aws.amazon.com/cdk/">AWS Cloud
+Development Kit (CDK)</a> so we can create all resources necessary, and
+keep the necessary infrastructure steps with the code. Unfortunately
+<a href="https://github.com/aws/jsii/issues/1684">jsii does not yet have Rust bindings</a> so
+the actual CDK code would need to be written in a supported language
+such as TypeScript.</p>
+<hr />
+<p>Many thanks to all of the contributors to the crates used in this
+example, and especially to the maintainers of <a href="https://github.com/awslabs/aws-lambda-rust-runtime">lambda_runtime</a> and <a href="https://github.com/rusoto/rusoto">Rusoto</a>
+whose efforts have made Rust a viable choice in this space.</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/vopono/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/intro-dod/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>My First Clippy Lint</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">My First Clippy Lint</h1>
+  <span class="post-date">2022-03-26</span>
+  <hr class="within-post">
+  <p>Recently I wrote my first <a href="https://github.com/rust-lang/rust-clippy">Clippy</a> lint. It was much easier to
+implement and test than I had expected. In this post I'll review the
+process of creating or contributing to a Clippy lint, the implementation itself and
+how this reflects Rust's values of empowerment.</p>
+<span id="continue-reading"></span>
+<p>Whilst writing some quick prototyping code back in October, I came
+across an issue accidentally triggering a recursive definition of
+the <code>Display</code> trait, with code similar to <a href="https://play.rust-lang.org/?version=stable&amp;mode=debug&amp;edition=2018&amp;gist=690cb006ae868d481ed830540bf1b52c">the following</a>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">struct </span><span>TestType;
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>std::ops::Deref </span><span style="color:#b48ead;">for </span><span>TestType {
+</span><span>    </span><span style="color:#b48ead;">type </span><span>Target = </span><span style="color:#b48ead;">str</span><span>;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">deref</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) -&gt; &amp;</span><span style="color:#b48ead;">Self::</span><span>Target {
+</span><span>        &quot;</span><span style="color:#a3be8c;">test</span><span>&quot;
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>std::fmt::Display </span><span style="color:#b48ead;">for </span><span>TestType {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">f</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>std::fmt::Formatter) -&gt; std::fmt::Result {
+</span><span>        write!(f, &quot;</span><span style="color:#d08770;">{}</span><span>&quot;, &amp;*</span><span style="color:#bf616a;">self</span><span>)
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Note the subtle issue of the single deref in <code>fmt()</code>, the code works
+correctly if <code>&amp;*self</code> is replaced with <code>&amp;**self</code> since <code>self</code> is already
+a reference inside the method. This mistake leads to infinite recursion since it tries to format
+<code>self</code> with <code>Display</code> whilst inside the definition for <code>Display</code>.</p>
+<p>However, the real issue was that neither rustc nor Clippy gave any
+warning about the infinite recursion. rustc does have
+its own lint for <a href="https://doc.rust-lang.org/rustc/lints/listing/warn-by-default.html#unconditional-recursion">unconditional recursion</a>,
+however in this case it is not triggered due to it not being a direct
+call of the same function (i.e. there some layers of function calls due
+to the formatting machinery).</p>
+<p>Being so used to rustc and Clippy detecting all sorts of issues, this
+was disappointing. So I created <a href="https://github.com/rust-lang/rust-clippy/issues/7830">an issue for Clippy</a>
+and was referred to a <a href="https://github.com/rust-lang/rust-clippy/issues/2691">much earlier issue</a> (from April 2018!)
+for the underlying problem (the recursive Display implementation).</p>
+<h2 id="implementing-the-lint">Implementing the lint</h2>
+<p>The rough procedure for implementing a new lint is as follows:</p>
+<ul>
+<li>Decide on the lint type (early pass or late pass)</li>
+<li>Write test cases (including positive and negative cases, and likely
+false positives and negatives) - in this case they are UI tests since
+we want to check that the user-facing output of the lint is correct.</li>
+<li>Implementing the lint (checking similar lints for help and possible complications)</li>
+<li>Checking test output is correct (i.e. only triggers where wanted)</li>
+<li>Updating the expected test output and lint register</li>
+</ul>
+<p>There are two lint pass types - early and late. The early lint pass is
+faster but has no access to type lookups (only the Abstract Syntax
+Tree (AST)). In this case we need the type information, so we use the late
+pass.</p>
+<p>When we implement the lint pass, we write code that will be executed for
+each matching node in the AST. Note that we can store state in the Lint
+struct itself, which is useful for keeping track of where we are in the
+code (i.e. to keep information from outer parts of the AST) - here we
+use this to only check expressions when inside the Display or Debug impl
+block.</p>
+<h3 id="lint-pass-overview">Lint pass overview</h3>
+<p>To start with we need to be able to detect when we are inside a Display
+or Debug impl block.</p>
+<p>In this code set the <code>self.format_trait_impl</code> field
+when we are inside the <code>Impl</code> of a format trait (Display or Debug)
+and unset it once we leave that <code>Impl</code> block:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub struct </span><span>FormatImpl {
+</span><span>    </span><span style="color:#65737e;">// Whether we are inside a Display or Debug trait impl - None for neither
+</span><span>    </span><span style="color:#bf616a;">format_trait_impl</span><span>: Option&lt;FormatTrait&gt;,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl</span><span>&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt; LateLintPass&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt; </span><span style="color:#b48ead;">for </span><span>FormatImpl {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_impl_item</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;&#39;_&gt;, </span><span style="color:#bf616a;">impl_item</span><span>: &amp;ImplItem&lt;&#39;_&gt;) {
+</span><span>	</span><span style="color:#65737e;">// Check if Impl is for Display or Debug
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.format_trait_impl = </span><span style="color:#96b5b4;">is_format_trait_impl</span><span>(cx, impl_item);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_impl_item_post</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;&#39;_&gt;, </span><span style="color:#bf616a;">impl_item</span><span>: &amp;ImplItem&lt;&#39;_&gt;) {
+</span><span>        </span><span style="color:#65737e;">// Assume no nested Impl of Debug and Display within eachother
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#96b5b4;">is_format_trait_impl</span><span>(cx, impl_item).</span><span style="color:#96b5b4;">is_some</span><span>() {
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.format_trait_impl = None;
+</span><span>        }
+</span><span>    }
+</span><span>    ...
+</span></code></pre>
+<p><code>check_impl_item</code> is triggered at the start of an Impl block, and
+<code>check_impl_item_post</code> when we leave it.</p>
+<p>This use of state means that we can then do our Expression level checks
+only when we're inside the relevant Impl blocks:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">impl</span><span>&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt; LateLintPass&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt; </span><span style="color:#b48ead;">for </span><span>FormatImpl {
+</span><span>    ...
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_expr</span><span>(&amp;</span><span style="color:#b48ead;">mut </span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt;, </span><span style="color:#bf616a;">expr</span><span>: &amp;</span><span style="color:#b48ead;">&#39;tcx </span><span>Expr&lt;&#39;_&gt;) {
+</span><span>        </span><span style="color:#b48ead;">let </span><span>Some(format_trait_impl) = </span><span style="color:#bf616a;">self</span><span>.format_trait_impl </span><span style="color:#b48ead;">else </span><span>{ </span><span style="color:#b48ead;">return </span><span>};
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">if</span><span> format_trait_impl.name == sym::Display {
+</span><span>            </span><span style="color:#96b5b4;">check_to_string_in_display</span><span>(cx, expr);
+</span><span>        }
+</span><span>
+</span><span>        </span><span style="color:#96b5b4;">check_self_in_format_args</span><span>(cx, expr, format_trait_impl);
+</span><span>        </span><span style="color:#96b5b4;">check_print_in_format_impl</span><span>(cx, expr, format_trait_impl);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>The <code>to_string_in_display</code> check is only relevant for the Display trait,
+so we check for it explicitly there.</p>
+<p>Note the use of separate functions for different lint checks. This
+allows us to combine checking related lints in the same lint pass whilst
+keeping the code readable.</p>
+<h3 id="to-string-in-display">to_string_in_display</h3>
+<p>The check for the use of <code>to_string()</code> on self whilst inside the Display
+impl is quite straightforward:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_to_string_in_display</span><span>(</span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;&#39;_&gt;, </span><span style="color:#bf616a;">expr</span><span>: &amp;Expr&lt;&#39;_&gt;) {
+</span><span>    if_chain! {
+</span><span>        </span><span style="color:#65737e;">// Get the hir_id of the object we are calling the method on
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>ExprKind::MethodCall(path, [</span><span style="color:#b48ead;">ref</span><span> self_arg, ..], _) = expr.kind;
+</span><span>        </span><span style="color:#65737e;">// Is the method to_string() ?
+</span><span>        </span><span style="color:#b48ead;">if</span><span> path.ident.name == sym!(to_string);
+</span><span>        </span><span style="color:#65737e;">// Is the method a part of the ToString trait? (i.e. not to_string() implemented
+</span><span>        </span><span style="color:#65737e;">// separately)
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(expr_def_id) = cx.</span><span style="color:#96b5b4;">typeck_results</span><span>().</span><span style="color:#96b5b4;">type_dependent_def_id</span><span>(expr.hir_id);
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#96b5b4;">is_diag_trait_item</span><span>(cx, expr_def_id, sym::ToString);
+</span><span>        </span><span style="color:#65737e;">// Is the method is called on self?
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>ExprKind::Path(QPath::Resolved(_, path)) = self_arg.kind;
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>[segment] = path.segments;
+</span><span>        </span><span style="color:#b48ead;">if</span><span> segment.ident.name == kw::SelfLower;
+</span><span>        then {
+</span><span>            </span><span style="color:#96b5b4;">span_lint</span><span>(
+</span><span>                cx,
+</span><span>                </span><span style="color:#d08770;">RECURSIVE_FORMAT_IMPL</span><span>,
+</span><span>                expr.span,
+</span><span>                &quot;</span><span style="color:#a3be8c;">using `self.to_string` in `fmt::Display` implementation will cause infinite recursion</span><span>&quot;,
+</span><span>            );
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Note the use of the <a href="https://docs.rs/if_chain/latest/if_chain/">if_chain!</a> macro to 
+chain if conditions without rightward drift (this is used throughout
+Clippy).</p>
+<p>The pattern <code>if let Some(XXX) = YYY;</code> is common when using if
+chains, to allow us to refer to <code>XXX</code> later in the if chain (and stop
+checking if it is None).</p>
+<p>It is the <code>span_lint()</code> call that actually returns output for the
+specific lint (i.e. <code>RECURSIVE_FORMAT_IMPL</code> in this case). This output
+(to stderr) is what is compared in the UI test.</p>
+<p>Also note the use of <a href="https://rustc-dev-guide.rust-lang.org/diagnostics/diagnostic-items.html">diagnostic items</a> with the
+<code>is_diag_trait_item()</code> check. This is <a href="https://github.com/rust-lang/rust-clippy/issues/5393">recommended over using hardcoded paths</a>.</p>
+<h4 id="ui-test-example">UI Test example</h4>
+<p>One UI test (in <code>tests/ui/recursive_format_impl.rs</code>) for the above check is:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#bf616a;">warn</span><span>(clippy::recursive_format_impl)]
+</span><span>#![</span><span style="color:#bf616a;">allow</span><span>(
+</span><span>    clippy::inherent_to_string_shadow_display,
+</span><span>    clippy::to_string_in_format_args,
+</span><span>    clippy::deref_addrof
+</span><span>)]
+</span><span>
+</span><span style="color:#b48ead;">use </span><span>std::fmt;
+</span><span>
+</span><span style="color:#b48ead;">struct </span><span>A;
+</span><span style="color:#b48ead;">impl </span><span>A {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) {
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">to_string</span><span>();
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">trait </span><span>B {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) {}
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>B </span><span style="color:#b48ead;">for </span><span>A {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>) {
+</span><span>        </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">to_string</span><span>();
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>fmt::Display </span><span style="color:#b48ead;">for </span><span>A {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">f</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>fmt::Formatter) -&gt; fmt::Result {
+</span><span>        write!(f, &quot;</span><span style="color:#d08770;">{}</span><span>&quot;, </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">to_string</span><span>())
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(</span><span style="color:#bf616a;">a</span><span>: A) {
+</span><span>    a.</span><span style="color:#96b5b4;">to_string</span><span>();
+</span><span>}
+</span></code></pre>
+<p>With the expected output:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>error: using `self.to_string` in `fmt::Display` implementation will cause infinite recursion
+</span><span>  --&gt; $DIR/recursive_format_impl.rs:29:25
+</span><span>   |
+</span><span>LL |         write!(f, &quot;{}&quot;, self.to_string())
+</span><span>   |                         ^^^^^^^^^^^^^^^^
+</span><span>   |
+</span><span>   = note: `-D clippy::recursive-format-impl` implied by `-D warnings`
+</span></code></pre>
+<p>i.e. it only triggers for the <code>fmt::Display</code> impl for A and not in the impl of
+trait <code>B</code> for struct <code>A</code>.</p>
+<h3 id="check-self-in-format-args">check_self_in_format_args</h3>
+<p>The original case to solve is slightly more complicated. First we need
+to find the use of the format macro e.g. <code>write!(...)</code> inside the
+Display/Debug impl, and then we need to check the arguments inside the macro call
+(to check whether any of them resolve to <code>self</code>).</p>
+<p>Here we use some of the shared Clippy utils like <code>root_macro_call_first_node()</code> which 
+make it much easier to deal with macros. This makes the first part quite
+straightforward:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_self_in_format_args</span><span>&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt;(</span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt;, </span><span style="color:#bf616a;">expr</span><span>: &amp;</span><span style="color:#b48ead;">&#39;tcx </span><span>Expr&lt;&#39;_&gt;, </span><span style="color:#bf616a;">impl_trait</span><span>: FormatTrait) {
+</span><span>    </span><span style="color:#65737e;">// First find the call of the format macro
+</span><span>    if_chain! {
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(outer_macro) = </span><span style="color:#96b5b4;">root_macro_call_first_node</span><span>(cx, expr);
+</span><span>        </span><span style="color:#b48ead;">if let</span><span> macro_def_id = outer_macro.def_id;
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(format_args) = FormatArgsExpn::find_nested(cx, expr, outer_macro.expn);
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#96b5b4;">is_format_macro</span><span>(cx, macro_def_id);
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(args) = format_args.</span><span style="color:#96b5b4;">args</span><span>();
+</span><span>        then {
+</span><span>            </span><span style="color:#b48ead;">for</span><span> arg in args {
+</span><span>		</span><span style="color:#65737e;">// It is okay to use a Display method in a Debug impl, and vice versa
+</span><span>                </span><span style="color:#b48ead;">if</span><span> arg.format_trait != impl_trait.name {
+</span><span>                    </span><span style="color:#b48ead;">continue</span><span>;
+</span><span>                }
+</span><span>		</span><span style="color:#65737e;">// Check if arg resolves to self
+</span><span>                </span><span style="color:#96b5b4;">check_format_arg_self</span><span>(cx, expr, &amp;arg, impl_trait);
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>As noted in the original example, checking the arguments to the format
+macro is slightly complicated by the fact we need to handle references
+and de-references. Here this is done with the use of the
+<code>peel_ref_operators()</code> utils function.</p>
+<p>After that, it's just a case of checking whether the result is <code>self</code> or
+not.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_format_arg_self</span><span>(</span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;&#39;_&gt;, </span><span style="color:#bf616a;">expr</span><span>: &amp;Expr&lt;&#39;_&gt;, </span><span style="color:#bf616a;">arg</span><span>: &amp;FormatArgsArg&lt;&#39;_&gt;, </span><span style="color:#bf616a;">impl_trait</span><span>: FormatTrait) {
+</span><span>    </span><span style="color:#65737e;">// Check each arg in format calls - do we ever use Display on self (directly or via deref)?
+</span><span>    </span><span style="color:#65737e;">// Handle multiple dereferencing of references e.g. &amp;&amp;self
+</span><span>    </span><span style="color:#65737e;">// Handle dereference of &amp;self -&gt; self that is equivalent (i.e. via *self in fmt() impl)
+</span><span>    </span><span style="color:#65737e;">// Since the argument to fmt is itself a reference: &amp;self
+</span><span>    </span><span style="color:#b48ead;">let</span><span> reference = </span><span style="color:#96b5b4;">peel_ref_operators</span><span>(cx, arg.value);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> map = cx.tcx.</span><span style="color:#96b5b4;">hir</span><span>();
+</span><span>    </span><span style="color:#65737e;">// Is the reference self?
+</span><span>    </span><span style="color:#b48ead;">if </span><span style="color:#96b5b4;">path_to_local</span><span>(reference).</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">x</span><span>| map.</span><span style="color:#96b5b4;">name</span><span>(x)) == Some(kw::SelfLower) {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> FormatTrait { name, .. } = impl_trait;
+</span><span>        </span><span style="color:#96b5b4;">span_lint</span><span>(
+</span><span>            cx,
+</span><span>            </span><span style="color:#d08770;">RECURSIVE_FORMAT_IMPL</span><span>,
+</span><span>            expr.span,
+</span><span>            &amp;format!(&quot;</span><span style="color:#a3be8c;">using `self` as `</span><span style="color:#d08770;">{name}</span><span style="color:#a3be8c;">` in `impl </span><span style="color:#d08770;">{name}</span><span style="color:#a3be8c;">` will cause infinite recursion</span><span>&quot;),
+</span><span>        );
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h3 id="things-to-consider">Things to consider</h3>
+<p>Note that we never execute the code itself, Clippy is entirely static
+analysis. However, the fact that we have access to the type information
+means we can still handle things like checking what the final type of an
+expression will be after applying dereferences, etc. as done here.</p>
+<p>However, one must take care not to create false positives by
+accidentally over-simplifying the checks. For example, my original code
+just compared the final type of the expression of the argument in the
+format macro with the <code>Self</code> type in the impl block, to avoid dealing with references and de-references directly.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>  </span><span style="color:#b48ead;">let</span><span> arg_ty = cx.</span><span style="color:#96b5b4;">typeck_results</span><span>().</span><span style="color:#96b5b4;">expr_ty_adjusted</span><span>(arg.value);
+</span><span>  </span><span style="color:#b48ead;">let</span><span> self_ty = cx.</span><span style="color:#96b5b4;">typeck_results</span><span>().</span><span style="color:#96b5b4;">node_type</span><span>(self_hir_id);
+</span><span>  </span><span style="color:#b48ead;">if</span><span> self_ty == arg_ty;
+</span></code></pre>
+<p>But this approach doesn't work with enums (thanks to <a href="https://github.com/rust-lang/rust-clippy/pull/8188#issuecomment-1002426663">@mikerite spotting
+this so quickly!</a>)
+such as in the following example (now a test case):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">enum </span><span>Tree {
+</span><span>    Leaf,
+</span><span>    Node(Vec&lt;Tree&gt;),
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">impl </span><span>fmt::Display </span><span style="color:#b48ead;">for </span><span>Tree {
+</span><span>    </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">fmt</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>, </span><span style="color:#bf616a;">f</span><span>: &amp;</span><span style="color:#b48ead;">mut </span><span>fmt::Formatter) -&gt; fmt::Result {
+</span><span>        </span><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self </span><span>{
+</span><span>            Tree::Leaf =&gt; write!(f, &quot;</span><span style="color:#a3be8c;">*</span><span>&quot;),
+</span><span>            Tree::Node(children) =&gt; {
+</span><span>                write!(f, &quot;</span><span style="color:#a3be8c;">(</span><span>&quot;)?;
+</span><span>                </span><span style="color:#b48ead;">for</span><span> child in children.</span><span style="color:#96b5b4;">iter</span><span>() {
+</span><span>                    write!(f, &quot;</span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">,</span><span>&quot;, child)?;
+</span><span>                }
+</span><span>                write!(f, &quot;</span><span style="color:#a3be8c;">)</span><span>&quot;)
+</span><span>            }
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>This code is fine and won't trigger infinite recursion since Nodes will
+always end in leaves, or have no children. But this would trigger a false positive
+if we only compare the types, since both enum variants have the same type when checked
+(since enum variants are not their own types yet - see the <a href="https://github.com/rust-lang/rfcs/pull/1450">Types for enum variants RFC</a> and 
+<a href="https://github.com/rust-lang/rfcs/pull/2593">Enum variant types RFC</a> for details on possible future changes to that).</p>
+<p>The corrected lint check works since <code>self</code> never refers to the same
+entity as <code>child</code>.</p>
+<p>Bear in mind that false negatives are greatly preferable to false
+positives, so always try to think of possible edge cases for testing,
+and lean towards more conservative solutions.</p>
+<p>Note it is still possible to write code that will trigger infinite
+recursion by similar means, but not be detected here. Such as calling
+<code>to_string()</code> on a type inside our Display impl, whose Display impl in turn calls <code>to_string()</code>
+on this type, etc. The aim is only to cover cases which are likely to
+come up when writing code in practice (after all we cannot solve the <a href="https://en.wikipedia.org/wiki/Halting_problem">Halting problem</a>!).</p>
+<h2 id="summary">Summary</h2>
+<p>If you run Clippy on <a href="https://play.rust-lang.org/?version=stable&amp;mode=debug&amp;edition=2018&amp;gist=690cb006ae868d481ed830540bf1b52c">the original example</a> you
+will now see the following error:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>error: using `self` as `Display` in `impl Display` will cause infinite recursion
+</span><span>  --&gt; src/main.rs:15:9
+</span><span>   |
+</span><span>15 |         write!(f, &quot;{}&quot;, &amp;*self)
+</span><span>   |         ^^^^^^^^^^^^^^^^^^^^^^^
+</span><span>   |
+</span><span>   = note: `#[deny(clippy::recursive_format_impl)]` on by default
+</span><span>   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#recursive_format_impl
+</span><span>   = note: this error originates in the macro `write` (in Nightly builds, run with -Z macro-backtrace for more info)
+</span></code></pre>
+<p>It's a great feeling to go from first hitting this issue, all the way to
+seeing the check running directly in the Rust playground.</p>
+<p>At the time of writing, the main code for the lint is available at <a href="https://github.com/rust-lang/rust-clippy/blob/master/clippy_lints/src/format_impl.rs">clippy_lints/src/format_impl.rs</a>
+and the UI tests are available at <a href="https://github.com/rust-lang/rust-clippy/blob/master/tests/ui/recursive_format_impl.rs">tests/ui/recursive_format_impl.rs</a> and <a href="https://github.com/rust-lang/rust-clippy/blob/master/tests/ui/recursive_format_impl.stderr">tests/ui/recursive_format_impl.stderr</a>.
+My original Pull Request (with corrections) is <a href="https://github.com/rust-lang/rust-clippy/pull/8188">#8188</a>.</p>
+<h3 id="conclusion">Conclusion</h3>
+<p>Overall, I was very impressed by how easy it was to write the lint. The
+Clippy team has done great work on providing examples, quick code
+reviews and a lot of easy-to-use shared utils code.</p>
+<p>If you ever find a similar nagging issue, no matter how small, I highly
+encourage you to at least create an issue on Github so you can open
+discussion around possible solutions and similar issues. In my case, it
+took me almost two months to go from first seeing the issue to 
+realising I could actually add the lint myself.</p>
+<p>If you do wish to contribute a lint to Clippy, I recommend
+reading the <a href="https://github.com/rust-lang/rust-clippy/blob/master/CONTRIBUTING.md">Contribution guidelines</a>,
+the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/basics.md">basics for hacking on Clippy</a>
+and the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/adding_lints.md">documentation on adding lints</a>, 
+and posting on the <a href="https://rust-lang.zulipchat.com/#narrow/stream/257328-clippy">clippy Zulip stream</a> for additional help/discussion.
+The <a href="https://rustc-dev-guide.rust-lang.org/hir.html">rustc dev guide</a>
+can be useful for additional documentation on the High-level
+Intermediate Representation (HIR), Diagnostic Items, and other concepts.
+Finally, the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/common_tools_writing_lints.md">Common tools for writing lints</a> 
+is also useful for recognising common operations (as well as reading
+through the existing lints and the <code>clippy_utils</code> crate).</p>
+<p>In my opinion this whole experience perfectly demonstrates Rust's value
+of empowerment for users and developers. I couldn't imagine making 
+a similar contribution to the tooling of any other language, and it was greatly
+facilitated by the efforts of reviewers and prior contributors.</p>
+<p>I hope writing up this example as a first-time contributor will help
+others to also start contributing. It is through thousands of
+contributions like this (how ever small or large) that Rust has become
+the least frustrating and most empowering programming language.</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/lambda-runtime/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

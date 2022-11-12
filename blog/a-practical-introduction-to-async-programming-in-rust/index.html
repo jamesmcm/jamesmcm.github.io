@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>A practical introduction to async programming in Rust</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content">
+<article>
+  <h1 class="post-title">A practical introduction to async programming in Rust</h1>
+  <span class="post-date">2020-05-06</span>
+  <hr class="within-post">
+  <p>In this post we will explore a brief example of asynchronous programming
+in Rust with the Tokio runtime, demonstrating different execution scenarios. This post is aimed
+at beginners to asynchronous programming.</p>
+<p>The source code for this example is <a href="https://github.com/jamesmcm/async-rust-example">available on Github</a>.
+A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch</a> using the async-std runtime is also available (contributed by
+<a href="https://github.com/BartMassey">@BartMassey</a>).</p>
+<span id="continue-reading"></span><h2 id="what-is-asynchronous-programming">What is asynchronous programming?</h2>
+<p>Asynchronous programming allows you to continue carrying out computations
+whilst waiting for results from IO operations
+(often network requests or responses), even on a single OS thread.</p>
+<p>This is achieved via the use of an async runtime which handles the
+assignment of async tasks (i.e. <a href="https://en.wikipedia.org/wiki/Green_threads">green threads</a>)
+to actual OS threads.</p>
+<p>Unlike OS threads, green threads are not expensive to create and so we
+needn't worry about hitting a hard limit. Whereas OS threads need to
+hold their own stack, leading to high memory usage when dealing with
+many threads. On Linux you can check your thread limit per process
+with: <code>cat /proc/sys/kernel/threads-max</code>, mine is 127,162.</p>
+<p>This is a significant issue if we need a separate OS
+thread to handle each request on a web server for example, and is the
+origin of the <a href="https://en.wikipedia.org/wiki/C10k_problem">C10k problem</a>
+- how to handle 10,000 concurrent connections to a web server. </p>
+<p>Early web servers did indeed use a separate OS thread per request, in order to
+handle requests in parallel. The key insight is that those threads spend
+most of their time waiting for network responses, rather than doing any
+computation.</p>
+<h3 id="async-and-await">Async and await</h3>
+<p>Rust has adopted the
+<a href="https://en.wikipedia.org/wiki/Async/await">async/await</a> syntax for
+defining asynchronous code blocks and functions.</p>
+<p>The <code>async</code> keyword defines an async code block or function. Specifying
+that it will return a <code>Future</code>, a value that will need to be <code>.await</code>ed
+elsewhere in order to trigger the execution of the task (note the lazy
+execution) and wait for the return value to be available.</p>
+<p>The <code>.await</code> keyword (which must be inside an <code>async</code> block/function)
+is used to wait asynchronously for an async task to finish, and get the return value.
+Note that while the task itself cannot progress until the <code>Future</code> is ready,
+the actual OS thread can have other tasks assigned to it by the runtime,
+and so continue to do work. </p>
+<p>Effectively the task is informing the
+runtime that at this point it may yield the execution to another task
+(eventually, that other task will also <code>await</code> something, and if the
+Future in this task is ready, execution of this task may continue) -
+this is an implementation of <a href="https://en.wikipedia.org/wiki/Cooperative_multitasking">co-operative multitasking</a>.</p>
+<p>This syntax is very elegant, and allows us to write asynchronous
+programs that maintain a structure similar to simple, synchronous
+programs.</p>
+<h2 id="when-should-i-use-async">When should I use async?</h2>
+<p>Asynchronous programming is useful when the thread would otherwise just be 
+waiting on IO operations - for example when making network requests or
+responses, reading or writing to disk, or waiting for user input.</p>
+<p>It is not useful if you are always doing computations and there is no
+waiting on IO operations, even if those computations could run in
+parallel - for example in a ray tracer. In this case it would be best to
+parallelise the computations over OS threads directly (taking advantage
+of the multiple cores in your CPU), for example using parallel iterators in the <a href="https://crates.io/crates/rayon">rayon</a>
+crate (or if you want thread-level control, then with the <a href="https://crates.io/crates/crossbeam">crossbeam</a>
+and <a href="https://crates.io/crates/threadpool">threadpool</a> crates). 
+However, remember <a href="https://en.wikipedia.org/wiki/Amdahl%27s_law">Amdahl's Law</a> and consider that
+algorithmic improvements might yield a better return than focusing on 
+parallelisation in this cases.</p>
+<p>It is also not useful if there are no other tasks to do whilst waiting 
+for the IO operations. For example in the <a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">previous blog post</a>, Rusoto
+actually returns a <code>RusotoFuture</code> object when we request the DB
+credentials from AWS Secrets Manager, however in this case one
+invocation of our Lambda function corresponds to one request - there is
+no work to be done whilst waiting for the DB credentials to arrive. So
+we can just program synchronously (fortunately <code>RusotoFuture</code> provides the
+<code>.sync()</code> method to do exactly that).</p>
+<h2 id="example">Example</h2>
+<p>In this example we will simulate three very slow network requests,
+consisting of three stages:</p>
+<ul>
+<li>Connection - an asynchronous delay of 2 seconds</li>
+<li>Waiting for a response - an asynchronous delay of 8 seconds (the delay
+is on the server side)</li>
+<li>Computation - a synchronous delay of 4 seconds (i.e. it has to block
+the current OS thread to do the computation).</li>
+</ul>
+<p>We will use <a href="https://docs.rs/tokio/0.2.20/tokio/">Tokio</a> as our async
+runtime for this example, as it is currently the most popular.
+The other main alternative is the <a href="https://docs.rs/async-std/1.5.0/async_std/">async_std</a> runtime
+- code for using this runtime is available in the <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">async-std branch of the Github repo</a> (this code
+was contributed by <a href="https://github.com/BartMassey">@BartMassey</a>).</p>
+<p>Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate 
+so you can swap the async runtime whilst keeping mostly the same API.</p>
+<h3 id="server">Server</h3>
+<p>The server used in this example is adapted from the <a href="https://tokio.rs/docs/getting-started/echo/">Tokio tutorial</a>.
+It echoes back the bytes received, after a delay of 8 seconds.</p>
+<p>The full adapted code is as follows (and <a href="https://github.com/jamesmcm/async-rust-example">available in the source code
+for this post</a>):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>futures::stream::StreamExt;
+</span><span style="color:#b48ead;">use </span><span>tokio::net::TcpListener;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> addr = &quot;</span><span style="color:#a3be8c;">127.0.0.1:6142</span><span>&quot;;
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> listener = TcpListener::bind(addr).await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> server = {
+</span><span>        async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>            </span><span style="color:#b48ead;">let mut</span><span> incoming = listener.</span><span style="color:#96b5b4;">incoming</span><span>();
+</span><span>            </span><span style="color:#b48ead;">while let </span><span>Some(conn) = incoming.</span><span style="color:#96b5b4;">next</span><span>().await {
+</span><span>                </span><span style="color:#b48ead;">match</span><span> conn {
+</span><span>                    Err(e) =&gt; eprintln!(&quot;</span><span style="color:#a3be8c;">accept failed = </span><span style="color:#d08770;">{:?}</span><span>&quot;, e),
+</span><span>                    Ok(</span><span style="color:#b48ead;">mut</span><span> sock) =&gt; {
+</span><span>                        tokio::spawn(async </span><span style="color:#b48ead;">move </span><span>{
+</span><span>                            </span><span style="color:#b48ead;">let </span><span>(</span><span style="color:#b48ead;">mut</span><span> reader, </span><span style="color:#b48ead;">mut</span><span> writer) = sock.</span><span style="color:#96b5b4;">split</span><span>();
+</span><span>                            tokio::time::delay_for(tokio::time::Duration::from_secs(</span><span style="color:#d08770;">8</span><span>)).await;
+</span><span>                            </span><span style="color:#b48ead;">match </span><span>tokio::io::copy(&amp;</span><span style="color:#b48ead;">mut</span><span> reader, &amp;</span><span style="color:#b48ead;">mut</span><span> writer).await {
+</span><span>                                Ok(amt) =&gt; {
+</span><span>                                    println!(&quot;</span><span style="color:#a3be8c;">wrote </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> bytes</span><span>&quot;, amt);
+</span><span>                                }
+</span><span>                                Err(err) =&gt; {
+</span><span>                                    eprintln!(&quot;</span><span style="color:#a3be8c;">IO error </span><span style="color:#d08770;">{:?}</span><span>&quot;, err);
+</span><span>                                }
+</span><span>                            }
+</span><span>                        });
+</span><span>                    }
+</span><span>                }
+</span><span>            }
+</span><span>        }
+</span><span>    };
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Server running on localhost:6142</span><span>&quot;);
+</span><span>    server.await;
+</span><span>}
+</span></code></pre>
+<h3 id="synchronous-requests">Synchronous requests</h3>
+<p>In the synchronous case, we simply run each request in series, one after
+another. Therefore we would expect a total execution time of <code>3*(2+8+4) = 42</code> seconds to finish all 3 tasks.</p>
+<p>We can visualise this case with a diagram:</p>
+<p><img src="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/synchronous.svg" alt="Synchronous execution" title="Synchronous execution" /></p>
+<p>We can implement this using only the standard library:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>std::io::prelude::*;
+</span><span style="color:#b48ead;">use </span><span>std::net::TcpStream;
+</span><span style="color:#b48ead;">use </span><span>std::thread::sleep;
+</span><span style="color:#b48ead;">use </span><span>std::time::Instant;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())?;
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())?;
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())?;
+</span><span>    Ok(())
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">task</span><span>(</span><span style="color:#bf616a;">label</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>, </span><span style="color:#bf616a;">now</span><span>: std::time::Instant) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+</span><span>    </span><span style="color:#65737e;">// Simulate network delay using thread sleep for 2 seconds
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> started: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>(),
+</span><span>    );
+</span><span>    </span><span style="color:#96b5b4;">sleep</span><span>(std::time::Duration::from_secs(</span><span style="color:#d08770;">2</span><span>));
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Write to server - server will echo this back to us with 8 second delay
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> stream = TcpStream::connect(&quot;</span><span style="color:#a3be8c;">127.0.0.1:6142</span><span>&quot;)?;
+</span><span>    stream.</span><span style="color:#96b5b4;">write_all</span><span>(label.</span><span style="color:#96b5b4;">as_bytes</span><span>())?;
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> written: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Read 5 chars we expect (to avoid dealing with EOF, etc.)
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> buffer = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">5</span><span>];
+</span><span>    stream.</span><span style="color:#96b5b4;">read_exact</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buffer)?;
+</span><span>    stream.</span><span style="color:#96b5b4;">shutdown</span><span>(std::net::Shutdown::Both)?;
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> read: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Simulate computation work by sleeping actual thread for 4 seconds
+</span><span>    </span><span style="color:#96b5b4;">sleep</span><span>(std::time::Duration::from_secs(</span><span style="color:#d08770;">4</span><span>));
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> finished: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        std::str::from_utf8(&amp;buffer)?,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>Running this (see <a href="https://github.com/jamesmcm/async-rust-example">the repo for this workspace</a>):</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cargo run</span><span style="color:#bf616a;"> --release --bin</span><span> server
+</span><span style="color:#bf616a;">$</span><span> cargo run</span><span style="color:#bf616a;"> --release --bin</span><span> client_synchronous
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>OS Thread ThreadId(1) - task1 started: 578ns
+</span><span>OS Thread ThreadId(1) - task1 written: 2.000346788s
+</span><span>OS Thread ThreadId(1) - task1 read: 10.002177173s
+</span><span>OS Thread ThreadId(1) - task1 finished: 14.002328699s
+</span><span>OS Thread ThreadId(1) - task2 started: 14.002387112s
+</span><span>OS Thread ThreadId(1) - task2 written: 16.002673602s
+</span><span>OS Thread ThreadId(1) - task2 read: 24.006071003s
+</span><span>OS Thread ThreadId(1) - task2 finished: 28.006204147s
+</span><span>OS Thread ThreadId(1) - task3 started: 28.006263855s
+</span><span>OS Thread ThreadId(1) - task3 written: 30.00652763s
+</span><span>OS Thread ThreadId(1) - task3 read: 38.008234993s
+</span><span>OS Thread ThreadId(1) - task3 finished: 42.008389223s
+</span></code></pre>
+<p>Gives exactly the 42 seconds total execution time that we calculated above.</p>
+<h3 id="synchronous-requests-tokio">Synchronous requests (Tokio)</h3>
+<p>Note that it is possible to get synchronous behaviour from async
+functions when using Tokio (sometimes unintentionally). Implementing the
+above with Tokio:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>futures::stream::StreamExt;
+</span><span style="color:#b48ead;">use </span><span>std::error::Error;
+</span><span style="color:#b48ead;">use </span><span>std::thread::sleep;
+</span><span style="color:#b48ead;">use </span><span>std::time::Instant;
+</span><span style="color:#b48ead;">use </span><span>tokio::join;
+</span><span style="color:#b48ead;">use </span><span>tokio::net::TcpStream;
+</span><span style="color:#b48ead;">use </span><span>tokio::prelude::*;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Synchronous
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()).await?;
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()).await?;
+</span><span>    </span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()).await?;
+</span><span>    Ok(())
+</span><span>}
+</span><span>
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">task</span><span>(</span><span style="color:#bf616a;">label</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>, </span><span style="color:#bf616a;">now</span><span>: std::time::Instant) -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#65737e;">// Simulate network delay using Tokio async delay for 2 seconds
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> started: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>(),
+</span><span>    );
+</span><span>    tokio::time::delay_for(tokio::time::Duration::from_secs(</span><span style="color:#d08770;">2</span><span>)).await;
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Write to server - server will echo this back to us with 8 second delay
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> stream = TcpStream::connect(&quot;</span><span style="color:#a3be8c;">127.0.0.1:6142</span><span>&quot;).await?;
+</span><span>    stream.</span><span style="color:#96b5b4;">write_all</span><span>(label.</span><span style="color:#96b5b4;">as_bytes</span><span>()).await?;
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> written: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Read 5 chars we expect (to avoid dealing with EOF, etc.)
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> buffer = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">5</span><span>];
+</span><span>    stream.</span><span style="color:#96b5b4;">read_exact</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> buffer).await?;
+</span><span>    stream.</span><span style="color:#96b5b4;">shutdown</span><span>(std::net::Shutdown::Both)?;
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> read: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        label,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Simulate computation work by sleeping actual thread for 4 seconds
+</span><span>    </span><span style="color:#96b5b4;">sleep</span><span>(std::time::Duration::from_secs(</span><span style="color:#d08770;">4</span><span>));
+</span><span>    println!(
+</span><span>        &quot;</span><span style="color:#a3be8c;">OS Thread </span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> - </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;"> finished: </span><span style="color:#d08770;">{:?}</span><span>&quot;,
+</span><span>        std::thread::current().</span><span style="color:#96b5b4;">id</span><span>(),
+</span><span>        std::str::from_utf8(&amp;buffer)?,
+</span><span>        now.</span><span style="color:#96b5b4;">elapsed</span><span>()
+</span><span>    );
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>Running this produces the same output as before:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> cargo run</span><span style="color:#bf616a;"> --release --bin</span><span> client_async
+</span></code></pre>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>OS Thread ThreadId(1) - task1 started: 333ns
+</span><span>OS Thread ThreadId(1) - task1 written: 2.001476012s
+</span><span>OS Thread ThreadId(1) - task1 read: 10.003284491s
+</span><span>OS Thread ThreadId(1) - task1 finished: 14.003404307s
+</span><span>OS Thread ThreadId(1) - task2 started: 14.003476979s
+</span><span>OS Thread ThreadId(1) - task2 written: 16.005013941s
+</span><span>OS Thread ThreadId(1) - task2 read: 24.005471439s
+</span><span>OS Thread ThreadId(1) - task2 finished: 28.005575307s
+</span><span>OS Thread ThreadId(1) - task3 started: 28.005615372s
+</span><span>OS Thread ThreadId(1) - task3 written: 30.007082377s
+</span><span>OS Thread ThreadId(1) - task3 read: 38.009223127s
+</span><span>OS Thread ThreadId(1) - task3 finished: 42.009349576s
+</span></code></pre>
+<p>It is the <code>.await</code>ing of the tasks in series which causes this to be
+synchronous. The main function is async, but the use of <code>.await</code> causes
+it to wait for the result of that Future before continuing. There is
+nothing special about the main function compared to other async
+functions in this regard. No other tasks exist at
+that time to yield execution to, causing the execution to be
+synchronous in practice.</p>
+<p>Note the Send + Sync bounds are not required for the above
+implementation (since it runs on only one OS thread),
+but we will need them in the last example. This is also why we clone
+<code>now</code> instead of borrowing it in <code>task()</code> (alternatively we could wrap
+it in an <code>Arc</code>).</p>
+<p>We will use the same <code>async fn task()</code> definition for the following
+examples, where it will be omitted.</p>
+<h3 id="asynchronous-requests-one-os-thread">Asynchronous requests (one OS thread)</h3>
+<p>In the asynchronous, single OS thread case we start the waiting
+steps (connection and getting the server response) concurrently.
+However, the final computation step will still need to be done in series
+for each task. Therefore we expect a total execution time of
+<code>8+2+(3*4)=22</code> seconds.</p>
+<p>In a diagram:</p>
+<p><img src="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/asynchronous_single.svg" alt="Asynchronous execution on a single OS thread" title="Asynchronous execution on a single OS thread" /></p>
+<p>Using the same definition of <code>async fn task()</code> as before:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>futures::stream::futures_unordered::FuturesUnordered;
+</span><span style="color:#b48ead;">use </span><span>futures::stream::StreamExt;
+</span><span style="color:#b48ead;">use </span><span>std::error::Error;
+</span><span style="color:#b48ead;">use </span><span>std::thread::sleep;
+</span><span style="color:#b48ead;">use </span><span>std::time::Instant;
+</span><span style="color:#b48ead;">use </span><span>tokio::net::TcpStream;
+</span><span style="color:#b48ead;">use </span><span>tokio::prelude::*;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Asynchronous single-thread
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> futs = FuturesUnordered::new();
+</span><span>
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()));
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()));
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()));
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">while let </span><span>Some(_handled) = futs.</span><span style="color:#96b5b4;">next</span><span>().await {}
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>Running this gives our expected total execution time of 22 seconds:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>OS Thread ThreadId(1) - task1 started: 3.994µs
+</span><span>OS Thread ThreadId(1) - task2 started: 21.174µs
+</span><span>OS Thread ThreadId(1) - task3 started: 25.511µs
+</span><span>OS Thread ThreadId(1) - task3 written: 2.002221984s
+</span><span>OS Thread ThreadId(1) - task2 written: 2.002406898s
+</span><span>OS Thread ThreadId(1) - task1 written: 2.002483563s
+</span><span>OS Thread ThreadId(1) - task3 read: 10.003326999s
+</span><span>OS Thread ThreadId(1) - task3 finished: 14.003478669s
+</span><span>OS Thread ThreadId(1) - task2 read: 14.00365763s
+</span><span>OS Thread ThreadId(1) - task2 finished: 18.00379238s
+</span><span>OS Thread ThreadId(1) - task1 read: 18.003951713s
+</span><span>OS Thread ThreadId(1) - task1 finished: 22.004094444s
+</span></code></pre>
+<p>In this case we use a <code>FuturesUnordered</code> collection to allow us to
+repeatedly await the different Futures. However, we never use
+<code>tokio::spawn()</code> so it is only running on the single OS thread
+(as we never allow the creation of more).</p>
+<p>Note that we could use the <code>join!</code> macro here instead of allocating a
+<code>FuturesUnordered</code>, we will see an example of this later. However, that
+is only practical for a small number of Futures.</p>
+<p>We can also force Tokio to only use one thread by putting arguments in
+the attribute for our main function:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>(core_threads = 1, max_threads = 1)]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>...
+</span><span>}
+</span></code></pre>
+<h3 id="asynchronous-requests-multiple-os-threads">Asynchronous requests (multiple OS threads)</h3>
+<p>In the case of asynchronous requests across multiple OS threads, we can
+do every step concurrently (and the OS threads could complete other tasks
+when the tasks await). This means that we can do the final computation step in
+parallel on different OS threads.</p>
+<p><img src="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/asynchronous_multi.svg" alt="Asynchronous execution on multiple OS threads" title="Asynchronous execution on multiple OS threads" /></p>
+<p>Therefore we would expect a total execution time of <code>2+8+4=14</code> seconds
+for all 3 requests. This is the best we can achieve - the same time as
+completing a single request.</p>
+<p>Note that this requires the types we send across threads to be
+thread-safe, i.e. implementing Send or Sync - just as we would if we were
+using OS threads directly.</p>
+<p>The implementation is very similar to the previous example, but instead
+of awaiting on the futures directly, we <code>tokio::spawn</code> the tasks and
+await their handles. This allows Tokio to execute them on different OS
+threads.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> futs = FuturesUnordered::new();
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())));
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())));
+</span><span>    futs.</span><span style="color:#96b5b4;">push</span><span>(tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())));
+</span><span>    </span><span style="color:#b48ead;">while let </span><span>Some(_handled) = futs.</span><span style="color:#96b5b4;">next</span><span>().await {}
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>And we observe the 14 second execution time (note we don't care about
+the order of execution):</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>OS Thread ThreadId(2) - task1 started: 17.055µs
+</span><span>OS Thread ThreadId(3) - task2 started: 30.227µs
+</span><span>OS Thread ThreadId(2) - task3 started: 32.513µs
+</span><span>OS Thread ThreadId(2) - task3 written: 2.001499145s
+</span><span>OS Thread ThreadId(3) - task1 written: 2.00153689s
+</span><span>OS Thread ThreadId(5) - task2 written: 2.001721878s
+</span><span>OS Thread ThreadId(3) - task3 read: 10.003403756s
+</span><span>OS Thread ThreadId(2) - task1 read: 10.003501s
+</span><span>OS Thread ThreadId(5) - task2 read: 10.003417328s
+</span><span>OS Thread ThreadId(3) - task3 finished: 14.003584085s
+</span><span>OS Thread ThreadId(2) - task1 finished: 14.003664981s
+</span><span>OS Thread ThreadId(5) - task2 finished: 14.003698375s
+</span></code></pre>
+<p>The different OS Thread IDs demonstrate that the tasks are being
+executed on separate OS threads.</p>
+<p>For completeness, here is the same implementation using the <code>join!</code>
+macro instead of allocating a <code>FuturesUnordered</code>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>    </span><span style="color:#65737e;">// Asynchronous multi-threaded
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match </span><span>join!(
+</span><span>        tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())),
+</span><span>        tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>())),
+</span><span>        tokio::spawn(</span><span style="color:#96b5b4;">task</span><span>(&quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;, now.</span><span style="color:#96b5b4;">clone</span><span>()))
+</span><span>    ) {
+</span><span>        (x, y, z) =&gt; {
+</span><span>            (x.</span><span style="color:#96b5b4;">ok</span><span>(), y.</span><span style="color:#96b5b4;">ok</span><span>(), z.</span><span style="color:#96b5b4;">ok</span><span>())
+</span><span>        }
+</span><span>    };
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>This saves the allocation of the <code>FuturesUnordered</code> but it can be
+awkward to work with the tuple of Results that is returned (especially
+for many Futures).</p>
+<h4 id="how-does-this-differ-from-os-thread-parallelisation">How does this differ from OS thread parallelisation?</h4>
+<p>You could implement something similar for the synchronous case using OS threads directly, for
+example with the <a href="https://crates.io/crates/rayon">rayon</a> crate mentioned previously.</p>
+<p>However, in this case each request would need its own OS thread, and if
+we had to carry out 10,000 concurrent requests, we might hit the thread
+limit. </p>
+<p>That is, the execution diagram would look like this:</p>
+<p><img src="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/synchronous_multios.svg" alt="Synchronous execution on multiple OS threads" title="Synchronous execution on multiple OS threads" /></p>
+<p>Note that the OS threads would spend a lot of time just waiting on IO operations,
+unable to start other requests.</p>
+<p>We can modify our first synchronous example above to do this with rayon:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">use </span><span>rayon::prelude::*;
+</span><span>
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn std::error::Error + Send + Sync&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> now = Instant::now();
+</span><span>
+</span><span>    [&quot;</span><span style="color:#a3be8c;">task1</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">task2</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">task3</span><span>&quot;]
+</span><span>        .</span><span style="color:#96b5b4;">par_iter</span><span>()
+</span><span>        .</span><span style="color:#96b5b4;">map</span><span>(|</span><span style="color:#bf616a;">x</span><span>| </span><span style="color:#96b5b4;">task</span><span>(x, now.</span><span style="color:#96b5b4;">clone</span><span>()))
+</span><span>        .collect::&lt;Result&lt;Vec&lt;_&gt;, _&gt;&gt;()?;
+</span><span>    Ok(())
+</span><span>}
+</span></code></pre>
+<p>And it terminates in 14 seconds as expected (note that each task is
+allocated to one OS thread):</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>OS Thread ThreadId(3) - task1 started: 280.871µs
+</span><span>OS Thread ThreadId(6) - task2 started: 281.03µs
+</span><span>OS Thread ThreadId(7) - task3 started: 283.838µs
+</span><span>OS Thread ThreadId(6) - task2 written: 2.000605562s
+</span><span>OS Thread ThreadId(7) - task3 written: 2.000619598s
+</span><span>OS Thread ThreadId(3) - task1 written: 2.000679853s
+</span><span>OS Thread ThreadId(3) - task1 read: 10.002321036s
+</span><span>OS Thread ThreadId(6) - task2 read: 10.00233185s
+</span><span>OS Thread ThreadId(7) - task3 read: 10.002384653s
+</span><span>OS Thread ThreadId(3) - task1 finished: 14.002447762s
+</span><span>OS Thread ThreadId(6) - task2 finished: 14.002540969s
+</span><span>OS Thread ThreadId(7) - task3 finished: 14.002589621s
+</span></code></pre>
+<p>However, this would not be resource-efficient when handling a large
+number of tasks since one task corresponds to one OS thread.</p>
+<p>Whereas in the async case we only need the additional threads during the
+computation step (which is synchronous). This means that we could use a
+fixed OS threadpool size and still benefit from some parallelisation in
+the computation step whilst having guarantees about our resource usage
+(i.e. we can limit the maximum number of OS threads and still be able to
+start new requests).</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>I hope this blog post has helped you to better understand when and how
+to apply asynchronous programming in Rust.</p>
+<p>The elegant async/await syntax allows for clear and concise asynchronous
+programming. However, it may take some getting used to if you do not
+have prior experience with asynchronous programming.</p>
+<p>These examples also demonstrate the difference between concurrency and
+parallelism. In the asynchronous single OS thread case we are handling
+tasks concurrently, but nothing is running in parallel (i.e. we use only
+one OS thread).</p>
+<h3 id="current-limitations">Current Limitations</h3>
+<p>Note that currently you cannot use <a href="https://rust-lang.github.io/async-book/07_workarounds/06_async_in_traits.html">async methods in traits</a>, and nor
+can you create <a href="https://boats.gitlab.io/blog/post/poll-drop/">async destructors</a>. This is a problem if you want a struct
+to make a network request when it is dropped, but you don't want to
+block the OS thread whilst it does that - you cannot <code>.await</code> because
+<code>drop()</code> (from <a href="https://doc.rust-lang.org/std/ops/trait.Drop.html">Drop</a>) is not async.</p>
+<p>I hit the latter issue in my recent <a href="https://github.com/jamesmcm/s3rename">s3rename</a> crate, and am still
+attempting to work around it. See <a href="https://github.com/jamesmcm/s3rename/issues/16">this issue</a> for details.</p>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+        <a class="previous" href="https://jamesmcm.github.io/blog/intro-dod/">‹ Newer Post</a>
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/data-engineering-with-rust-and-aws-lambda/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2022 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

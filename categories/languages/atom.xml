@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>James McMurray&#x27;s blog - Languages</title>
+	<subtitle>A technical blog about Rust, Linux and other topics.</subtitle>
+	<link href="https://jamesmcm.github.io/categories/languages/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://jamesmcm.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2014-08-21T00:00:00+00:00</updated>
+	<id>https://jamesmcm.github.io/categories/languages/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Resources to learn Spanish</title>
+		<published>2014-08-21T00:00:00+00:00</published>
+		<updated>2014-08-21T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://jamesmcm.github.io/blog/spresource/" type="text/html"/>
+		<id>https://jamesmcm.github.io/blog/spresource/</id>
+		<content type="html">&lt;p&gt;In this post I list some resources which have helped me to learn Spanish, I hope that they will help you too!&lt;&#x2F;p&gt;
+&lt;p&gt;All of the listed resources are (mostly) free, except News In Slow Spanish (and the Latino version), and clearly the textbooks, TV series and films.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h2 id=&quot;in-the-beginning&quot;&gt;In the beginning...&lt;&#x2F;h2&gt;
+&lt;p&gt;If you have just started learning Spanish, I would recommend focussing on the grammar and some basic and conversational vocabulary, because with this down, it is easy to learn more vocabulary through films and speaking to other Spanish speakers. One other thing, is not to get hung up on learning Spanish from Spain or from Latin America specifically, in the end you will want to be familiar with all of them.&lt;&#x2F;p&gt;
+&lt;p&gt;To this end, I recommend the following resources:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.duolingo.com&#x2F;&quot;&gt;Duolingo&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;Duolingo is the best resource I&#x27;ve used for learning Spanish. It is &lt;strong&gt;free&lt;&#x2F;strong&gt; and provides a full course covering all of the basics for conversation. It took me about 6 months to complete from scratch (when I had no prior knowledge of Spanish).&lt;&#x2F;p&gt;
+&lt;p&gt;It uses a method focussed on vocabulary, so sometimes you may need to look up grammatical concepts on your own, but the abundance of topics covered, mobile support and the ease of getting straight to learning definitely make it worthwhile!&lt;&#x2F;p&gt;
+&lt;p&gt;Note this teaches Latin American Spanish, and so does not teach the use of &amp;quot;vosotros&amp;quot;, and note that despite teaching Latin American Spanish, it only teaches &amp;quot;tú&amp;quot; (and not &amp;quot;vos&amp;quot;).&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;Reddit user graaahh&#x27;s &lt;a href=&quot;http:&#x2F;&#x2F;issuu.com&#x2F;graaahh&quot;&gt;Spanish Study Guide&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This is an excellent resource for grammar, and one of the best free resources for learning to read Spanish that I know of. To download it from issuu.com, first click the guide, then &amp;quot;Share&amp;quot;, and then &amp;quot;Download&amp;quot;.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.studyspanish.com&#x2F;&quot;&gt;StudySpanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website has great resources for grammatical concepts especially, and makes an excellent beginner reference for Duolingo.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.speakshop.org&#x2F;study-spanish&quot;&gt;SpeakShop grammar pages&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website also has some excellent pages on grammar. See the links on &amp;quot;Beginning Spanish Grammar&amp;quot;, &amp;quot;Intermediate Spanish Grammar&amp;quot; and &amp;quot;Advancd Spanish Grammar&amp;quot;.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.veintemundos.com&#x2F;en&#x2F;&quot;&gt;Veinte Mundos&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website has good articles targeted different reading levels, and good accompanying resources to help.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;youtube-videos&quot;&gt;YouTube videos&lt;&#x2F;h2&gt;
+&lt;p&gt;YouTube also has many channels dedicated to teaching Spanish:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;channel&#x2F;UCItcQIzzVfhAg4sKJ5iCTPw&quot;&gt;LightSpeed Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This YouTube channel has a huge number of excellent videos - with everything from basic lessons, vocabulary to grammar lessons and interviews with Spanish speakers. It really is brilliant, there is a &lt;a href=&quot;http:&#x2F;&#x2F;www.lightspeedspanish.co.uk&#x2F;spanish-lesson-table-contents&#x2F;&quot;&gt;full list of lessons here&lt;&#x2F;a&gt; - I especially recommend &amp;quot;El Aula&amp;quot;! Note that this teaches mainly Spanish from Spain.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;channel&#x2F;UC9yudInUYzMh9H4gJs4DrHg&quot;&gt;Butterfly Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This YouTube channel is run by a Mexican girl who teaches Spanish. The level is often quite basic, but the videos are fun and informative.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;channel&#x2F;UC2-lKlnIdzq6-e-zwU34YJw&quot;&gt;Professor Jason Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;These videos are excellent for covering grammatical concepts in detail, I&#x27;d definitely recommend them if you want a more thorough educational approach.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;podcasts&quot;&gt;Podcasts&lt;&#x2F;h2&gt;
+&lt;p&gt;There are many great podcasts available on Spotify and other platforms:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.newsinslowspanish.com&#x2F;&quot;&gt;News In Slow Spanish&lt;&#x2F;a&gt; (and the &lt;a href=&quot;http:&#x2F;&#x2F;www.newsinslowspanish.com&#x2F;latino&#x2F;?force_switch&quot;&gt;Latino version&lt;&#x2F;a&gt;)&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;I really like this podcast, however note that, unlike the previous resources, you have to pay to get access to the full resources and podcasts. I like News In Slow Spanish Latino (and actually haven&#x27;t listened to the original), so I&#x27;d definitely recommend it anyway. The prices vary depending on the content chosen but you&#x27;re looking at around $13 a month or so. Gift subscriptions are also available, and you can preview some podcasts for free.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.lightspeedspanish.co.uk&#x2F;spanish-lesson-table-contents&#x2F;&quot;&gt;LightSpeed Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;Although, this was mentioned above, it&#x27;s worth noting that all of the YouTube videos are also available as podcasts, completely free. And these podcasts deserve to be mentioned twice! There are also work packs available for purchase (with free samples), and they offer personal lessons in Skype.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.notesinspanish.com&#x2F;&quot;&gt;Notes in Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This is very similar to LightSpeed Spanish, though with more focus on conversations and pronunciation, and has following analyses in English. It seems very good and all the podcasts are also available for free. Note this mainly teaches Spanish from Spain&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;radiolingua.com&#x2F;coffeebreakspanish&#x2F;&quot;&gt;Coffee Break Spanish&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This is a podcast for beginners, with small interviews followed by explanations in English. For the free podcasts, click the &amp;quot;Free Lessons&amp;quot; in the navigation bar on the website. Note season 3 is more advanced and known as &amp;quot;Showtime Spanish&amp;quot; (although currently named inconsistently on the website). This has a somewhat similar structure but with more Spanish speaking - I found it to be useful, but not as good as News In Slow Spanish and LightSpeed Spanish in my opinion (also Showtime Spanish has an awful theme song!) - note this teaches mainly Spanish from Spain.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;spanishobsessed.com&#x2F;&quot;&gt;Spanish Obsessed&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;These podcasts are produced by an Englishman and a Colombian, there are four in total, aimed at different levels of ability.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;online-communities&quot;&gt;Online Communities&lt;&#x2F;h2&gt;
+&lt;p&gt;Online communities provide a great way to practice by writing directly
+to others:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.interpals.net&#x2F;&quot;&gt;Interpals&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website is incredible for finding people to speak with in Skype, and write to. It really is one of the best resources I&#x27;ve found for helping with conversational skills.&lt;&#x2F;dd&gt;
+&lt;dt&gt;**&lt;a href=&quot;http:&#x2F;&#x2F;www.hellotalk.com&#x2F;&quot;&gt;HelloTalk&lt;&#x2F;a&gt; **(mobile only)****&lt;&#x2F;dt&gt;
+&lt;dd&gt;This mobile app is a bit like Interpals, with an interface like WhatsApp. There are lot of users, and the easy-to-use voice chat is useful, but I think it&#x27;s harder to have long conversations writing from a mobile, and prefer Interpals for that reason. But it&#x27;s still a good, free application.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;
+&lt;dt&gt;&lt;strong&gt;Reddit&lt;&#x2F;strong&gt;&lt;&#x2F;b&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;The subreddits &lt;a href=&quot;http:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;learnspanish&#x2F;&quot;&gt;&#x2F;r&#x2F;learnspanish&lt;&#x2F;a&gt;, &lt;a href=&quot;http:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;Spanish&#x2F;&quot;&gt;&#x2F;r&#x2F;Spanish&lt;&#x2F;a&gt; y &lt;a href=&quot;http:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;languagelearning&#x2F;&quot;&gt;&#x2F;r&#x2F;languagelearning&lt;&#x2F;a&gt; are very useful for discussing the language. There are also specific subreddits for some countries such as &lt;a href=&quot;http:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;mexico&#x2F;&quot;&gt;&#x2F;r&#x2F;mexico&lt;&#x2F;a&gt; and &lt;a href=&quot;http:&#x2F;&#x2F;www.reddit.com&#x2F;r&#x2F;spain&#x2F;&quot;&gt;&#x2F;r&#x2F;spain&lt;&#x2F;a&gt; for example.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;online-courses&quot;&gt;Online Courses&lt;&#x2F;h2&gt;
+&lt;p&gt;Online courses are a great way of getting rigorous feedback on common
+mistakes:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;&quot;&gt;Coursera&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;Coursera has many courses available in Spanish. I completed &lt;a href=&quot;https:&#x2F;&#x2F;www.coursera.org&#x2F;course&#x2F;escrituraesp&quot;&gt;this course&lt;&#x2F;a&gt; and would definitely recommend it. It helped a lot with more formal writing. On Coursera you can see the future sessions and sign up or add it to your watchlist if none are currently available. In this course you can get a certificate for free, but have to pay for the verified certificate (with a remotely monitored exam, etc.). I also recommend looking at the other courses in Spanish on Coursera. I cannot recommend this website enough, it has changed my life completely.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.miriadax.net&#x2F;&quot;&gt;MiríadaX&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;MiríadaX is like a Spanish version of Coursera, and so has many courses in Spanish. However, note that you must pay after completing the course in order to receive a certificate (but can complete the course for free). I completed &lt;a href=&quot;https:&#x2F;&#x2F;www.miriadax.net&#x2F;web&#x2F;espanol-salamanca-a2&quot;&gt;this course in A2 Spanish&lt;&#x2F;a&gt;. Most of the courses are from Spain, and so in Spanish from Spain.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;reading&quot;&gt;Reading&lt;&#x2F;h2&gt;
+&lt;p&gt;Reading articles helps a lot to grow vocabulary over time:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.monde-diplomatique.es&#x2F;&quot;&gt;Le Monde Diplomatique en Español&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This magazine has a lot of great, detailed articles. Unfortunately it&#x27;s quite expensive to subscribe outside of Spain, and I believe they still don&#x27;t sell an electronic version. Here is &lt;a href=&quot;http:&#x2F;&#x2F;hcalvospina.free.fr&#x2F;spip.php?article515&quot;&gt;an example article&lt;&#x2F;a&gt; which was also published in more detail in Le Monde, about the period of political violence in Colombia.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.farkastranslations.com&#x2F;bilingual_books.php&quot;&gt;Farkas Translations&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website provides side-by-side translations of some out-of-copyright books, sourced from various sources (some less reliable than others). It can be quite good for comparing more idiomatic expressions.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;reference-resources&quot;&gt;Reference resources&lt;&#x2F;h2&gt;
+&lt;p&gt;References are great for checking conjugations and usage:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.spanishdict.com&#x2F;&quot;&gt;SpanishDict&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This dictionary website is invaluable, both for definitions and conjugations (and pronunciation!).&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.wordreference.com&#x2F;&quot;&gt;WordReference&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website is also a great dictionary (and thesaurus), with more of a focus on examples.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.linguee.es&#x2F;espanol-ingles&#x2F;&quot;&gt;Linguee&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This website lets you look up phrases, and shows side-by-side translations from reliable sources (European documents, universities, etc.). This is amazing for checking the idiomatic ways of phrasing things.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;textbooks&quot;&gt;Textbooks&lt;&#x2F;h2&gt;
+&lt;p&gt;Textbooks can also be a great resource to ensure you have no gaps in
+your knowledge:
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.amazon.co.uk&#x2F;Colloquial-Spanish-Latin-America-Beginners&#x2F;dp&#x2F;0415237866&quot;&gt;Colloquial Spanish of Latin America&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;I found this book to be good for revising the grammar, it also has good listening exercises. Although note that despite being &amp;quot;Spanish of Latin America&amp;quot; it does not cover the use of &amp;quot;vos&amp;quot; much (like Duolingo).&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.amazon.com&#x2F;Spanish-Reading-A-Self-Instructional-Course&#x2F;dp&#x2F;0764103334&quot;&gt;Spanish For Reading&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This book is a great (reasonably concise) introduction to Spanish grammar and reading, it makes a good companion to Duolingo.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;elblogdegramatica.blogspot.de&#x2F;&quot;&gt;El blog de gramática&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This is an excellent blog covering the nuances of Spanish grammar.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;other-resources&quot;&gt;Other resources&lt;&#x2F;h2&gt;
+&lt;p&gt;This post is not meant to be a fully comprehensive collection of resources, but just ones which I believe others may find useful. Here are some other resources which I haven&#x27;t put in the sections above because I didn&#x27;t find them so useful.
+&lt;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.rosettastone.co.uk&#x2F;&quot;&gt;Rosetta Stone&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This software uses the Pimsleur method (i.e. focussing on vocabulary, not grammar), a lot like Duolingo but with a large pricetag attached. Honestly, I do not think it is worth the money under any circumstances.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.michelthomas.com&#x2F;learn-spanish.php&quot;&gt;Michel Thomas CDs&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;Some people really recommend this too, but I didn&#x27;t think it was worth the money, and I also prefer to listen to things either fully in Spanish or in English. Due to this, I really like News In Slow Spanish and LightSpeed Spanish for their clear Spanish podcasts. But perhaps it could be worthwhile.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;user&#x2F;LanguageTransfer&quot;&gt;Language Transfer: Complete Spanish YouTube series&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;Some people really recommend this course too, it&#x27;s apparently similar to the Michel Thomas CDs, but is free. However, I found the speaker&#x27;s accent, and the mixing of Spanish and English very distracting.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;channel&#x2F;UCmcAqs44NIamvLO7DD_8bPQ&quot;&gt;Sra. Westerman&#x27;s YouTube Channel&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;This YouTube channel has a lot of videos on very basic Spanish. But the videos were so basic that I think the concepts are better covered by other resources and YouTube channels listed here.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.italki.com&#x2F;&quot;&gt;italki&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;italki is a platform for people to offer language lessons via the internet. It is usually quite cheap, but I&#x27;m not sure it&#x27;s really worth the effort since you could just find native speakers on Interpals.&lt;&#x2F;dd&gt;
+&lt;dt&gt;&lt;strong&gt;&lt;a href=&quot;http:&#x2F;&#x2F;www.busuu.com&#x2F;enc&#x2F;&quot;&gt;Busuu&lt;&#x2F;a&gt;&lt;&#x2F;strong&gt;&lt;&#x2F;dt&gt;
+&lt;dd&gt;If you are interested in a similar alternative to Duolingo, Busuu also offers similar resources for Spanish, unfortunately one must pay to use the majority of the services - but it also provides checks of writing and voice recording, as well as specific grammar lessons. I personally didn&#x27;t think it offered sufficiently more than Duolingo.&lt;&#x2F;dd&gt;
+&lt;&#x2F;dl&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h2&gt;
+&lt;p&gt;In conclusion, I recommend the following plan of action:&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;beginner&quot;&gt;Beginner:&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Finish the free Duolingo Spanish course. The clear goal and clear path to achieve it makes it much easier to stay focussed on learning the new concepts and vocabulary.&lt;&#x2F;li&gt;
+&lt;li&gt;Pass the free Duolingo Spanish exam. This ensures you remember the most important concepts from the course. Note the exam is &amp;quot;bought&amp;quot; with &amp;quot;lingots&amp;quot; you earn during the course.&lt;&#x2F;li&gt;
+&lt;li&gt;(Optional) Supplement this with reading on grammar, for example, in the Spanish for Reading textbook, or the SpeakShop and StudySpanish websites.&lt;&#x2F;li&gt;
+&lt;li&gt;(Optional) Listen to beginner podcasts and YouTube videos, such as Butterfly Spanish, the early LightSpeed Spanish and Notes In Spanish podcasts and Coffee Break Spanish.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;intermediate&quot;&gt;Intermediate:&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Use Interpals to speak with native speakers, through text and Skype. This is an excellent resource to practice speaking, and learn more about Spanish&#x2F;Latin American culture (you can definitely get a lot of movie recommendations!)&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Watch some TV shows and films in Spanish, with Spanish subtitles (you can get free subtitles from &lt;a href=&quot;http:&#x2F;&#x2F;www.opensubtitles.org&#x2F;en&#x2F;search&quot;&gt;OpenSubtitles.org&lt;&#x2F;a&gt;). I started out by watching 24 in Spanish, this was a great choice as the dialog is usually not so complicated. You could also watch Disney&#x2F;Pixar films, and action films, without such a focus on complex dialog.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Play video games in Spanish. This works excellently with fully voiced games such as Skyrim, where it helps create immersion and provides the easy ability to repeat words. Though note that they are usually dubbed in Spanish from Spain. The Steam page of a game will tell you in which languages it is available.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Read childrens&#x27; books and young adult fiction in Spanish to learn more vocabulary. &lt;a href=&quot;http:&#x2F;&#x2F;www.childrenslibrary.org&#x2F;icdl&#x2F;SimpleSearchCategory?ids=&amp;amp;pnum=1&amp;amp;cnum=1&amp;amp;text=&amp;amp;ilangcode=es&amp;amp;langid=61&amp;amp;ilang=English&quot;&gt;Childrens&#x27; Library.org&lt;&#x2F;a&gt; has a lot of free childrens&#x27; books in Spanish.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;advanced&quot;&gt;Advanced:&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Watch native Spanish films and shows without subtitles. I would recommend &amp;quot;Abre Los Ojos&amp;quot; an excellent film from Spain (yes, with Penelope Cruz), and &amp;quot;No Se Aceptan Devoluciones&amp;quot; a brilliant comedy film from Mexico.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Meet native speakers in your city with &amp;quot;tandem&amp;quot; language exchanges (search in Facebook, for example).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;Read classic authors who wrote in Spanish, such as Gabriel García Márquez, Pablo Neruda, and so on. &lt;a href=&quot;http:&#x2F;&#x2F;www.gutenberg.org&#x2F;browse&#x2F;languages&#x2F;es&quot;&gt;Project Gutenberg&lt;&#x2F;a&gt; has a huge archive of out-of-copyright books written in Spanish for example.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;concluding-the-conclusion&quot;&gt;Concluding the conclusion&lt;&#x2F;h3&gt;
+&lt;p&gt;I hope these resources help others to learn Spanish too, I really think they provide enough to learn Spanish to a fluent level (and definitely conversational), at little to no cost. We are incredibly lucky to live in a time when online education is so easy, and a huge number of resources are freely available. Take advantage of it!&lt;&#x2F;p&gt;
+&lt;p&gt;Finally, please note these are my own opinions. Perhaps you might prefer Busuu to Duolingo, etc. - so if you don&#x27;t get on well with the resources I recommended, look at the others too.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>
