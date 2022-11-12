@@ -1,0 +1,50 @@
+{% extends "index.html" %}
+{% block title %}James McMurray: {{ section.title }}{% endblock title %}
+{% block content %}
+
+    <div class="blog-content">
+    <div class="posts">
+        {% for page in paginator.pages%}
+          <article>
+            <h1 class="post-title">
+              <a href="{{ page.permalink }}">{{ page.title }}</a>
+            </h1>
+            <span class="post-date">{{ page.date | date(format="%Y-%m-%d") }}</span>
+            <div class="post__summary">
+                {{ page.summary | safe }}
+            </div>
+            <div class="read-more">
+                <a href="{{ page.permalink }}">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        {% endfor %}
+
+    <nav class="pagination">
+        {% if paginator.previous %}
+            <a class="previous" href="{{ paginator.previous }}">‹ Newer</a>
+        {% endif %}
+        <a class="top" href="#top">Back to top</a>
+        {% if paginator.next %}
+            <a class="next" href="{{ paginator.next }}">Older ›</a>
+        {% endif %}
+    </nav>
+    </div>
+
+    <aside class="sidebar">
+    {% for tax in section.taxonomies %}
+    <section>
+	    <h2 class="capitalize">{{ tax.kind.name }}</h2>
+	    <ul display="block">
+		{% for term in tax.items %}
+		<li><a href={{ term.permalink }}>{{ term.name }} ({{term.pages | length}})</a></li>
+		{% endfor %}
+	    </ul>
+    </section>
+    {% endfor %}
+    </aside>
+
+    </div>
+
+{% endblock content %}
+

@@ -1,0 +1,28 @@
+name = "Octozola"
+description = "Port of Octopress theme to Zola"
+license = "MIT"
+homepage = "https://github.com/jamesmcm/octozola"
+# The minimum version of Zola required
+min_version = "0.4.0"
+# An optional live demo URL
+# demo = ""
+
+# Any variable there can be overridden in the end user `config.toml`
+# You don't need to prefix variables by the theme name but as this will
+# be merged with user data, some kind of prefix or nesting is preferable
+# Use snake_casing to be consistent with the rest of Zola
+[extra]
+octo_title = "Blog Title"
+octo_subtitle = "Blog Subtitle"
+
+# The theme author info: you!
+[author]
+name = "James McMurray"
+homepage = "https://jamesmcm.github.io"
+
+# If this is porting a theme from another static site engine, provide
+# the info of the original author here
+[original]
+author =  "Octopress"
+homepage = "http://octopress.org/"
+repo = "https://github.com/octopress/octopress"

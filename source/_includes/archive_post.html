@@ -1,8 +1,0 @@
-{% capture category %}{{ post.categories | size }}{% endcapture %}
-<h1><div display='inline' class="titleEnglish"> <a href="{{ root_url }}{{ post.url }}">{{ post.titleen }} </a> </div><div class='titleSpanish' style='display: none'><a href="{{ root_url }}{{ post.url }}">{{ post.titlesp }}</a></div></h1>
-<time datetime="{{ post.date | datetime | date_to_xmlschema }}" pubdate>{{ post.date | date: "<span class='month'>%b</span> <span class='day'>%d</span> <span class='year'>%Y</span>"}}</time>
-{% if category != '0' %}
-<footer>
-    <span class="categories"><div class="English" display="inline">posted in</div><div class="Spanish" display="none">enviado en</div> {{ post.categories | category_links }}</span>
-</footer>
-{% endif %}

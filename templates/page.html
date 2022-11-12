@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+
+{% block title %}{{ page.title }}{% endblock title %}
+{% block content %}
+<div class="blog-content">
+<article>
+  <h1 class="post-title">{{ page.title }}</h1>
+  <span class="post-date">{{ page.date | date(format="%Y-%m-%d") }}</span>
+  <hr class="within-post">
+  {{ page.content | safe }}
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    {% if page.lower %}
+        <a class="previous" href="{{ page.lower.permalink | safe }}">‹ Newer Post</a>
+    {% endif %}
+    <a class="top" href="#top">Back to top</a>
+    {% if page.higher %}
+    <a class="next" href="{{ page.higher.permalink | safe}}">Older Post ›</a>
+    {% endif %}
+</nav>
+</div>
+{% endblock content %}
+
+
