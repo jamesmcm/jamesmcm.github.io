@@ -91,10 +91,13 @@ development and electronics.</p>
 <p>The aim was to get more comfortable with the <a href="https://docs.esp-rs.org/esp-hal/">esp-hal crate</a> and using
 <a href="https://embassy.dev/">embassy</a>.</p>
 <h3 id="video">Video</h3>
+<br>
 <video controls>
   <source src="snake_video_smaller.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video> 
+<br>
+<br>
 <h2 id="hardware">Hardware</h2>
 <p>I used the following hardware:</p>
 <ul>
@@ -326,7 +329,9 @@ then used in the game loop, e.g.:</p>
 </span></code></pre>
 <h2 id="conclusion">Conclusion</h2>
 <p>That covers all of the embassy / esp32 related parts of this project (I
-won't cover programming Snake itself!).</p>
+won't cover programming Snake itself!). The source code is available  in the <a href="https://github.com/jamesmcm/snake_rust_esp32">snake_rust_esp32 repo</a> on Github.
+The project is also <a href="https://wokwi.com/projects/413450202628576257">available on Wokwi</a> with the breadboard diagram
+but won't build there at the moment.</p>
 <p>The hardest parts were:</p>
 <ul>
 <li>Not realising the I2C pins needed pull-up resistors to communicate
