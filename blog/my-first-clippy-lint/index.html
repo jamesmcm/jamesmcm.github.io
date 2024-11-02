@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">My First Clippy Lint</h1>
   <span class="post-date">2022-03-26</span>
@@ -213,7 +213,7 @@ impl is quite straightforward:</p>
 </span><span>    }
 </span><span>}
 </span></code></pre>
-<p>Note the use of the <a href="https://docs.rs/if_chain/latest/if_chain/">if_chain!</a> macro to 
+<p>Note the use of the <a href="https://docs.rs/if_chain/latest/if_chain/">if_chain!</a> macro to
 chain if conditions without rightward drift (this is used throughout
 Clippy).</p>
 <p>The pattern <code>if let Some(XXX) = YYY;</code> is common when using if
@@ -278,7 +278,7 @@ trait <code>B</code> for struct <code>A</code>.</p>
 to find the use of the format macro e.g. <code>write!(...)</code> inside the
 Display/Debug impl, and then we need to check the arguments inside the macro call
 (to check whether any of them resolve to <code>self</code>).</p>
-<p>Here we use some of the shared Clippy utils like <code>root_macro_call_first_node()</code> which 
+<p>Here we use some of the shared Clippy utils like <code>root_macro_call_first_node()</code> which
 make it much easier to deal with macros. This makes the first part quite
 straightforward:</p>
 <pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_self_in_format_args</span><span>&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt;(</span><span style="color:#bf616a;">cx</span><span>: &amp;LateContext&lt;</span><span style="color:#b48ead;">&#39;tcx</span><span>&gt;, </span><span style="color:#bf616a;">expr</span><span>: &amp;</span><span style="color:#b48ead;">&#39;tcx </span><span>Expr&lt;&#39;_&gt;, </span><span style="color:#bf616a;">impl_trait</span><span>: FormatTrait) {
@@ -366,7 +366,7 @@ such as in the following example (now a test case):</p>
 <p>This code is fine and won't trigger infinite recursion since Nodes will
 always end in leaves, or have no children. But this would trigger a false positive
 if we only compare the types, since both enum variants have the same type when checked
-(since enum variants are not their own types yet - see the <a href="https://github.com/rust-lang/rfcs/pull/1450">Types for enum variants RFC</a> and 
+(since enum variants are not their own types yet - see the <a href="https://github.com/rust-lang/rfcs/pull/1450">Types for enum variants RFC</a> and
 <a href="https://github.com/rust-lang/rfcs/pull/2593">Enum variant types RFC</a> for details on possible future changes to that).</p>
 <p>The corrected lint check works since <code>self</code> never refers to the same
 entity as <code>child</code>.</p>
@@ -403,21 +403,21 @@ reviews and a lot of easy-to-use shared utils code.</p>
 <p>If you ever find a similar nagging issue, no matter how small, I highly
 encourage you to at least create an issue on Github so you can open
 discussion around possible solutions and similar issues. In my case, it
-took me almost two months to go from first seeing the issue to 
+took me almost two months to go from first seeing the issue to
 realising I could actually add the lint myself.</p>
 <p>If you do wish to contribute a lint to Clippy, I recommend
 reading the <a href="https://github.com/rust-lang/rust-clippy/blob/master/CONTRIBUTING.md">Contribution guidelines</a>,
 the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/basics.md">basics for hacking on Clippy</a>
-and the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/adding_lints.md">documentation on adding lints</a>, 
+and the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/adding_lints.md">documentation on adding lints</a>,
 and posting on the <a href="https://rust-lang.zulipchat.com/#narrow/stream/257328-clippy">clippy Zulip stream</a> for additional help/discussion.
 The <a href="https://rustc-dev-guide.rust-lang.org/hir.html">rustc dev guide</a>
 can be useful for additional documentation on the High-level
 Intermediate Representation (HIR), Diagnostic Items, and other concepts.
-Finally, the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/common_tools_writing_lints.md">Common tools for writing lints</a> 
+Finally, the <a href="https://github.com/rust-lang/rust-clippy/blob/master/doc/common_tools_writing_lints.md">Common tools for writing lints</a>
 is also useful for recognising common operations (as well as reading
 through the existing lints and the <code>clippy_utils</code> crate).</p>
 <p>In my opinion this whole experience perfectly demonstrates Rust's value
-of empowerment for users and developers. I couldn't imagine making 
+of empowerment for users and developers. I couldn't imagine making
 a similar contribution to the tooling of any other language, and it was greatly
 facilitated by the efforts of reviewers and prior contributors.</p>
 <p>I hope writing up this example as a first-time contributor will help
@@ -442,7 +442,7 @@ the least frustrating and most empowering programming language.</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

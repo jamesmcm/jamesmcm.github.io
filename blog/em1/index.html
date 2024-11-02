@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">The Expectation Maximisation (EM) Algorithm</h1>
   <span class="post-date">2014-10-24</span>
@@ -88,16 +88,16 @@ JavaScript.</p>
 <h2 id="general-idea-of-em">General idea of EM</h2>
 <p>The objective of the EM algorithm is to obtain Maximum Likelihood estimates of the parameters and the values of latent variables, for a model with latent variables. This is achieved by iteratively updating the values of the latent variables (e.g. in this example, our best estimate of which Gaussian the data point came from) given the current estimate of the model parameters, and then updating the parameters of the model (e.g. the parameters of the Gaussians) given the values of the latent variables.</p>
 <p>Note this bootstrap approach makes sense because it is simple to infer missing data given the parameters of the model, and to find the Maximum Likelihood estimates of the parameters for the model, given the data. However note that this can lead to problems with local optima and initialisation.</p>
-<p>The likelihood is defined as follows (i.e. probability of the data given the model), but note we usually cannot marginalise over \(\mathbf{Z}\) directly: </p>
+<p>The likelihood is defined as follows (i.e. probability of the data given the model), but note we usually cannot marginalise over \(\mathbf{Z}\) directly:</p>
 <p>$$L(\boldsymbol \theta; \mathbf{X} ) = P(\mathbf{X} | \boldsymbol \theta ) = \sum_z P(\mathbf{X}, \mathbf{Z} | \boldsymbol \theta ) $$</p>
 <p>So instead we take this iterative updating approach. We first update our estimate of the expected value of the log-likelihood with respect to the latent variables, \(\mathbf{Z}\), given our current estimate of the model parameters. Then, using this soft assignment, we update our estimates of the parameters.</p>
-<p>Assigning \(\mathbf{Z}\) (i.e. the Gaussian assignments in this example - technically we are calculating the conditional distribution  \(P(\mathbf{Z}|\mathbf{X},\boldsymbol \theta)\) ): </p>
+<p>Assigning \(\mathbf{Z}\) (i.e. the Gaussian assignments in this example - technically we are calculating the conditional distribution  \(P(\mathbf{Z}|\mathbf{X},\boldsymbol \theta)\) ):</p>
 <p>$$Q(\boldsymbol \theta | \boldsymbol \theta^t ) = \mathbb{E}_{Z|X,\theta^t} \left [ \log ( L(\boldsymbol \theta; \mathbf{X}, \mathbf{Z} )) \right ] $$</p>
 <p>Updating the parameters \(\boldsymbol \theta\):</p>
-<p>$$\boldsymbol \theta ^{t+1} = \arg\max_\theta Q(\boldsymbol \theta | \boldsymbol \theta^t ) $$ </p>
+<p>$$\boldsymbol \theta ^{t+1} = \arg\max_\theta Q(\boldsymbol \theta | \boldsymbol \theta^t ) $$</p>
 <h2 id="application-to-gaussian-mixture-models">Application to Gaussian Mixture Models</h2>
 <p>Now let's apply this to the problem of fitting a Gaussian Mixture Model to data. In general the problem is as follows, we wish to fit \( k \) Gaussians to describe the mixture of data we observe. The data has \( D \) dimensions.</p>
-<p>We have a data matrix \(\mathbf{X}\) of size \(N \times D \), a matrix of assignment probabilities \(\mathbf{Z}\) of size \(N \times k \), a vector of marginal probabilities of assignment to the Gaussians (i.e. the proportion of points that come from this Gaussian) \( \boldsymbol \tau \) which is of size \(k \times 1 \). We also have the parameters of the Gaussians: their means \(\boldsymbol \mu_j\) of each of size \(D \times 1\) and their covariances \(\boldsymbol \Sigma_j \) each of size \( D \times D \). </p>
+<p>We have a data matrix \(\mathbf{X}\) of size \(N \times D \), a matrix of assignment probabilities \(\mathbf{Z}\) of size \(N \times k \), a vector of marginal probabilities of assignment to the Gaussians (i.e. the proportion of points that come from this Gaussian) \( \boldsymbol \tau \) which is of size \(k \times 1 \). We also have the parameters of the Gaussians: their means \(\boldsymbol \mu_j\) of each of size \(D \times 1\) and their covariances \(\boldsymbol \Sigma_j \) each of size \( D \times D \).</p>
 <p>For the sake of brevity, we will first consider fitting two Gaussians in a one-dimensional space. This means that \(D=1\), \(k=2\) and that the means, \(\mu_1\) and \(\mu_2\), and the variances, \(\sigma^2_1\) and \(\sigma^2_2\) are all scalars.</p>
 <div class="caption" style="display:table;">
   <img src="exgmm1.png" height="400" style="block">    
@@ -111,7 +111,7 @@ JavaScript.</p>
 <p>$$\begin{align}L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) = &amp; \exp \left ( \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j)\right . \cr
 &amp; \left . \left [ \log (\tau_j) - \log(\sigma_j )- \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ] \right )\end{align}$$</p>
 <p>Where \(\mathbb{I}(Z_i=j)\) is the indicator function (i.e. returns 1 iff. \(Z_i = j\), else returns 0).</p>
-<p>So the log-likelihood, which we want to maximise is: </p>
+<p>So the log-likelihood, which we want to maximise is:</p>
 <p>$$\log ( L(\boldsymbol \theta ; \mathbf{X}, \mathbf{Z}) ) = \sum_{i=1}^n  \sum_{j=1}^2 \mathbb{I}(Z_i=j) \left [ \log (\tau_j) - \log(\sigma_j) - \frac{1}{2\sigma^2_j} (x_i - \mu_j)^2 - \frac{d}{2} \log(2\pi) \right ]$$</p>
 <h3 id="the-expectation-step">The Expectation step</h3>
 <p>Recall that the Gaussian assignment probabilities are in \(\mathbf{T}\), this is what we wish to return in the E-step. From Bayes Rule:</p>
@@ -162,7 +162,7 @@ JavaScript.</p>
 </ul>
 <h3 id="video">Video</h3>
 <ul>
-<li>The EM algorithm is covered within the &quot;Learning with Incomplete Data&quot; section of <a href="https://class.coursera.org/pgm-2012-002/lecture">Daphne Koller's Coursera course on Probabilistic Graphical Models</a>.</li>
+<li>The EM algorithm is covered within the "Learning with Incomplete Data" section of <a href="https://class.coursera.org/pgm-2012-002/lecture">Daphne Koller's Coursera course on Probabilistic Graphical Models</a>.</li>
 <li>The EM algorithm is also covered in <a href="https://www.youtube.com/watch?v=AnbiNaVp3eQ&amp;list=PLD0F06AA0D2E8FFBA&amp;index=116">some of MathematicalMonk's YouTube videos</a>.</li>
 </ul>
 <h3 id="other">Other</h3>
@@ -190,7 +190,7 @@ JavaScript.</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

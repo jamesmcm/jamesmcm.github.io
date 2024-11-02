@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">A practical introduction to async programming in Rust</h1>
   <span class="post-date">2020-05-06</span>
@@ -99,7 +99,7 @@ with: <code>cat /proc/sys/kernel/threads-max</code>, mine is 127,162.</p>
 <p>This is a significant issue if we need a separate OS
 thread to handle each request on a web server for example, and is the
 origin of the <a href="https://en.wikipedia.org/wiki/C10k_problem">C10k problem</a>
-- how to handle 10,000 concurrent connections to a web server. </p>
+- how to handle 10,000 concurrent connections to a web server.</p>
 <p>Early web servers did indeed use a separate OS thread per request, in order to
 handle requests in parallel. The key insight is that those threads spend
 most of their time waiting for network responses, rather than doing any
@@ -116,7 +116,7 @@ execution) and wait for the return value to be available.</p>
 is used to wait asynchronously for an async task to finish, and get the return value.
 Note that while the task itself cannot progress until the <code>Future</code> is ready,
 the actual OS thread can have other tasks assigned to it by the runtime,
-and so continue to do work. </p>
+and so continue to do work.</p>
 <p>Effectively the task is informing the
 runtime that at this point it may yield the execution to another task
 (eventually, that other task will also <code>await</code> something, and if the
@@ -126,7 +126,7 @@ this is an implementation of <a href="https://en.wikipedia.org/wiki/Cooperative_
 programs that maintain a structure similar to simple, synchronous
 programs.</p>
 <h2 id="when-should-i-use-async">When should I use async?</h2>
-<p>Asynchronous programming is useful when the thread would otherwise just be 
+<p>Asynchronous programming is useful when the thread would otherwise just be
 waiting on IO operations - for example when making network requests or
 responses, reading or writing to disk, or waiting for user input.</p>
 <p>It is not useful if you are always doing computations and there is no
@@ -135,12 +135,12 @@ parallel - for example in a ray tracer. In this case it would be best to
 parallelise the computations over OS threads directly (taking advantage
 of the multiple cores in your CPU), for example using parallel iterators in the <a href="https://crates.io/crates/rayon">rayon</a>
 crate (or if you want thread-level control, then with the <a href="https://crates.io/crates/crossbeam">crossbeam</a>
-and <a href="https://crates.io/crates/threadpool">threadpool</a> crates). 
+and <a href="https://crates.io/crates/threadpool">threadpool</a> crates).
 However, remember <a href="https://en.wikipedia.org/wiki/Amdahl%27s_law">Amdahl's Law</a> and consider that
-algorithmic improvements might yield a better return than focusing on 
+algorithmic improvements might yield a better return than focusing on
 parallelisation in this cases.</p>
-<p>It is also not useful if there are no other tasks to do whilst waiting 
-for the IO operations. For example in the <a href="/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">previous blog post</a>, Rusoto
+<p>It is also not useful if there are no other tasks to do whilst waiting
+for the IO operations. For example in the <a href="/blog/data-engineering-with-rust-and-aws-lambda">previous blog post</a>, Rusoto
 actually returns a <code>RusotoFuture</code> object when we request the DB
 credentials from AWS Secrets Manager, however in this case one
 invocation of our Lambda function corresponds to one request - there is
@@ -162,7 +162,7 @@ runtime for this example, as it is currently the most popular.
 The other main alternative is the <a href="https://docs.rs/async-std/1.5.0/async_std/">async_std</a> runtime
 - code for using this runtime is available in the <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">async-std branch of the Github repo</a> (this code
 was contributed by <a href="https://github.com/BartMassey">@BartMassey</a>).</p>
-<p>Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate 
+<p>Note that both use the common <a href="https://docs.rs/futures/0.3.4/futures/">futures</a> crate
 so you can swap the async runtime whilst keeping mostly the same API.</p>
 <h3 id="server">Server</h3>
 <p>The server used in this example is adapted from the <a href="https://tokio.rs/docs/getting-started/echo/">Tokio tutorial</a>.
@@ -512,7 +512,7 @@ for many Futures).</p>
 example with the <a href="https://crates.io/crates/rayon">rayon</a> crate mentioned previously.</p>
 <p>However, in this case each request would need its own OS thread, and if
 we had to carry out 10,000 concurrent requests, we might hit the thread
-limit. </p>
+limit.</p>
 <p>That is, the execution diagram would look like this:</p>
 <p><img src="https://jamesmcm.github.io/blog/a-practical-introduction-to-async-programming-in-rust/synchronous_multios.svg" alt="Synchronous execution on multiple OS threads" title="Synchronous execution on multiple OS threads" /></p>
 <p>Note that the OS threads would spend a lot of time just waiting on IO operations,
@@ -591,7 +591,7 @@ attempting to work around it. See <a href="https://github.com/jamesmcm/s3rename/
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

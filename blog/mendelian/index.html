@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">Introduction to Mendelian Randomization</h1>
   <span class="post-date">2014-08-17</span>
@@ -84,16 +84,16 @@ It uses the measured variation of genes (of known function) to <strong>bound</st
 <p>Here is the Directed Acyclic Graph (<strong>DAG</strong>) for the basic set-up. Here <strong>G</strong> is the observed genotype (i.e. the presence of a SNP), <strong>X</strong> is an environmental exposure, <strong>U</strong> is a (possible) unobserved confounder and <strong>Y</strong> is the phenotype (i.e. disease status). This will be explained in detail later.</p>
 <p><img src="https://jamesmcm.github.io/blog/mendelian/simpmr.png" alt="Simple Mendelian Randomization" title="Simple Mendelian Randomization" /></p>
 <h2 id="motivation">Motivation</h2>
-<p>Mendelian Randomization is a useful technique precisely because it allows for causal inference from <strong>observational data</strong>. <strong>Randomised Control Trials</strong> (RCTs) are the gold standard for causal inference, but is not always ethical or possible to carry out RCTs. For example, we cannot randomly assign a lifetime of heavy smoking (or non-smoking) to groups of individuals. This leads to a need to use observational data, however this requires many <strong>assumptions</strong>. </p>
+<p>Mendelian Randomization is a useful technique precisely because it allows for causal inference from <strong>observational data</strong>. <strong>Randomised Control Trials</strong> (RCTs) are the gold standard for causal inference, but is not always ethical or possible to carry out RCTs. For example, we cannot randomly assign a lifetime of heavy smoking (or non-smoking) to groups of individuals. This leads to a need to use observational data, however this requires many <strong>assumptions</strong>.</p>
 <h2 id="instrumental-variables-ivs">Instrumental Variables (IVs)</h2>
 <p>In the previous <strong>DAG</strong>, <strong>G</strong> is the <strong>instrumental variable</strong> (or instrument), because it affects <strong>Y</strong> only through <strong>X</strong> (that is, exclusively, no other path may exist). Therefore, under certain <strong>assumptions</strong> (to be explained later), if <strong>G</strong> is correlated with <strong>Y</strong> then we can infer the edge <strong>X -&gt; Y</strong> (note that <strong>X</strong> must be correlated with <strong>G</strong>).</p>
 <p>Now we will consider an example application of instrumental variables, for a hypothetical investigation of the effect of smoking on lung cancer.</p>
 <p><img src="https://jamesmcm.github.io/blog/mendelian/smoking.png" alt="Smoking Policy Example" title="Smoking Policy Example" /></p>
-<p>If the <strong>assumptions</strong> of the instrumental variable method are met, then if we observe that an increase in tax leads to a reduction in lung cancer, then one can infer that smoking is a &quot;cause&quot; of lung cancer (though perhaps indirectly, i.e. it's not smoking directly that causes cancer but the build-up of tar in the lungs, etc.).</p>
+<p>If the <strong>assumptions</strong> of the instrumental variable method are met, then if we observe that an increase in tax leads to a reduction in lung cancer, then one can infer that smoking is a "cause" of lung cancer (though perhaps indirectly, i.e. it's not smoking directly that causes cancer but the build-up of tar in the lungs, etc.).</p>
 <h2 id="assumptions-of-the-instrumental-variables-method">Assumptions of the Instrumental Variables method</h2>
 <p>Assumptions are necessary in all areas of statistics, however it is important to know what assumptions we are making and whether they hold true.</p>
 <h3 id="z-x-must-exist">Z -&gt; X must exist</h3>
-<p>We must know <strong>a priori</strong> that the causal direction is <strong>Z -&gt; X</strong> and not <strong>X -&gt; Z</strong>. This is what makes the causal structure unique and <strong>identifiable</strong>. Note this does not mean that <strong>Z</strong> has to be the &quot;true&quot; cause of <strong>X</strong>. For example, if <strong>Z</strong> is a SNP, we can choose a SNP in linkage disequilibrium with <strong>Z</strong>, so long as it is independent of all of the other variables, but still correlated with <strong>X</strong>. Note the more correlated that <strong>Z</strong> is with <strong>X</strong>, the better the power will be (i.e. less data required for significant results), if it is not correlated, it cannot be used as an instrumental variable.</p>
+<p>We must know <strong>a priori</strong> that the causal direction is <strong>Z -&gt; X</strong> and not <strong>X -&gt; Z</strong>. This is what makes the causal structure unique and <strong>identifiable</strong>. Note this does not mean that <strong>Z</strong> has to be the "true" cause of <strong>X</strong>. For example, if <strong>Z</strong> is a SNP, we can choose a SNP in linkage disequilibrium with <strong>Z</strong>, so long as it is independent of all of the other variables, but still correlated with <strong>X</strong>. Note the more correlated that <strong>Z</strong> is with <strong>X</strong>, the better the power will be (i.e. less data required for significant results), if it is not correlated, it cannot be used as an instrumental variable.</p>
 <p><img src="https://jamesmcm.github.io/blog/mendelian/snpld.png" alt="Z to X must exist" title="Z to X must exist" /></p>
 <h3 id="z-must-be-independent-of-u">Z must be independent of U</h3>
 <p>No factor can affect both the instrument and the effects. For example, there cannot be a factor that causes both higher tobacco taxes and less cancer (e.g. if we were comparing rates in different cancers between countries, national health awareness could be such a factor).</p>
@@ -127,7 +127,7 @@ It uses the measured variation of genes (of known function) to <strong>bound</st
 <h3 id="canalization">Canalization</h3>
 <p>Canalization refers to the variation in the <strong>robustness of phenotypes</strong> to changes in the genotype and environment.</p>
 <p>The classic example is Waddington's Drosophilia experiment. In the experiment, Drosophilia pupae were exposed to heat shock (i.e. a rapid increase in temperature). Eventually a Cross-veinless phenotype (no cross-veins in wings) was produced. However, by then selectively breeding the resulting flies for this phenotype, it eventually appears without heat shock.</p>
-<p>This led to theory of organisms rolling downhill in to &quot;canals&quot; of the <strong>epigenetic landscape</strong> with development, becoming more robust to variation of the environment. We can think of it like an optimization problem which settles in local minima.</p>
+<p>This led to theory of organisms rolling downhill in to "canals" of the <strong>epigenetic landscape</strong> with development, becoming more robust to variation of the environment. We can think of it like an optimization problem which settles in local minima.</p>
 <p>The exact biological/molecular mechanisms of canalization are still unknown. With regards to Mendelian Randomization, it can act as a <strong>confounder</strong> between the genotype, environment and phenotype.</p>
 <h3 id="no-pleiotropy">No Pleiotropy</h3>
 <p>Pleiotropy is the phenomena whereby one gene can affect many (even seemingly unrelated) phenotypes. Mendelian Randomisation makes the assumption of <strong>no pleiotropy</strong>.</p>
@@ -168,7 +168,7 @@ Some work has been done on this under the name of  multi-step Mendelian Randomis
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

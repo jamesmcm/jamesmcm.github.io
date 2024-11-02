@@ -73,25 +73,25 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">Writing a simple AWS Lambda Custom Runtime in Rust</h1>
   <span class="post-date">2020-10-24</span>
   <hr class="within-post">
   <p>I was recently reading more about the <a href="https://crates.io/crates/lambda_runtime">lambda_runtime crate</a>
-and came across <a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">this issue</a> 
+and came across <a href="https://github.com/awslabs/aws-lambda-rust-runtime/issues/259">this issue</a>
 where it is mentioned that the <code>#[lambda]</code> procedural macro can be
 misleading and cause problems if used naively.</p>
 <p>In this post we will implement our own simple custom runtime for
 AWS Lambda in Rust, and understand the reasons behind this issue.</p>
-<p>The code used in this blog post is available on Github in 
+<p>The code used in this blog post is available on Github in
 my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
 <span id="continue-reading"></span>
 <p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
 <h1 id="aws-lambda">AWS Lambda</h1>
 <p><a href="https://aws.amazon.com/lambda/">AWS Lambda</a> is a serverless computing service. I have previously covered
-setting up serverless data pipelines <a href="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">from Excel files on S3</a>, and
-<a href="http://jamesmcm.github.io/blog/2020/08/29/rust-ses/#en">from email attachments with SES and Workmail</a> using Rust and the
+setting up serverless data pipelines <a href="/blog/data-engineering-with-rust-and-aws-lambda">from Excel files on S3</a>, and
+<a href="/blog/rust-ses">from email attachments with SES and Workmail</a> using Rust and the
 <a href="https://github.com/awslabs/aws-lambda-rust-runtime">lambda_runtime crate</a>.</p>
 <h2 id="custom-runtimes">Custom Runtimes</h2>
 <p>A <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html">Custom Runtime</a> allows you to run any x86_64 binary as an AWS Lambda
@@ -187,9 +187,9 @@ small amount of code:</p>
 (perhaps anything that implements Display), and possibly also
 asynchronous handler functions, etc. - this is what the lambda_runtime
 crate does.</p>
-<p>This code is available on Github in 
+<p>This code is available on Github in
 my <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>.</p>
-<p>If you want to follow along, the 
+<p>If you want to follow along, the
 <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-walkthrough.html">tutorial on publishing a custom runtime</a> is
 also very useful - covering an example of an AWS Lambda custom runtime in bash.</p>
 <h2 id="example-lambda-function">Example Lambda function</h2>
@@ -247,12 +247,12 @@ is treated as the <em>handler function</em> (<a href="https://github.com/awslabs
 That is, any initialisation should take
 place <em>before</em> the handler function is called, so that it is only run
 once even if there are multiple invocations before the runtime is
-terminated (this is a &quot;warm start&quot;).</p>
+terminated (this is a "warm start").</p>
 <p>This causes problems when new users see the above example, and put
 logger intialisation code, etc. in there directly, which will then fail
 in the cases of warm starts - which might appear as sporadic and
 confusing failures to the developer.</p>
-<p>This can be fixed by 
+<p>This can be fixed by
 <a href="https://github.com/awslabs/aws-lambda-rust-runtime/blob/master/lambda/examples/hello-without-macro.rs">separating out the handler invocation</a>,
 just like we did in our earlier code. In this case it could be:</p>
 <pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
@@ -279,12 +279,12 @@ Richard Feynman said:</p>
 <p>If you look at the the
 <a href="https://github.com/jamesmcm/micro_lambda">micro_lambda repository</a>,
 you'll see I tried to reduce the binary size by some means. I'd
-originally wanted to write this as 
+originally wanted to write this as
 a <a href="https://rust-embedded.github.io/book/intro/no-std.html">#[no_std] crate</a>
 but the requirement to make HTTP requests made this too difficult,
 considering the networking required. If you do know how to handle this
 well please create an issue or PR on the repo!</p>
-<p>Another possible extension of this would be to support the 
+<p>Another possible extension of this would be to support the
 <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-extensions-api.html">AWS Lambda Extensions API</a>.</p>
 
 </article>
@@ -306,7 +306,7 @@ well please create an issue or PR on the repo!</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

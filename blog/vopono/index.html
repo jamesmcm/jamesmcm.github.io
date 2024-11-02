@@ -73,12 +73,12 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">Retrospective of my first useful Rust project</h1>
   <span class="post-date">2020-09-05</span>
   <hr class="within-post">
-  <p>This post is a retrospective of my first &quot;useful&quot; Rust project. <a href="https://github.com/jamesmcm/vopono">vopono</a> 
+  <p>This post is a retrospective of my first "useful" Rust project. <a href="https://github.com/jamesmcm/vopono">vopono</a>
 is a Linux program to launch applications in temporary network
 namespaces (managed by vopono), in order to run specific applications
 through VPN connections, without affecting the rest of your system.</p>
@@ -111,7 +111,7 @@ support to the scripts I was using. But I thought it would be best to
 also address the issues of manually managing the network namespaces and
 create a comprehensive application to handle OpenVPN and Wireguard
 connections for various VPN providers, and create and destroy the
-network namespaces on demand. </p>
+network namespaces on demand.</p>
 <p>This was the start of vopono, my first
 useful Rust project (I suppose <a href="https://github.com/jamesmcm/s3rename">s3rename</a> was also useful, but a much smaller
 scope).</p>
@@ -133,22 +133,22 @@ commands and subcommands. This allows you to abstract away dealing with command-
 and for the relevant code to be somewhat self-documenting (as <a href="https://doc.rust-lang.org/stable/rust-by-example/meta/doc.html">doc comments</a> are used to provide the user-facing help output).</p>
 <p>Note that some developers prefer to use <a href="https://crates.io/crates/clap">clap</a> directly.</p>
 <h3 id="result-and-anyhow">Result and anyhow</h3>
-<p>Rust's <a href="https://doc.rust-lang.org/std/result/enum.Result.html">Result enum</a> 
+<p>Rust's <a href="https://doc.rust-lang.org/std/result/enum.Result.html">Result enum</a>
 and <code>?</code> operator (the <a href="https://doc.rust-lang.org/edition-guide/rust-2018/error-handling-and-panics/the-question-mark-operator-for-easier-error-handling.html">try operator</a>)
 make it simple and ergonomic to handle operations which may fail
 (which are almost all operations when dealing with disk IO and
 launching processes).</p>
 <p>It is also very convenient when working with fallible operations over a
 collection, where we may want to return to the user a list of operations
-which failed. In Rust, we can 
-<a href="https://doc.rust-lang.org/stable/rust-by-example/error/iter_result.html">filter and map over a collection of Results</a> 
+which failed. In Rust, we can
+<a href="https://doc.rust-lang.org/stable/rust-by-example/error/iter_result.html">filter and map over a collection of Results</a>
 to a collection of Errors and then return that to the user - this feels
 very natural compared to other languages.</p>
 <p>Combined with the <a href="https://crates.io/crates/anyhow">anyhow crate</a>, it is easy to provide useful error
 messages to the end-user whilst also keeping the code very concise.</p>
 <h3 id="serde">Serde</h3>
 <p>The <a href="https://crates.io/crates/serde">Serde crate</a> provides traits you can derive on your structs,
-allowing for easy serialization and deserialization. </p>
+allowing for easy serialization and deserialization.</p>
 <p>In vopono this is used to serialize and deserialize lockfiles, so that
 if you launch a new application in an existing network namespace (via
 vopono), the namespace will not be destroyed until <em>both</em> applications
@@ -185,7 +185,7 @@ which gets provider configuration files.</p>
 <p>This subcommand relies on the <a href="https://crates.io/crates/reqwest">reqwest crate</a>
 to make HTTPS requests, but we want to avoid depending on OpenSSL to make it easier to
 build a statically linked binary that will be independent of the runtime
-environment. Fortunately we only need to set the &quot;rustls&quot; feature flag
+environment. Fortunately we only need to set the "rustls" feature flag
 in the reqwest dependency.</p>
 <h3 id="musl-and-static-linking">musl and static linking</h3>
 <p>The <code>x86_64-unknown-linux-musl</code> target can be used to (cross-)compile,
@@ -198,7 +198,7 @@ platform with an earlier version of glibc).</p>
 <p>If you come from scripting languages, you may find that Rust has a
 smaller standard library compared to those languages. For example, there
 is no recursive copy (<code>cp -r</code> equivalent) in the standard library
-directly, and I had to do this using the 
+directly, and I had to do this using the
 <a href="https://crates.io/crates/walkdir">walkdir crate</a> and copying each item.</p>
 <h3 id="compile-times">Compile times</h3>
 <p>Rust has longer compile times than most other languages (except perhaps
@@ -385,7 +385,7 @@ the issues mentioned above, and there are <a href="https://github.com/jamesmcm/v
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

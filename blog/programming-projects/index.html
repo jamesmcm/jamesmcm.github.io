@@ -73,14 +73,14 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">What should I program?</h1>
   <span class="post-date">2020-10-11</span>
   <hr class="within-post">
   <p>Doing projects is often the best way to get more programming experience
-and learn about new concepts and problem domains. However, a common issue 
-is finding feasible projects of a reasonable scope that can 
+and learn about new concepts and problem domains. However, a common issue
+is finding feasible projects of a reasonable scope that can
 produce something useful in a few weekends.</p>
 <p>In this post I will list some classic project ideas for beginner and
 intermediate programmers (most of which should be achievable in 2-3
@@ -114,35 +114,35 @@ Another interesting project using graph search algorithms is <a href="https://en
 <h2 id="tcp-client-server-or-proxy">TCP client/server or proxy</h2>
 <p>Writing a TCP client and server, or a TCP proxy server, will force you
 to work with multithreading or asynchronous programming (or both - see
-<a href="http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en">my previous post on asynchronous programming</a> 
+<a href="/blog/a-practical-introduction-to-async-programming-in-rust">my previous post on asynchronous programming</a>
 if you are unsure of the difference).</p>
 <p>I recently wrote a <a href="https://github.com/jamesmcm/basic_tcp_proxy">simple synchronous TCP proxy server</a> in Rust for
-use in <a href="https://github.com/jamesmcm/vopono">vopono</a> without adding a 
+use in <a href="https://github.com/jamesmcm/vopono">vopono</a> without adding a
 lot of async dependencies. You could also write a
 <a href="https://github.com/dpohanlon/Transfer">simple file transfer program</a>
 for example.</p>
 <h2 id="chip-8-emulator">CHIP-8 emulator</h2>
 <p><a href="https://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a> is an interpreted
 programming language, that was used on several microcomputers in the
-late 1970s. </p>
+late 1970s.</p>
 <p>The language is effectively a high-level instruction set,
 where the opcodes correspond to different instructions from low-level
 mathematical operations to high-level operations like drawing on the
 screen.</p>
-<p>I highly recommend reading 
+<p>I highly recommend reading
 <a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM">Cowgod's Chip-8 Technical Reference</a>
 if you choose to do this project. I wrote <a href="https://github.com/jamesmcm/chip8go">an implementation in Go</a>
-which includes the documentation of the opcodes and some issues which I hit 
+which includes the documentation of the opcodes and some issues which I hit
 mentioned in the README.</p>
 <p>Here is my CHIP-8 interpreter running Breakout:</p>
 <p><img src="https://jamesmcm.github.io/blog/programming-projects/breakout.png" alt="My CHIP-8 interpreter running Breakout" title="My CHIP-8 interpreter running Breakout" /></p>
-<p>If you enjoy building an emulator/Virtual Machine I'd also recommend the 
+<p>If you enjoy building an emulator/Virtual Machine I'd also recommend the
 <a href="https://adventofcode.com/2019/day/2">Advent of Code 2019</a> intcode problems
 (starting on day 2) which involve building a VM to execute the intcode instructions.</p>
-<p>Then if you really want a greater challenge you could try implementing a 
+<p>Then if you really want a greater challenge you could try implementing a
 NES or Gameboy emulator (also check out <a href="https://www.reddit.com/r/EmuDev/">Reddit's /r/EmuDev</a>). The <a href="http://wiki.nesdev.com/w/index.php/Nesdev_Wiki">NesDev Wiki</a>
-is a great resource for the former, combined with <a href="https://www.youtube.com/watch?v=nViZg02IMQo&amp;list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf">OneLoneCoder's video series</a>. 
-For the Gameboy the <a href="https://github.com/gbdev/awesome-gbdev">gbdev community</a> 
+is a great resource for the former, combined with <a href="https://www.youtube.com/watch?v=nViZg02IMQo&amp;list=PLrOv9FMX8xJHqMvSGB_9G9nZZ_4IgteYf">OneLoneCoder's video series</a>.
+For the Gameboy the <a href="https://github.com/gbdev/awesome-gbdev">gbdev community</a>
 has a lot of comprehensive documentation. Here is <a href="https://github.com/BlueBlazin/gbemu">a Gameboy emulator compiled to WebAssembly</a> for
 example.</p>
 <p>A great advanced project idea would be a SNES emulator compiled to WebAssembly
@@ -169,11 +169,11 @@ there is also the <a href="https://justinmeiners.github.io/lc3-vm/">Write your o
 <p>For compilers and programming language development, you might be
 interested in reading <a href="https://craftinginterpreters.com/">Crafting Interpreters</a>,
 <a href="https://interpreterbook.com/">Writing an interpreter in Go</a>,
-<a href="https://compilerbook.com/">Writing a compiler in Go</a> and the 
+<a href="https://compilerbook.com/">Writing a compiler in Go</a> and the
 <a href="https://createlang.rs/">Create your own programming language with Rust</a>
 online book.</p>
 <p>For Operating Systems development, the <a href="https://wiki.osdev.org/Expanded_Main_Page">osdev Wiki</a>
-has a lot of comprehensive resources. There is also the 
+has a lot of comprehensive resources. There is also the
 <a href="https://os.phil-opp.com/">Writing an OS in Rust</a> blog series, and the
 rust-embedded group's <a href="https://github.com/rust-embedded/rust-raspberrypi-OS-tutorials">Rust RaspberryPi OS tutorials</a>.</p>
 <p><a href="https://www.amazon.com/Code-Language-Computer-Hardware-Software/dp/0735611319">Charles Petzold's Code</a>
@@ -215,7 +215,7 @@ for an alternative resource aimed at C++.</p>
 <p>Graphics programming is a very deep rabbit hole. If you find the Ray
 Tracer project interesting, I'd definitely recommend Bisqwit's YouTube channel
 with videos on <a href="https://www.youtube.com/watch?v=HQYsFshbkYw">DOOM-style rendering</a>,
-<a href="https://www.youtube.com/watch?v=PahbNFypubE">Polygon Rasterisation</a> and 
+<a href="https://www.youtube.com/watch?v=PahbNFypubE">Polygon Rasterisation</a> and
 <a href="https://www.youtube.com/watch?v=Nwfm6cpskIM">Illumination</a> mostly in C
 and C++.</p>
 <h1 id="my-project-ideas">My project ideas</h1>
@@ -226,7 +226,7 @@ begin!).</p>
 <p>As in the previous section, projects are sorted by approximate difficulty in
 ascending order.</p>
 <h2 id="scrabble-solver">Scrabble solver</h2>
-<p><a href="https://en.wikipedia.org/wiki/Scrabble">Scrabble</a> / Words With Friends 
+<p><a href="https://en.wikipedia.org/wiki/Scrabble">Scrabble</a> / Words With Friends
 is a popular word game where you must form the best words from your character
 tiles to score the highest points against your opponent.</p>
 <p>I wrote a simple <a href="https://github.com/jamesmcm/scala-scrabble-solver">Scrabble solver in Scala</a>
@@ -250,10 +250,10 @@ heuristic to discard positions/moves. Also you may often have the 3rd and 5th
 letter of a word constrained but not the first letter for example, so
 the data structure for the word list would need to account for that.</p>
 <h2 id="crusader-kings-3-save-game-file-analyzer">Crusader Kings 3 save-game file analyzer</h2>
-<p><a href="https://store.steampowered.com/app/1158310/Crusader_Kings_III/">Crusader Kings 3</a> 
+<p><a href="https://store.steampowered.com/app/1158310/Crusader_Kings_III/">Crusader Kings 3</a>
 is an excellent Grand Strategy game available on GNU/Linux. Overall, the
 game is a great improvement to its predecessor, however one feature that
-it lacks is the &quot;Chronicle&quot; which, in Crusader Kings 2, documented the
+it lacks is the "Chronicle" which, in Crusader Kings 2, documented the
 history of your dynasty and their rise to power.</p>
 <p>It'd be great to build a WebAssembly based tool that could parse CK3
 save game files and show the history of the game (using the title owner
@@ -269,7 +269,7 @@ different, binary format.</p>
 <p>The idea would be to first handle deserialising the relevant parts of
 the JSON debug saves to useful structs, and then build this to
 WebAssembly with a frontend framework (e.g. <a href="https://seed-rs.org/">Seed</a>)
-and some JavaScript (e.g. <a href="https://github.com/plotly/plotly.js">plotly.js</a>) 
+and some JavaScript (e.g. <a href="https://github.com/plotly/plotly.js">plotly.js</a>)
 to create the visualisations.</p>
 <p>Once something is useful for the debug saves, then a deserialiser for
 the Ironman saves could be created. From my brief analysis of the save
@@ -286,7 +286,7 @@ with the Ironman issue for EU4 saves too, so it is not insurmountable.</p>
 <p>Another interesting project would be to be able to use an Xbox One controller to create
 music with a software <a href="https://en.wikipedia.org/wiki/MIDI">MIDI</a> synthesizer.
 I found two repositories on Github doing this already:
-<a href="https://github.com/quotepilgrim/midibox360">midibox360</a> and 
+<a href="https://github.com/quotepilgrim/midibox360">midibox360</a> and
 <a href="https://github.com/maxmechanic/xbox-midi-controller">xbox-midi-controller</a>.</p>
 <p>I tried out midixbox360 but the latency was too high to be usable so I
 wrote my own test in Rust. I have the put the <a href="https://github.com/jamesmcm/xboxone_midi">test code on Github</a>,
@@ -308,7 +308,7 @@ these issues at some point.</p>
 <a href="https://developer.amazon.com/en-US/docs/alexa/custom-skills/understanding-custom-skills.html">Custom Alexa skill</a>
 to read and vote on Reddit stories and comments.</p>
 <p>I investigated this before and wrote a simple Hello World skill in Rust
-and AWS Lambda, using the <a href="https://github.com/arienmalec/alexa_rust">alexa_rust crate</a> 
+and AWS Lambda, using the <a href="https://github.com/arienmalec/alexa_rust">alexa_rust crate</a>
 (the tutorial in the crate README is quite comprehensive).
 The Alexa Skill can be hosted in AWS Lambda, and just needs to handle
 the Alexa requests like a state machine, with most of the hard work
@@ -332,18 +332,18 @@ I'm not building a skill for my own company/service), especially as this
 could be a great tool for accessibility for those with poor eyesight or
 arthritis, etc. that would struggle to use a smartphone or computer.</p>
 <h2 id="alma-docker-support-alma-hub">ALMA docker support + ALMA Hub</h2>
-<p>As <a href="http://jamesmcm.github.io/blog/2020/09/09/alma/#en">mentioned in a previous blog post</a>,
+<p>As <a href="/blog/alma">mentioned in a previous blog post</a>,
 <a href="https://github.com/r-darwish/alma">ALMA</a> is a tool for
 creating persistent LiveUSB installations of Arch Linux, that can be
 configured with <a href="https://github.com/jamesmcm/arch-i3-usb">a collection of preset files</a>
-(also see <a href="https://github.com/madskjeldgaard/arch-linux-computermusic-usb">this collection</a> 
+(also see <a href="https://github.com/madskjeldgaard/arch-linux-computermusic-usb">this collection</a>
 aimed at audio production).</p>
 <p>If support were added to install directly to a partition (i.e. not
 formatting the entire disk and installing a bootloader), and it were
 possible to run in Docker then it might be possible to use ALMA as a
-universal Arch Linux installer. </p>
+universal Arch Linux installer.</p>
 <p>It would give you the opportunity to try
-out the &quot;meta-distribution&quot; of preset files on a LiveUSB or a VM first
+out the "meta-distribution" of preset files on a LiveUSB or a VM first
 (as already exists),
 and then install it directly to a disk or partition, even from Windows
 (via Docker).</p>
@@ -352,7 +352,7 @@ but I think this would be a great project and remove the need for a lot
 of simplified Arch Linux based distributions like EndeavourOS, Manjaro,
 etc.</p>
 <p>Eventually the meta-distributions of preset file collections could be
-shared on an &quot;ALMA Hub&quot; website - providing screenshots and summaries of
+shared on an "ALMA Hub" website - providing screenshots and summaries of
 the different configurations available.</p>
 <h2 id="linux-cli-hex-editor">Linux CLI Hex editor</h2>
 <p>Whilst analysing the Crusader Kings 3 save games mentioned above, it was
@@ -361,7 +361,7 @@ a pain not being able to use neovim directly. It is possible to just run
 series of bytes is difficult as it depends on the formatting (i.e. if
 xxd split the line or not).</p>
 <p>Overall I found <a href="https://github.com/afrantzis/bless">bless</a> to be the
-best hex editor (<a href="https://wiki.gnome.org/Apps/Ghex">ghex</a> 
+best hex editor (<a href="https://wiki.gnome.org/Apps/Ghex">ghex</a>
 is a close second), but it'd be great to have something like this on the
 command line, or if possible, as a neovim plugin.</p>
 <p>Mainly it'd need to be able to:</p>
@@ -399,11 +399,11 @@ will use TLS, so it is necessary to Man-in-the-Middle these connections
 exists on Linux, although it is not quite as advanced as CheatEngine.</p>
 <h2 id="command-line-interface-chiptune-tracker">Command-line Interface Chiptune Tracker</h2>
 <p><a href="https://en.wikipedia.org/wiki/Chiptune">Chiptunes</a> are a type of synthesised music
-generated with waveform generators (i.e. an &quot;instrument&quot; in a track might be a sine
+generated with waveform generators (i.e. an "instrument" in a track might be a sine
 wave, with different notes representing different frequencies). Here is
 a famous example track: <a href="https://www.youtube.com/watch?v=9F0_OOv7EPw">To Norway With Love</a></p>
 <p>These are usually created with <a href="https://en.wikipedia.org/wiki/Music_tracker">music trackers</a>,
-a good example on Linux is <a href="https://milkytracker.org/">MilkyTracker</a> 
+a good example on Linux is <a href="https://milkytracker.org/">MilkyTracker</a>
 (I recommend <a href="https://www.youtube.com/watch?v=N2s04YYO0Wg&amp;list=PLgQLAgklMBxEuPzQUNKc2xSJu5pXx7xVx">this tutorial series</a> for getting started).</p>
 <p>It'd be great to create a CLI-based music tracker and an open library
 for music tracker development (so it could be extended to WebAssembly
@@ -447,11 +447,11 @@ balancing the economy and popularity with different demographics.</p>
 <p>The main game view of Democracy 3 showing the relationships between different variables:</p>
 <p><img src="https://jamesmcm.github.io/blog/programming-projects/democracy3.jpg" alt="The main game view of Democracy 3" title="The main game view of Democracy 3" /></p>
 <p>The idea here would be to build an AI that can play the game
-successfully, managing the different policy choices 
+successfully, managing the different policy choices
 (<a href="https://en.wikipedia.org/wiki/Project_Cybersyn">Project Cybersyn</a> style).</p>
 <p>I investigated this briefly about 5 years ago. All of the equations relating different variables and policies can be
 extracted from the game files - note that many have non-linear
-relationships. </p>
+relationships.</p>
 <p>The main challenges would be:</p>
 <ul>
 <li>Building a simulation of the game, using the equations in the game
@@ -463,7 +463,7 @@ and the final outcome (i.e. election popularity and budget) without
 knowing the relationships a priori.</li>
 </ul>
 <p>Once a fast simulation is possible, at least many different methods
-could be tried for the policy model itself such as 
+could be tried for the policy model itself such as
 <a href="https://en.wikipedia.org/wiki/Q-learning">Q-learning</a> or
 <a href="https://deepmind.com/research/publications/playing-atari-deep-reinforcement-learning">Deep Q-learning</a>.</p>
 <p>For learning more about Artificial Intelligence, I enjoyed Udacity's
@@ -474,7 +474,7 @@ expensive, but you might be able to get a similar experience by reading
 <h2 id="foss-engine-for-netstorm">FOSS engine for Netstorm</h2>
 <p><a href="https://en.wikipedia.org/wiki/NetStorm:_Islands_At_War">Netstorm</a> is
 a Real-Time Strategy game released in late 1997. Unlike popular RTS
-games, the game is more similar to Populous in that you only directly 
+games, the game is more similar to Populous in that you only directly
 control one High Priest and a few other units.</p>
 <p>Most of the gameplay revolves around building a network of bridges from randomly available
 Tetris-style bridge patterns, and tower defences which have different
@@ -495,7 +495,7 @@ perhaps a mod for <a href="https://www.youtube.com/watch?v=HAh03WuGrsU">Factorio
 <p>If you do choose to investigate this project, I'd recommend reading
 <a href="https://mamclain.com/?page=Blog_Programing_CPP_Data_Padding_and_Alignment">this article on reverse engineering in C++</a>
 which mentions NetStorm explicitly, and also to review the source code
-for the incomplete <a href="https://github.com/samcday/javastorm">JavaStorm reimplementation</a> and 
+for the incomplete <a href="https://github.com/samcday/javastorm">JavaStorm reimplementation</a> and
 <a href="https://github.com/tomjepp/NetStormSharp">NetStormSharp</a> which contains
 code to read the TARC (archive) and SHP (graphics) formats of the game files.</p>
 <p>It'd be great to see more advanced games get FOSS engine implementations
@@ -540,7 +540,7 @@ example, I personally use <a href="https://github.com/jamesmcm/vopono">vopono</a
 that helped a lot to inspire me to keep improving it and covering more
 use cases.</p>
 <p>If you are an absolute beginner, or still getting comfortable with a new
-programming language, then I do recommend doing some small problems on 
+programming language, then I do recommend doing some small problems on
 websites like <a href="https://leetcode.com/">Leetcode</a>,
 <a href="http://rosalind.info/about/">Project Rosalind</a>,
 <a href="https://adventofcode.com/">Advent Of Code</a>,
@@ -549,7 +549,7 @@ you get more comfortable with programming, I think it is more rewarding
 to work on larger projects (even if they are still very small in scope
 compared to professional work).</p>
 <p>It's worth noting that what is considered as a good beginner
-project has changed over time. In the past, writing your own <a href="http://wiki.haskell.org/Roll_your_own_IRC_bot">IRC bot</a> 
+project has changed over time. In the past, writing your own <a href="http://wiki.haskell.org/Roll_your_own_IRC_bot">IRC bot</a>
 (or even client or server) was considered as a rite of passage, but now that the
 popularity of IRC has sadly dwindled, this is less common (perhaps you
 could write a <a href="https://brendan.abolivier.bzh/enter-the-matrix/">Matrix client</a> instead).</p>
@@ -571,7 +571,7 @@ which has a channel dedicated to sharing projects with the community
 (often focussed on video games).</p>
 <p>Finally, many of the projects mentioned above depend upon <a href="https://www.gnu.org/philosophy/free-sw.en.html">Free Software</a>,
 or at least <a href="https://fsfe.org/freesoftware/standards/def.en.html">Open Standards</a>,
-so I'd highly recommend reading 
+so I'd highly recommend reading
 <a href="https://www.gnu.org/doc/fsfs3-hardcover.pdf">Free Software, Free Society (PDF)</a>
 about the history and importance of the Free Software movement.</p>
 
@@ -594,7 +594,7 @@ about the history and importance of the Free Software movement.</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

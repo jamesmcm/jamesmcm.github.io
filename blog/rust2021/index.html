@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">My Rust 2021 roadmap: crates, concision, and community</h1>
   <span class="post-date">2020-09-24</span>
@@ -89,7 +89,7 @@ see improved during 2021.</p>
 proposed and started implementing the migration of our serverless data
 ingestion pipelines to Rust. The requirements of these pipelines vary
 but usually involve receiving some external data (e.g. via email or S3, possibly
-via <a href="https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/">SFTP to S3</a>), 
+via <a href="https://aws.amazon.com/blogs/aws/new-aws-transfer-for-sftp-fully-managed-sftp-service-for-amazon-s3/">SFTP to S3</a>),
 validating and transforming that data (with AWS Lambda) and loading it to a data
 warehouse.</p>
 <p>I originally proposed switching to Rust due to having deployment issues
@@ -108,8 +108,8 @@ the hard parts of deployment are largely handled by other teams).</p>
 <p>I have published two personal programs written in Rust: <a href="https://github.com/jamesmcm/vopono">vopono</a> for
 running specific applications through VPN connections, and <a href="https://github.com/jamesmcm/s3rename">s3rename</a>
 for mass-renaming keys in an S3 bucket. I have also written a few prior
-blog posts on Rust, the most popular being <a href="http://jamesmcm.github.io/blog/2020/07/25/intro-dod/#en">about data-oriented design in Rust</a>
-and <a href="http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en">an introduction to async programming</a>.</p>
+blog posts on Rust, the most popular being <a href="/blog/intro-dod">about data-oriented design in Rust</a>
+and <a href="/blog/a-practical-introduction-to-async-programming-in-rust">an introduction to async programming</a>.</p>
 <p>To summarise: As a data engineer, I want to be able to easily test and
 deploy statically linked Rust binaries on various platforms and
 architectures, and interact with popular services and protocols without
@@ -143,7 +143,7 @@ to turn around these perceptions.</p>
 the experience might be similar to writing C (i.e. dealing directly with
 malloc, etc.). I think a lot of this comes from Rust often being
 compared to C and C++ implementations in benchmarks, and being more
-strongly adopted in the systems programming community. </p>
+strongly adopted in the systems programming community.</p>
 <p>I think this will largely be countered by Rust usage becoming more widespread in other
 domains, such as Web Development with crates like Actix, Rocket, Hyper, etc. on the
 backend and Seed and Yew on the frontend, and Data Engineering with crates
@@ -153,7 +153,7 @@ like ndarray, Serde, Polars, Calamine, Amadeus and Ballista.</p>
 the lifetime notation. Here I think a lot of great work has already
 been done with non-lexical lifetimes greatly simplifying the necessary
 notation in many cases, and rust-analyzer providing a fast debug loop
-(along with the ongoing efforts to improve error messages). </p>
+(along with the ongoing efforts to improve error messages).</p>
 <p>The main thing to note here for the future, in my opinion, is just how much
 language and syntax improvements can help new users and further adoption. I hope Rust
 continues to work on making the code more concise for the developer in
@@ -169,11 +169,11 @@ from the compiler or borrow checker during development doesn't
 necessarily mean development is slower - as those errors are probably
 catching lots of issues that might go unnoticed in other languages
 (until you hit an issue in production).</p>
-<p>In German there is a saying &quot;Wenn schon, denn schon.&quot;, which roughly translates
-to &quot;if you're going to do it, do it properly&quot;. This is where I believe Rust
+<p>In German there is a saying "Wenn schon, denn schon.", which roughly translates
+to "if you're going to do it, do it properly". This is where I believe Rust
 excels - whilst you might hit a few lifetime and ownership issues during
 the development of your program, in the end you are saved from a whole
-class of bugs and also aren't bound by issues like the <a href="https://en.wikipedia.org/wiki/Global_interpreter_lock">Global Interpreter Lock</a> 
+class of bugs and also aren't bound by issues like the <a href="https://en.wikipedia.org/wiki/Global_interpreter_lock">Global Interpreter Lock</a>
 or the lack of type safety as in simpler scripting languages.</p>
 <p>But it is important to ensure
 that the feedback loop is fast for the developer. Here I think the great
@@ -201,18 +201,18 @@ a whole. For example, Rusoto is still slightly less user-friendly than
 request).</p>
 <p>Another example would be the need to provide root CA certificates (i.e. in a
 PEM file) to rustls for use with <a href="https://crates.io/crates/tokio-postgres-rustls">tokio-postgres-rustls</a> for example.
-This is a minor issue, but one that is not necessary in more &quot;batteries-included&quot; libraries in other
+This is a minor issue, but one that is not necessary in more "batteries-included" libraries in other
 languages (e.g. psycopg2 in Python).</p>
 <p>These are small examples but can impact the learning curve for new
 developers. As a community, I think we should try to create issues for
-any such &quot;paper-cuts&quot; we come across and contribute pull requests where
+any such "paper-cuts" we come across and contribute pull requests where
 possible.</p>
 <p>Documentation is also relevant to this. Overall, Rust has excellent
 documentation with the combination of rustdoc and mdBook being used to
 provide crate documentation and detailed developer and contributor
 guides. Throughout 2021 we should aim to expand existing documentation,
 and ensure that it is accessible for new developers to do so too - for
-example, contributing common use cases to <a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>. 
+example, contributing common use cases to <a href="https://rust-lang-nursery.github.io/rust-cookbook/">the Rust cookbook</a>.
 Myself, I struggled greatly with Serde's <code>deserialize_with</code> field attribute until looking at examples.</p>
 <p>Hopefully in the future, the establishment of the <a href="https://blog.rust-lang.org/2020/08/18/laying-the-foundation-for-rusts-future.html">Rust foundation</a>
 will eventually be able to provide commercial support to critical projects like
@@ -241,7 +241,7 @@ static <code>&amp;str</code> when matching on an enum containing a <code>String<
 </span><span>}
 </span></code></pre>
 <p>Currently it is necessary to use a match guard (as far as I know). The
-<a href="https://github.com/rust-lang/rust/issues/42640">closest RFC I could find</a> handles auto deref but not ref. 
+<a href="https://github.com/rust-lang/rust/issues/42640">closest RFC I could find</a> handles auto deref but not ref.
 Note that is already implemented.</p>
 <h3 id="blocking-futures-without-an-async-runtime">Blocking Futures without an async runtime</h3>
 <p>At the moment if any crate returns a Future, the developer has to use an
@@ -272,7 +272,7 @@ explicitly:</p>
 unintuitive, this seems to be decided by the
 <a href="https://doc.rust-lang.org/reference/lifetime-elision.html#default-trait-object-lifetimes">default trait object lifetime rules</a>.</p>
 <p>It'd be nice if this could be adjusted similar to the
-<a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a> 
+<a href="https://internals.rust-lang.org/t/pre-rfc-lifetime-elision-1-1-structs-with-one-reference-field/4914">lifetime elision in structs</a>
 RFC mentioned above so that if the containing struct has a specified
 lifetime then the trait object would default to that lifetime (the
 developer could always specify <code>'static</code> if required). Perhaps
@@ -291,7 +291,7 @@ this is impractical or undesirable due to other consequences though.</p>
 itself then we could use <a href="https://doc.rust-lang.org/beta/std/convert/trait.AsRef.html">AsRef</a>
 to accept a <code>String</code> in the signature, but the other way around doesn't
 seem possible even though in the end the <code>&amp;str</code> and <code>&amp;String</code> are
-equivalent for our purposes. </p>
+equivalent for our purposes.</p>
 <p>That is, we'd like to accept any type which
 <code>T</code> could ref in to, not any type which could ref in to <code>T</code> (which is
 what <code>AsRef&lt;T&gt;</code> provides us). Perhaps there are reasons this isn't
@@ -353,7 +353,7 @@ seen in any ecosystem. I look forward to what 2021 will bring!</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

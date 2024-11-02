@@ -73,13 +73,13 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">Serverless Data Ingestion with Rust and AWS SES</h1>
   <span class="post-date">2020-08-29</span>
   <hr class="within-post">
   <p>In this post we will set up a simple, serverless data ingestion pipeline using Rust,
-AWS Lambda and AWS SES with Workmail. </p>
+AWS Lambda and AWS SES with Workmail.</p>
 <p>We will handle multiple types of
 AWS events with one Lambda function, parse received emails
 with the mailparse crate, and send email with SES and the lettre crate.</p>
@@ -98,7 +98,7 @@ parsed content in S3 (if we are able to parse it) and email the
 recipient with either a confirmation of success, or a list of
 encountered errors (either in deserialization of the attachment or
 validation) and their file for reference.</p>
-<p>Note that in <a href="http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en">a previous post</a> 
+<p>Note that in <a href="/blog/data-engineering-with-rust-and-aws-lambda">a previous post</a>
 I dealt with creating a Lambda based
 pipeline for parsing Excel files and loading the resulting CSV to Redshift. There are a
 few differences and things to note in this process:</p>
@@ -133,7 +133,7 @@ of emails first, and then sending emails). First we need to set up our
 AWS resources.</p>
 <h3 id="aws-resources">AWS resources</h3>
 <p>Create an AWS Workmail organisation (note this will charge $4 a month
-after 30 days) in the <a href="https://eu-west-1.console.aws.amazon.com/workmail/home">Workmail console</a>. 
+after 30 days) in the <a href="https://eu-west-1.console.aws.amazon.com/workmail/home">Workmail console</a>.
 We only need the default user and domain. Now in the SES console in
 <code>Email Receiving &gt; Rule Sets</code>, edit the <code>INBOUND_MAIL</code> Rule Set, and
 edit the existing rule to write to an S3 bucket (create a bucket if you
@@ -294,7 +294,7 @@ later, so we maintain the same format) as follows:</p>
 </span></code></pre>
 <p>We specify the deserialization and serialization functions for the dates
 so that we can specify the format to match the original input. Note the
-alias attribute means we can deserialize from either &quot;ID&quot; or &quot;id&quot;, see
+alias attribute means we can deserialize from either "ID" or "id", see
 <a href="https://serde.rs/field-attrs.html">the Serde field attributes for more details</a>.</p>
 <p>Then to deserialize we use:</p>
 <pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">pub fn </span><span style="color:#8fa1b3;">deserialize_csv</span><span>(</span><span style="color:#bf616a;">attachment</span><span>: &amp;</span><span style="color:#b48ead;">str</span><span>) -&gt; (Vec&lt;Entry&gt;, Vec&lt;csv::Error&gt;) {
@@ -357,7 +357,7 @@ use rustls).</p>
 <p>By default SES will be in <a href="https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html">Sandbox mode</a>. This means you must
 verify the email addresses that you want to send to (and from) in the
 SES console.</p>
-<p>The full code is available in 
+<p>The full code is available in
 <a href="https://github.com/jamesmcm/rust_ses_example/blob/master/src/email.rs">the Github repo</a>.
 Here is an excerpt showing how to handle adding the attachment part
 if necessary:</p>
@@ -582,7 +582,7 @@ whose efforts have made Rust a viable choice in this space.</p>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

@@ -73,7 +73,7 @@
 
 <div class="content">
 
-<div class="blog-content">
+<div class="blog-content-page">
 <article>
   <h1 class="post-title">An introduction to Data Oriented Design with Rust</h1>
   <span class="post-date">2020-07-25</span>
@@ -85,7 +85,7 @@ Design</a> using Rust.</p>
 <p>Data-oriented design is an approach to optimising programs by carefully
 considering the memory layout of data structures, and their implications
 for auto-vectorisation and use of the CPU cache. I highly recommend
-watching Mike Acton's <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">&quot;Data-Oriented Design and C++&quot;</a> talk
+watching Mike Acton's <a href="https://www.youtube.com/watch?v=rX0ItVEVjHc">"Data-Oriented Design and C++"</a> talk
 if you haven't seen it already.</p>
 <p>In this post we will cover 4 cases, using <a href="https://docs.rs/criterion/0.3.3/criterion/">criterion</a> for
 benchmarking. The cases are:</p>
@@ -96,7 +96,7 @@ benchmarking. The cases are:</p>
 <li>The cost of dynamic dispatch vs. monomorphisation</li>
 </ul>
 <h2 id="struct-of-arrays-vs-array-of-structs">Struct of Arrays vs. Array of Structs</h2>
-<p>The <a href="https://en.wikipedia.org/wiki/AoS_and_SoA">Struct of Arrays vs. Array of Structs</a> 
+<p>The <a href="https://en.wikipedia.org/wiki/AoS_and_SoA">Struct of Arrays vs. Array of Structs</a>
 refers to two contrasting ways of organising entity data to be operated
 over.</p>
 <p>For example, imagine we are writing a video game and we would like to
@@ -246,7 +246,7 @@ the above output is specifically for the default target, which is
 misleading since <code>cargo bench</code> uses the native target by default (i.e.
 all possible features on your CPU), so our benchmarks are not using the
 above assembly code.</p>
-<p>By setting the compiler flag to <code>-C target-cpu=skylake-avx512</code> to enable 
+<p>By setting the compiler flag to <code>-C target-cpu=skylake-avx512</code> to enable
 Skylake features, we get the <a href="https://godbolt.org/z/PEPdvn">following output</a>:</p>
 <pre data-lang="asm" style="background-color:#2b303b;color:#c0c5ce;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#8fa1b3;">// OOP </span><span style="color:#b48ead;">loop
 </span><span style="color:#8fa1b3;">.LBB0_2:
@@ -300,7 +300,7 @@ performance. By default Rust will re-order fields automatically, but you can set
 example).</p>
 <h3 id="summary">Summary</h3>
 <p>This example demonstrates the importance of considering memory layout
-when aiming for performant code and auto-vectorisation. </p>
+when aiming for performant code and auto-vectorisation.</p>
 <p>Note that the same logic can also apply when working with arrays of
 structs - making your struct smaller will allow you to load more
 elements on the same cache line and possibly lead to autovectorisation.
@@ -325,7 +325,7 @@ interested in the <a href="https://github.com/lumol-org/soa-derive">soa-derive</
 crate that will allow you to derive the struct of arrays from your
 struct.</p>
 <h2 id="branching-in-a-hot-loop">Branching in a hot loop</h2>
-<p>Another optimisation tactic is to avoid branching in any &quot;hot&quot; parts of
+<p>Another optimisation tactic is to avoid branching in any "hot" parts of
 the code (i.e. any part that will be executed many, many times).</p>
 <p>Branching can arise in subtle ways, often by trying to use one struct for many
 different cases. For example, we might define some general Node type as follows:</p>
@@ -394,7 +394,7 @@ contiguous memory.</p>
 Foos split by <code>calc_type</code>.</p>
 <p>The results of the benchmark are as follows:</p>
 <p><img src="https://jamesmcm.github.io/blog/intro-dod/innercheck.svg" alt="Loop branch benchmark" title="Loop branch benchmark" /></p>
-<p>Overall, we see that the data-oriented approach finishes in about a 
+<p>Overall, we see that the data-oriented approach finishes in about a
 quarter of the time.</p>
 <p>The <a href="https://godbolt.org/z/6ocTx8">output on Godbolt</a> is less clear this
 time, but we can see that there seems to be some unrolling in the
@@ -403,7 +403,7 @@ check the <code>calc_type</code> in that case.</p>
 <h3 id="summary-1">Summary</h3>
 <p>The concept of moving any instructions you can outside of hot loops
 should be familiar, but this example also demonstrates how it can impact
-vectorisation. </p>
+vectorisation.</p>
 <h2 id="indirection-iteration-in-a-linked-list">Indirection: Iteration in a Linked List</h2>
 <p>In this example we will compare iterating through a (doubly) linked list
 vs. a vector. This case is well-known and mentioned in <a href="https://doc.rust-lang.org/beta/std/collections/struct.LinkedList.html">Rust's
@@ -481,7 +481,7 @@ performance.</p>
 <h2 id="indirection-dynamic-dispatch-vs-monomorphisation">Indirection: Dynamic Dispatch vs. Monomorphisation</h2>
 <p>When writing generic functions (i.e. for any types implementing certain
 Traits), we have the choice between <a href="https://doc.rust-lang.org/book/ch17-02-trait-objects.html">dynamic dispatch</a>
-and monomorphisation. </p>
+and monomorphisation.</p>
 <p>Dynamic dispatch allows us to work with a mixed
 collection of trait objects, i.e. we can have a <code>Vec&lt;Box&lt;dyn MyTrait&gt;&gt;</code>
 which can contain references to different types which all implement
@@ -617,7 +617,7 @@ LLVM intermediate representation).</li>
 <footer role="contentinfo">
 
 <p>
-Copyright © 2022 - James McMurray -
+Copyright © 2024 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

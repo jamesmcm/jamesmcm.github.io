@@ -1,355 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
-	<title>James McMurray&#x27;s blog - Linux</title>
-	<subtitle>A technical blog about Rust, Linux and other topics.</subtitle>
-	<link href="https://jamesmcm.github.io/categories/linux/atom.xml" rel="self" type="application/atom+xml"/>
-  <link href="https://jamesmcm.github.io"/>
-	<generator uri="https://www.getzola.org/">Zola</generator>
-	<updated>2020-09-12T00:00:00+00:00</updated>
-	<id>https://jamesmcm.github.io/categories/linux/atom.xml</id>
-	<entry xml:lang="en">
-		<title>Why governments should adopt and invest in FOSS</title>
-		<published>2020-09-12T00:00:00+00:00</published>
-		<updated>2020-09-12T00:00:00+00:00</updated>
-		<link rel="alternate" href="https://jamesmcm.github.io/blog/foss-government/" type="text/html"/>
-		<id>https://jamesmcm.github.io/blog/foss-government/</id>
-		<content type="html">&lt;p&gt;This post covers why I believe local and national governments should
+    <title>James McMurray&#x27;s blog - Linux</title>
+    <subtitle>A technical blog about Rust, Linux and other topics.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://jamesmcm.github.io/categories/linux/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://jamesmcm.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2020-09-12T00:00:00+00:00</updated>
+    <id>https://jamesmcm.github.io/categories/linux/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Why governments should adopt and invest in FOSS</title>
+        <published>2020-09-12T00:00:00+00:00</published>
+        <updated>2020-09-12T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              James McMurray
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/foss-government/"/>
+        <id>https://jamesmcm.github.io/blog/foss-government/</id>
+        
+        <summary type="html">&lt;p&gt;This post covers why I believe local and national governments should
 adopt and invest in &lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org&#x2F;philosophy&#x2F;free-sw.en.html&quot;&gt;Free and Open Source Software&lt;&#x2F;a&gt; (FOSS).&lt;&#x2F;p&gt;
-&lt;p&gt;This has been in the news recently due to the city of Munich renewing 
+&lt;p&gt;This has been in the news recently due to the city of Munich renewing
 it&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;www.zdnet.com&#x2F;article&#x2F;linux-not-windows-why-munich-is-shifting-back-from-microsoft-to-open-source-again&#x2F;&quot;&gt;LiMux Linux distribution&lt;&#x2F;a&gt;
 thanks to an agreement between the local SDP and Green politicians, and
 the efforts of the &lt;a href=&quot;https:&#x2F;&#x2F;publiccode.eu&#x2F;&quot;&gt;Public Money, Public Code&lt;&#x2F;a&gt; campaign.&lt;&#x2F;p&gt;
-&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
-&lt;p&gt;Opinions expressed are solely my own and do not express the views or opinions of my employer.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;limux&quot;&gt;LiMux&lt;&#x2F;h2&gt;
-&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;LiMux&quot;&gt;LiMux&lt;&#x2F;a&gt; is a project by the German city of Munich to migrate its desktop
-infrastructure to FOSS solutions, specifically to the LiMux Linux
-distribution (based on Ubuntu) and LibreOffice (initially to OpenOffice). The project was started in 2004, and
-migration began in 2006. &lt;&#x2F;p&gt;
-&lt;p&gt;By the end of 2013, 15,000 desktops had been migrated successfully.
-However, in September 2016 &lt;a href=&quot;https:&#x2F;&#x2F;mspoweruser.com&#x2F;microsoft-germany-moves-into-a-new-headquarters&#x2F;&quot;&gt;Microsoft announced the opening of a new headquarters in Munich&lt;&#x2F;a&gt;, and then
-in 2017 the &lt;a href=&quot;https:&#x2F;&#x2F;www.techrepublic.com&#x2F;article&#x2F;end-of-an-open-source-era-linux-pioneer-munich-confirms-switch-to-windows-10&#x2F;&quot;&gt;city council decided to switch back to Microsoft Windows and Office&lt;&#x2F;a&gt;.
-The timing of this decision led to many accusations of effective
-bribery, using the potential office opening to pressure the council in to using
-Microsoft products (note that there is no evidence of a kick-back scheme
-&lt;a href=&quot;https:&#x2F;&#x2F;www.zdnet.com&#x2F;article&#x2F;microsoft-to-pay-25m-to-doj-and-sec-in-hungary-bribery-case&#x2F;&quot;&gt;like practiced by Microsoft Hungary&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
-&lt;p&gt;Fortunately &lt;a href=&quot;https:&#x2F;&#x2F;fsfe.org&#x2F;news&#x2F;2020&#x2F;news-20200506-01.en.html&quot;&gt;this decision has now been reversed&lt;&#x2F;a&gt;, and LiMux 
-development and roll-out will continue.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;other-cities&quot;&gt;Other cities&lt;&#x2F;h2&gt;
-&lt;p&gt;Munich is not the only city choosing Free Software solutions, many
-others are beginning to see the potential benefits too. In Catalonia,
-Barcelona&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;ajuntament.barcelona.cat&#x2F;digital&#x2F;es&#x2F;transformacion-digital&#x2F;tecnologia-para-un-gobierno-mejor&#x2F;software-libre&quot;&gt;Digital Transformation programme supports Free Software&lt;&#x2F;a&gt;.
-From first-hand experience this means that the government transport &#x2F;
-road organisation use LibreOffice for all documents - so local driving
-schools, etc. do not need a copy of Microsoft Office to handle the
-necessary digital paperwork.&lt;&#x2F;p&gt;
-&lt;p&gt;In Valencia, &lt;a href=&quot;https:&#x2F;&#x2F;www.muylinux.com&#x2F;2013&#x2F;08&#x2F;22&#x2F;generalitat-valenciana-libreoffice&#x2F;&quot;&gt;the local government migrated its administration and
-schools to LibreOffice&lt;&#x2F;a&gt;
-saving 1.5 million euros per year, and saving students and other
-end-users from having to purchase their own copies of Microsoft Office.&lt;&#x2F;p&gt;
-&lt;p&gt;However, it is not always straightforward. &lt;a href=&quot;https:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;737818&#x2F;&quot;&gt;Munich faced a lot of push-back in some areas&lt;&#x2F;a&gt;, and the &lt;a href=&quot;https:&#x2F;&#x2F;cronicaglobal.elespanol.com&#x2F;politica&#x2F;colau-gasta-4-5-millones-en-microsoft-mientras-promete-software-libre_32165_102.html&quot;&gt;city of Barcelona still pays almost 5 million
-euros&lt;&#x2F;a&gt;
-in license costs to Microsoft.&lt;&#x2F;p&gt;
-&lt;p&gt;The main issue here is not so much the direct cost to the city itself
-(which is substantial, but not critical compared to other costs -
-especially since any migration will incur a significant short-term
-cost), but more that the cost must be paid over and over again by all
-users separately. Barcelona continues to pay millions to Microsoft every
-year, but so will other cities in Spain and across Europe, and then so will all
-users of those services that may have to use a copy of Microsoft Office for
-compatibility reasons (i.e. students and small businesses).&lt;&#x2F;p&gt;
-&lt;p&gt;The same cost is paid over and over again to a foreign company that will
-not hire local developers or invest in the local economy, and &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Criticism_of_Microsoft#Vendor_lock-in&quot;&gt;uses vendor lock-in&lt;&#x2F;a&gt;
-to eventually control all of the critical infrastructure.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;benefits-of-foss&quot;&gt;Benefits of FOSS&lt;&#x2F;h2&gt;
-&lt;p&gt;The most commonly cited benefit of Free Software is certainly the cost
-savings vs. proprietary licensing. Whilst this can be a benefit
-in some circumstances, I think it overlooks many greater far-reaching
-benefits, and may not actually manifest itself in the short-term due to
-the additional costs of the actual migration (i.e. costs of deployment
-and training).&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;shared-investment&quot;&gt;Shared investment&lt;&#x2F;h3&gt;
-&lt;p&gt;The main benefit of using FOSS solutions is that any investment in the
-development and improvement of the software also benefits all other
-users of the software.&lt;&#x2F;p&gt;
-&lt;p&gt;That is, whilst the city of Munich might need &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;WollMux&#x2F;WollMux&quot;&gt;some improvements in
-handling templates&lt;&#x2F;a&gt;, other cities
-might need other improvements - however they can all benefit from
-each others&#x27; investment, with no need to pay again just to keep a license.&lt;&#x2F;p&gt;
-&lt;p&gt;This helps to build up a commonwealth of high-quality, well-maintained
-software which anyone can use. There is no central, unique
-owner of the projects (any project could be forked if necessary), so
-there is no company that can demand payments just to allow you to keep using the
-existing software.&lt;&#x2F;p&gt;
-&lt;p&gt;Any investment in development made is truly an investment, leading directly
-to project improvements, rather than just money sent to a foreign
-company whilst the customers have no ownership of the actual product,
-allowing the company to charge even more in the future just for the
-right to keep using it (usually this is done by giving discounts for the
-early migration which then result in higher prices later once the
-customer is locked in).&lt;&#x2F;p&gt;
-&lt;p&gt;Note that this initial investment might be higher than the current costs
-of existing proprietary software licensing, when considering the
-migration and training costs and possible development costs. However,
-unlike those licensing costs it is a one-time cost, and the customer
-retains some ownership over the resulting product (i.e. there is not a
-license that can be revoked).&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;freedom-for-development&quot;&gt;Freedom for development&lt;&#x2F;h3&gt;
-&lt;p&gt;There is also more freedom in the development process. The fact that the
-products aren&#x27;t owned by a company means that contributions can be made
-by anyone, anywhere. &lt;&#x2F;p&gt;
-&lt;p&gt;Users of the software (such as the cities mentioned above) could fund
-&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;hng&#x2F;tech-coops&quot;&gt;local co-operatives of developers&lt;&#x2F;a&gt; to add desired features and maintain
-the projects, instead of being forced to fund a foreign corporation with
-no local investment.&lt;&#x2F;p&gt;
-&lt;p&gt;In the long-term this might also help to break up some of the monopolistic
-Big Tech companies, and result in a freer society and business
-environment for everyone.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;national-security&quot;&gt;National security&lt;&#x2F;h3&gt;
-&lt;p&gt;In Europe especially, the current dependence on proprietary software
-often means a dependence on foreign corporations which operate in
-co-operation with their country&#x27;s intelligence service. As revealed by
-Edward Snowden, &lt;a href=&quot;https:&#x2F;&#x2F;www.theguardian.com&#x2F;world&#x2F;2013&#x2F;jul&#x2F;11&#x2F;microsoft-nsa-collaboration-user-data&quot;&gt;Microsoft provided backdoor access to encrypted messages&lt;&#x2F;a&gt; to
-the NSA, CIA and FBI as part of the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;PRISM_(surveillance_program)&quot;&gt;PRISM programme&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;It is indefensible that such a company can run the critical infrastructure
-of the vast majority of local and central government administrations, as
-well as personal computers. Especially when the &lt;a href=&quot;https:&#x2F;&#x2F;www.theguardian.com&#x2F;us-news&#x2F;2015&#x2F;jul&#x2F;08&#x2F;nsa-tapped-german-chancellery-decades-wikileaks-claims-merkel&quot;&gt;NSA has been proven to
-intercept communications of supposedly allied nations&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;With FOSS software there is no central company to be pressured by
-intelligence services or build in backdoors. All of the code can be
-scrutinised by developers and users. &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Linus%27s_law&quot;&gt;Linus&#x27;s Law&lt;&#x2F;a&gt; states:&lt;&#x2F;p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;Given enough eyeballs, all bugs are shallow.&lt;&#x2F;p&gt;
-&lt;&#x2F;blockquote&gt;
-&lt;p&gt;The same concept applies to introducing backdoors to access private data. It
-might be possible to pressure or bribe one company to do so, but it
-isn&#x27;t possible to do the same to tens of thousands of independent users and
-developers.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;bigger-picture&quot;&gt;Bigger picture&lt;&#x2F;h2&gt;
-&lt;p&gt;The effects of co-ordinated FOSS adoption are much more far-reaching and
-positive than solely saving the costs of current software licenses.&lt;&#x2F;p&gt;
-&lt;p&gt;The adoption of FOSS and investment by many governments (at all levels)
-would help to create a commonwealth of quality Free Software for all
-citizens and government bodies to benefit from.&lt;&#x2F;p&gt;
-&lt;p&gt;It would also allow development of these projects to be done from
-anywhere, allowing users to fund local developers or co-operatives. This
-would help to break up the massive, monopolistic Big Tech companies, and
-could also be used as a way of bringing investment and jobs to parts of
-the country&#x2F;region that require it.&lt;&#x2F;p&gt;
-&lt;p&gt;This would also be highly beneficial to developers, as they would have
-more control over their own work (as they are not tied to the few
-employers that own these popular products), and would also likely be
-able to negotiate a larger portion of the compensation directly since
-there would not be the overhead of salespeople and lawyers, etc. present in
-current large software companies.&lt;&#x2F;p&gt;
-&lt;p&gt;All Free Software users would benefit from the greater usage and
-investment - GNU&#x2F;Linux users could expect better hardware support for
-example, as it becomes more commonplace.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;how-to-get-there&quot;&gt;How to get there&lt;&#x2F;h2&gt;
-&lt;p&gt;Whilst the benefits of adopting FOSS are clear, the cases in Munich and
-Hungary show that it will not be an easy path to greater adoption. We
-cannot just rely on central government eventually carry out the adoption
-as the few representatives are easily pressured by the beneficiaries of
-the status quo, and are serving a much larger political platform.&lt;&#x2F;p&gt;
-&lt;p&gt;Ultimately, I think the solution lies in applying &amp;quot;Linus&#x27;s Law&amp;quot; to
-politics itself. It is no coincidence that the successes in FOSS
-adoption so far have been concentrated in local government - in specific
-city councils and regional administrations, because it is easier for
-engaged groups of citizens to have a direct effect in local government.&lt;&#x2F;p&gt;
-&lt;p&gt;At a national level, it might be possible for a large software company
-to pressure a few political leaders and policy makers, however, it is
-much harder to do the same to a whole board of a dozen or more local
-councillors (especially across the multitude of different counties and
-regional administrations). There is &amp;quot;safety in numbers&amp;quot; as it becomes
-unfeasible to pressure and manipulate large groups of
-politically-engaged citizens.&lt;&#x2F;p&gt;
-&lt;p&gt;It it is the responsibility of every citizen in a democratic society not
-only to inform themselves and vote in national elections, but also to really partake in the
-political system: by joining a political party, taking part in local and
-regional elections, and ensuring that the democratic standards are
-upheld both inside the party and in political institutions.&lt;&#x2F;p&gt;
-&lt;p&gt;This should have support from across the political spectrum, as
-guaranteeing the security and privacy of citizens&#x27; data whilst also
-cutting out the middlemen of massive foreign corporations, shouldn&#x27;t be
-a controversial policy.&lt;&#x2F;p&gt;
-&lt;p&gt;Efforts in local politics have already proven successful, such as the
-LiMux project and others mentioned previously. So if you agree with the
-points raised here I hope you will join whichever local political party
-you agree most with, and help to bring about FOSS adoption by your
-government.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
-&lt;p&gt;Greater FOSS adoption by our governments benefits the administrations
-themselves by being free from repeated software licensing costs.&lt;&#x2F;p&gt;
-&lt;p&gt;It would benefit us as citizens by helping to ensure that our data is kept secure and private from foreign
-intelligence services. It would also benefit us as FOSS users by providing a
-greater user base, ultimately leading to better hardware and software
-support. &lt;&#x2F;p&gt;
-&lt;p&gt;Finally, it would benefit us as developers by providing greater
-freedom in the possibilities of employment (since many different
-employers could work on contracts for FOSS improvement), leading to a
-better geographical distribution of opportunities and not being subject
-to bad corporate practices such as non-compete agreements and
-&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;High-Tech_Employee_Antitrust_Litigation&quot;&gt;anti-poaching agreements between large software companies&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;If you agree with the points in this post, please consider:&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;Joining a local political party which you agree with, and supporting
-FOSS adoption&lt;&#x2F;li&gt;
-&lt;li&gt;Joining the &lt;a href=&quot;https:&#x2F;&#x2F;publiccode.eu&#x2F;&quot;&gt;Public Money, Public Code campaign&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;Supporting the &lt;a href=&quot;https:&#x2F;&#x2F;fsfe.org&#x2F;&quot;&gt;Free Software Foundation Europe (FSFE)&lt;&#x2F;a&gt; (or your &lt;a href=&quot;https:&#x2F;&#x2F;www.fsf.org&#x2F;&quot;&gt;local Free Software Foundation&lt;&#x2F;a&gt;)&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-</content>
-	</entry>
-	<entry xml:lang="en">
-		<title>Using ALMA for persistent LiveUSB installations of Arch Linux</title>
-		<published>2020-09-09T00:00:00+00:00</published>
-		<updated>2020-09-09T00:00:00+00:00</updated>
-		<link rel="alternate" href="https://jamesmcm.github.io/blog/alma/" type="text/html"/>
-		<id>https://jamesmcm.github.io/blog/alma/</id>
-		<content type="html">&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;r-darwish&#x2F;alma&quot;&gt;ALMA&lt;&#x2F;a&gt; (available as &lt;a href=&quot;https:&#x2F;&#x2F;aur.archlinux.org&#x2F;packages&#x2F;alma-git&#x2F;&quot;&gt;alma-git on the AUR&lt;&#x2F;a&gt;) is a tool for creating
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Using ALMA for persistent LiveUSB installations of Arch Linux</title>
+        <published>2020-09-09T00:00:00+00:00</published>
+        <updated>2020-09-09T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              James McMurray
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/alma/"/>
+        <id>https://jamesmcm.github.io/blog/alma/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;r-darwish&#x2F;alma&quot;&gt;ALMA&lt;&#x2F;a&gt; (available as &lt;a href=&quot;https:&#x2F;&#x2F;aur.archlinux.org&#x2F;packages&#x2F;alma-git&#x2F;&quot;&gt;alma-git on the AUR&lt;&#x2F;a&gt;) is a tool for creating
 persistent LiveUSB installations of Arch Linux. With one command you
 can generate a customised installation on a
-USB stick (or any other removable media) including the packages and 
+USB stick (or any other removable media) including the packages and
 config files you want, with full persistence.&lt;&#x2F;p&gt;
 &lt;p&gt;This is very useful for disk recovery and system maintenance, and a
 great tool for all Linux users. Especially with the customisation
 options provided by collections of preset files (such as
 &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;arch-i3-usb&quot;&gt;arch-i3-usb&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
-&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;
-&lt;p&gt;Opinions expressed are solely my own and do not express the views or opinions of my employer.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;alma&quot;&gt;ALMA&lt;&#x2F;h2&gt;
-&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;r-darwish&#x2F;alma&quot;&gt;ALMA&lt;&#x2F;a&gt; is a tool, written in Rust, to
-automate the installation of Arch Linux to removable media with
-persistent storage (i.e. it is usable as a normal system, booted from
-USB).&lt;&#x2F;p&gt;
-&lt;p&gt;ALMA creates an ext4 partition, installs Arch Linux and sets the locale
-and installs GRUB for you. Full disk encryption is also available with
-the &lt;code&gt;alma -e&lt;&#x2F;code&gt; option, using &lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;Dm-crypt&#x2F;Encrypting_an_entire_system&quot;&gt;LUKS&lt;&#x2F;a&gt;,
-where you will be prompted for the password.&lt;&#x2F;p&gt;
-&lt;p&gt;Note ALMA is available in the AUR as &lt;a href=&quot;https:&#x2F;&#x2F;aur.archlinux.org&#x2F;packages&#x2F;alma-git&#x2F;&quot;&gt;alma-git&lt;&#x2F;a&gt;.
-I recommend the git version because there are some significant unreleased changes.&lt;&#x2F;p&gt;
-&lt;p&gt;However, what really makes ALMA powerful is the ability to customise
-your installation with preset files.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;preset-files&quot;&gt;Preset files&lt;&#x2F;h2&gt;
-&lt;p&gt;Preset files are &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;TOML&quot;&gt;TOML files&lt;&#x2F;a&gt; which specify one or more of the
-following:&lt;&#x2F;p&gt;
-&lt;ul&gt;
-&lt;li&gt;A list of Arch Linux packages to install: &lt;code&gt;packages&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;A list of AUR packages to install (which will be handled by the
-user-specified AUR helper, by default this is &lt;code&gt;yay&lt;&#x2F;code&gt;): &lt;code&gt;aur_packages&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;A bash script to execute &lt;strong&gt;after&lt;&#x2F;strong&gt; installation of the above packages:
-&lt;code&gt;script&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;A list of directories (in the directory of preset files) which should
-be mounted when the bash script is run: &lt;code&gt;shared_directories&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;A list of required environment variables to be used in the script
-(these must be passed to ALMA in the environment): &lt;code&gt;environment_variables&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;Here is an example for installing &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;alacritty&#x2F;alacritty&quot;&gt;alacritty&lt;&#x2F;a&gt; and copying its config
-file:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;toml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-toml &quot;&gt;&lt;code class=&quot;language-toml&quot; data-lang=&quot;toml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;alacritty&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shared_directories &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;alacritty_config&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;script &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&amp;quot;&amp;quot;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;mkdir -p &#x2F;home&#x2F;${ALMA_USER}&#x2F;.config&#x2F;alacritty&#x2F;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;cp &#x2F;shared_dirs&#x2F;alacritty_config&#x2F;alacritty.yml &#x2F;home&#x2F;${ALMA_USER}&#x2F;.config&#x2F;alacritty&#x2F;alacritty.yml
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;chown -R ${ALMA_USER} &#x2F;home&#x2F;${ALMA_USER}&#x2F;.config&#x2F;alacritty
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;chgrp -R ${ALMA_USER} &#x2F;home&#x2F;${ALMA_USER}&#x2F;.config&#x2F;alacritty
-&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&amp;quot;&amp;quot;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;environment_variables &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ALMA_USER&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;The environment variable &lt;code&gt;ALMA_USER&lt;&#x2F;code&gt; would be the username, created in
-an earlier preset file.&lt;&#x2F;p&gt;
-&lt;p&gt;What makes ALMA so useful is that these preset files are &lt;em&gt;composable&lt;&#x2F;em&gt;.
-They will be executed in alphanumeric order, so you can create a
-collection of preset files for your own customised installation of Arch
-Linux, and then swap out preset files for different package
-configurations, etc. (i.e. for different sizes of removeable media).&lt;&#x2F;p&gt;
-&lt;p&gt;An example of this is my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;arch-i3-usb&quot;&gt;arch-i3-usb&lt;&#x2F;a&gt; collection, where I have a
-&amp;quot;minimal&amp;quot; preset collection in &lt;code&gt;&#x2F;preset&lt;&#x2F;code&gt; and additional preset files in
-&lt;code&gt;&#x2F;additional&lt;&#x2F;code&gt; for a more comprehensive installation.&lt;&#x2F;p&gt;
-&lt;p&gt;This provides a full installation with i3, thunar, alacritty, neovim,
-fish and firefox ready to use.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;alma&#x2F;archqemu.png&quot; alt=&quot;arch-i3-usb standard installation running in qemu&quot; title=&quot;arch-i3-usb standard installation in qemu&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;known-issue-package-initialisation&quot;&gt;Known issue - package initialisation&lt;&#x2F;h3&gt;
-&lt;p&gt;One known issue is that if you install a package which requires some
-initialisation step (such as setting the Rust toolchain after installing
-rustup) then you can&#x27;t install dependent packages by the normal preset
-lists because &lt;em&gt;all&lt;&#x2F;em&gt; of the package installation takes place before any
-user scripts are run.&lt;&#x2F;p&gt;
-&lt;p&gt;i.e. the order is:&lt;&#x2F;p&gt;
-&lt;ol&gt;
-&lt;li&gt;All non-AUR packages are installed&lt;&#x2F;li&gt;
-&lt;li&gt;If AUR packages are present in the toml files, yay (or another specified AUR helper) is installed&lt;&#x2F;li&gt;
-&lt;li&gt;All AUR packages are installed.&lt;&#x2F;li&gt;
-&lt;li&gt;Preset scripts are executed according to their filenames in alphanumeric order.&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
-&lt;p&gt;This means that in cases that need initialisation steps (such as Rust
-packages built from source), you will need to workaround this in the
-preset file. Here is an example for i3status-rust:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;toml&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-toml &quot;&gt;&lt;code class=&quot;language-toml&quot; data-lang=&quot;toml&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;packages &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;i3-wm&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;i3lock&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;i3status&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;dmenu&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;arandr&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;rustup&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;powerline-fonts&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ttf-font-awesome&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;upower&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;aur_packages &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;autotiling&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;, &amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ttf-font-awesome-4&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;shared_directories &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;i3_config&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;script &lt;&#x2F;span&gt;&lt;span&gt;= &amp;quot;&amp;quot;&amp;quot;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sudo -u ${ALMA_USER} rustup toolchain install nightly
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sudo -u ${ALMA_USER} rustup default nightly
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;sudo -u ${ALMA_USER} yay -S --nocleanmenu --nodiffmenu --noeditmenu --noupgrademenu --useask --removemake --norebuild --noconfirm --answeredit None --answerclean None --mflags --noconfirm i3status-rust-git
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;# ...
-&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;&amp;quot;&amp;quot;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;environment_variables &lt;&#x2F;span&gt;&lt;span&gt;= [&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;ALMA_USER&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;]
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;h2 id=&quot;near-future-improvements&quot;&gt;Near-future improvements&lt;&#x2F;h2&gt;
-&lt;p&gt;There are a number of small improvements that could be made in the
-near-future.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;secureboot-support&quot;&gt;SecureBoot support&lt;&#x2F;h3&gt;
-&lt;p&gt;Support for &lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;Unified_Extensible_Firmware_Interface&#x2F;Secure_Boot&quot;&gt;SecureBoot&lt;&#x2F;a&gt;
-could be added (probably to ALMA directly since it is a common
-requirement). The main difficulty here is testing, since you need to
-test it on actual hardware, and deal with adding the signed keys to the
-BIOS, etc.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;better-error-handling-and-script-debugging&quot;&gt;Better error handling and script debugging&lt;&#x2F;h3&gt;
-&lt;p&gt;At the moment any failure in a user script results in the whole installation
-failing. This could be improved by allowing the user to edit, repeat, or
-skip a failed user script (showing the user the script output).&lt;&#x2F;p&gt;
-&lt;p&gt;A subcommand could also be added allowing the preset developer to lint
-their scripts with &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;koalaman&#x2F;shellcheck&quot;&gt;shellcheck&lt;&#x2F;a&gt; to catch syntax errors.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;more-preset-examples&quot;&gt;More preset examples&lt;&#x2F;h3&gt;
-&lt;p&gt;It would be very useful to add a preset example for loading config files
-from a &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;twpayne&#x2F;chezmoi&quot;&gt;chezmoi&lt;&#x2F;a&gt; repo (and other
-dotfiles managers) instead of just mounting shared directories.&lt;&#x2F;p&gt;
-&lt;p&gt;It would also be useful to add a preset example for &lt;a href=&quot;https:&#x2F;&#x2F;wiki.archlinux.org&#x2F;index.php&#x2F;Dm-crypt&#x2F;Encrypting_a_non-root_file_system&quot;&gt;home partition encryption&lt;&#x2F;a&gt;
-(i.e. not the whole disk) and unencrypting on login with polkit, etc. -
-for cases where full disk encryption is not desirable (i.e. on a USB
-with other partitions for general file transfer on FAT32).&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;far-future-almahub&quot;&gt;Far future: ALMAhub?&lt;&#x2F;h2&gt;
-&lt;p&gt;In the more distant future, it would be great to allow ALMA to install
-to a specified (already existing) partition instead of wiping the disk.
-GRUB installation could also be optional in this case. This, plus an
-option to disable the few LiveUSB optimisations (like storing journal
-log data in memory, no swap, etc.), would allow ALMA to function as an
-installer for normal Arch Linux installations too.&lt;&#x2F;p&gt;
-&lt;p&gt;With these additions, and the composable preset files, one could build a
-repository like the AUR for hosting different collections of preset
-files. So you could browse the repository, choose a configuration that
-appeals to you, install it to LiveUSB to try it out, and then use that
-same LiveUSB to install it to disk if you like it.&lt;&#x2F;p&gt;
-&lt;p&gt;The repository would need to be easily auditable (like the AUR) since
-these preset files can install arbitrary packages and run arbitrary
-commands, so it is clearly a possible security risk (like any custom
-installer for Linux
-distributions).&lt;&#x2F;p&gt;
-&lt;p&gt;Another huge addition would be the ability to run ALMA in a minimal
-Docker container, so it could be run on non-Arch Linux platforms. It
-would be great if it could be run on Windows and Ubuntu so as to
-bootstrap the installation process (i.e. first to LiveUSB, then create
-the necessary partitions on disk from the live environment and install
-to disk from there).&lt;&#x2F;p&gt;
-&lt;p&gt;These are much larger additions, but I think that it would be incredibly
-useful to the Linux community as a whole to be able to share different
-configurations as installations directly. This is especially true for
-newer users, with the ability to try them out as a persistent LiveUSB first.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
-&lt;p&gt;Hopefully you will find ALMA as useful as I have, and create a LiveUSB
-installation for future debugging and system recovery.&lt;&#x2F;p&gt;
-&lt;p&gt;If you also find the possible future improvements interesting, please
-share your preset collections, or even contribute to ALMA directly!&lt;&#x2F;p&gt;
-</content>
-	</entry>
+</summary>
+        
+    </entry>
 </feed>
