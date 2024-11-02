@@ -87,7 +87,7 @@ body > header h2 {
 h1, h2, h3, h4, h5, h6 {
   text-rendering: optimizelegibility;
   font-weight: bold;
-  margin-bottom: 1em;
+  margin-bottom: 0.2em;
   margin-top: 0;
 }
 
@@ -344,13 +344,11 @@ hr {
 }
 
 hr.within-post {
-  margin-top: 1em;
+  margin-top: 0.5em;
 }
 
 .post-date {
   display: block;
-  margin-top: -.5rem;
-  margin-bottom: 1rem;
   color: #9a9a9a;
 }
 
@@ -358,12 +356,24 @@ body > div {
   background: #f2f2f2;
 }
 
+code {
+  font-family: Menlo,Monaco,"Courier New",monospace;
+  display: inline-block;
+  background: #fff;
+  font-size: .9em;
+  line-height: 1.5em;
+  border: 1px solid #ddd;
+  border-radius: 0.4em;
+  padding: 0 0.3em;
+  margin: -1px 0;
+}
+
 pre {
   display: block;
   margin-top: 0;
   margin-bottom: 1rem;
   padding: 0.8em;
-  font-size: 13px;
+  font-size: .8em;
   line-height: 1.45em;
   overflow-x: scroll;
   background-color: #f9f9f9;
@@ -378,6 +388,7 @@ pre code {
   font-size: 100%;
   color: inherit;
   background-color: transparent;
+  border: none;
 }
 
 body > footer {
