@@ -332,6 +332,11 @@ then used in the game loop, e.g.:</p>
 won't cover programming Snake itself!). The source code is available  in the <a href="https://github.com/jamesmcm/snake_rust_esp32">snake_rust_esp32 repo</a> on Github.
 The project is also <a href="https://wokwi.com/projects/413450202628576257">available on Wokwi</a> with the breadboard diagram
 but won't build there at the moment.</p>
+<p>While the project is very simple, I think the benefits of using Rust are
+already apparent. For example, we were able to use the Ssd1306 crate to
+safely interact with the OLED display, while having the full expressive
+power of Rust's enums for handling game state, and Embassy for easily
+spawning asynchronous tasks.</p>
 <p>The hardest parts were:</p>
 <ul>
 <li>Not realising the I2C pins needed pull-up resistors to communicate
