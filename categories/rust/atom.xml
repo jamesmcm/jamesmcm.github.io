@@ -5,8 +5,31 @@
     <link rel="self" type="application/atom+xml" href="https://jamesmcm.github.io/categories/rust/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://jamesmcm.github.io"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2022-03-26T00:00:00+00:00</updated>
+    <updated>2024-11-02T00:00:00+00:00</updated>
     <id>https://jamesmcm.github.io/categories/rust/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Beginner Rust ESP32 development - Snake</title>
+        <published>2024-11-02T00:00:00+00:00</published>
+        <updated>2024-11-02T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              James McMurray
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/beginner-rust-esp32-lcdsnake/"/>
+        <id>https://jamesmcm.github.io/blog/beginner-rust-esp32-lcdsnake/</id>
+        
+        <summary type="html">&lt;p&gt;In this post we will create a basic ESP32 project using Rust and espup.&lt;&#x2F;p&gt;
+&lt;p&gt;We will write a Snake game to run on an ESP32 development board with a
+connected OLED display and controlled with a joystick.&lt;&#x2F;p&gt;
+&lt;p&gt;The code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;snake_rust_esp32&quot;&gt;snake_rust_esp32 repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
     <entry xml:lang="en">
         <title>My First Clippy Lint</title>
         <published>2022-03-26T00:00:00+00:00</published>

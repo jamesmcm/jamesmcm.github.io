@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Beginner Rust ESP32 development - Snake</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="/favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content-page">
+<article>
+  <h1 class="post-title">Beginner Rust ESP32 development - Snake</h1>
+  <span class="post-date">2024-11-02</span>
+  <hr class="within-post">
+  <p>In this post we will create a basic ESP32 project using Rust and espup.</p>
+<p>We will write a Snake game to run on an ESP32 development board with a
+connected OLED display and controlled with a joystick.</p>
+<p>The code for this example is available on Github in my <a href="https://github.com/jamesmcm/snake_rust_esp32">snake_rust_esp32 repo</a>.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<h2 id="overview">Overview</h2>
+<p>I started this project to practice deploying Rust on an ESP32 board and
+basic peripheral interaction, as a complete beginner with embedded
+development and electronics.</p>
+<p>The aim was to get more comfortable with the <a href="https://docs.esp-rs.org/esp-hal/">esp-hal crate</a> and using
+<a href="https://embassy.dev/">embassy</a>.</p>
+<h3 id="video">Video</h3>
+<video controls>
+  <source src="snake_video_smaller.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video> 
+<h2 id="hardware">Hardware</h2>
+<p>I used the following hardware:</p>
+<ul>
+<li>1x <a href="https://www.az-delivery.de/en/products/esp32-developmentboard">ESP32-WROOM-32 Xtensa development board</a></li>
+<li>1x <a href="https://www.az-delivery.de/en/products/0-96zolldisplay">SSD1306 128x64 I2C OLED display</a></li>
+<li>1x <a href="https://www.az-delivery.de/en/products/joystick-modul">KY-023 joystick module</a></li>
+<li>Jumper wires</li>
+<li>2x Breadboards (joined together in this case, since the development board
+I used is wide).</li>
+</ul>
+<p>Wokwi wiring diagram - <a href="https://wokwi.com/projects/413450202628576257">project link</a>, not it does not build online
+due to the dependencies:
+<img src="https://jamesmcm.github.io/blog/beginner-rust-esp32-lcdsnake/diagram.png" alt="Wokwi wiring diagram" /></p>
+<h2 id="software">Software</h2>
+<p>First install Rust and espup according to the <a href="https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html">Xtensa ESP32 section of the Rust on ESP32 book</a>.</p>
+<p>This project was written without using the standard library, so we use
+the <code>esp-template</code> no_std template for project generation.</p>
+<p>The code can the be built and flashed with:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> source </span><span style="color:#bf616a;">~</span><span>/export-esp.sh
+</span><span style="color:#bf616a;">$</span><span> cargo run</span><span style="color:#bf616a;"> --release
+</span></code></pre>
+<p>When connected with a data-transfer capable micro-USB cable.</p>
+<h3 id="initialisation-with-embassy">Initialisation with Embassy</h3>
+<p>When using Embassy it is important to remember to initialise it with a
+timer so that spawned tasks will actually run.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#bf616a;">no_std</span><span>]
+</span><span>#![</span><span style="color:#bf616a;">no_main</span><span>]
+</span><span>
+</span><span>...
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">esp_hal_embassy</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#bf616a;">spawner</span><span>: Spawner) {
+</span><span>    esp_println::logger::init_logger_from_env();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> peripherals = esp_hal::init(esp_hal::Config::default());
+</span><span>    </span><span style="color:#b48ead;">let</span><span> io = esp_hal::gpio::Io::new(peripherals.</span><span style="color:#d08770;">GPIO</span><span>, peripherals.</span><span style="color:#d08770;">IO_MUX</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> timg0 = TimerGroup::new(peripherals.</span><span style="color:#d08770;">TIMG0</span><span>);
+</span><span>    esp_hal_embassy::init(timg0.timer0);
+</span><span>    ...
+</span><span>}
+</span></code></pre>
+<h3 id="interacting-with-the-oled-display-over-i2c">Interacting with the OLED display over I2C</h3>
+<p>With the OLED display connected (note I used the 5V supply pin), we can interact with using the I2C
+communication protocol. We only need 2 GPIO pins for the clock and data.
+Any pins can be used for this, but be sure to avoid reserved pins if
+your board has those (e.g. pins reserved for SPI expansion, if these are
+restricted).</p>
+<p>Here we use pins 21 and 22 for data and clock respectively.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> sda = io.pins.gpio21;
+</span><span style="color:#b48ead;">let</span><span> scl = io.pins.gpio22;
+</span><span style="color:#b48ead;">let</span><span> i2c = esp_hal::i2c::I2c::new(peripherals.</span><span style="color:#d08770;">I2C0</span><span>, sda, scl, HertzU32::kHz(</span><span style="color:#d08770;">100</span><span>));
+</span></code></pre>
+<p>One useful thing for debugging, is to scan for I2C devices connected to
+the pins. This is useful if you do not know which I2C address to use,
+but also to confirm that basic communication is working before writing
+more code.</p>
+<p>This code is adapted from the <a href="https://dev.to/theembeddedrustacean/esp32-embedded-rust-at-the-hal-i2c-scanner-54mg">ESP32 Embedded Rust at the HAL blog series</a>:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">for</span><span> addr in </span><span style="color:#d08770;">1</span><span>..=</span><span style="color:#d08770;">127 </span><span>{
+</span><span>    esp_println::println!(&quot;</span><span style="color:#a3be8c;">Scanning Address {}</span><span>&quot;, addr as </span><span style="color:#b48ead;">u8</span><span>);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> res = i2c.</span><span style="color:#96b5b4;">read</span><span>(addr as </span><span style="color:#b48ead;">u8</span><span>, &amp;</span><span style="color:#b48ead;">mut </span><span>[</span><span style="color:#d08770;">0</span><span>]);
+</span><span>    </span><span style="color:#b48ead;">match</span><span> res {
+</span><span>        Ok(_) =&gt; esp_println::println!(&quot;</span><span style="color:#a3be8c;">Device Found at Address {}</span><span>&quot;, addr as </span><span style="color:#b48ead;">u8</span><span>),
+</span><span>        Err(_) =&gt; esp_println::println!(&quot;</span><span style="color:#a3be8c;">No Device Found</span><span>&quot;),
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>This helped me notice that the I2C pins required pull-up resistors, so I
+added two 2k Ohm resistors to the 5V rail.</p>
+<p>In our case the address should be <code>0x3C</code> (note for some different
+SSD1306 displays it could be <code>0x3D</code> so confirm this). This is the
+default value in the <a href="https://crates.io/crates/ssd1306">Ssd1306 crate</a>, so we do not need to provide this
+address manually.</p>
+<p>We can initialise the display with the following code:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> interface = I2CDisplayInterface::new(i2c);
+</span><span style="color:#b48ead;">let mut</span><span> display = Ssd1306::new(interface, DisplaySize128x64, DisplayRotation::Rotate0)
+</span><span>    .</span><span style="color:#96b5b4;">into_buffered_graphics_mode</span><span>();
+</span><span>display.</span><span style="color:#96b5b4;">init</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span></code></pre>
+<p>And then draw using the <a href="https://crates.io/crates/embedded-graphics">embedded_graphics</a> crate:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> text_style = MonoTextStyleBuilder::new()
+</span><span>    .</span><span style="color:#96b5b4;">font</span><span>(&amp;</span><span style="color:#bf616a;">self</span><span>.title_font)
+</span><span>    .</span><span style="color:#96b5b4;">text_color</span><span>(BinaryColor::On)
+</span><span>    .</span><span style="color:#96b5b4;">build</span><span>();
+</span><span>Text::with_baseline(
+</span><span>    &quot;</span><span style="color:#a3be8c;">Click stick</span><span style="color:#96b5b4;">\n</span><span style="color:#a3be8c;">to start! </span><span>&quot;,
+</span><span>    Point::zero(),
+</span><span>    text_style,
+</span><span>    Baseline::Top,
+</span><span>)
+</span><span>.</span><span style="color:#96b5b4;">draw</span><span>(display)
+</span><span>.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>display.</span><span style="color:#96b5b4;">flush</span><span>().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span></code></pre>
+<p>With this, we can draw and update the screen. Note that by default we
+are using the <a href="https://docs.rs/ssd1306/0.9.0/ssd1306/mode/struct.BufferedGraphicsMode.html">BufferedGraphicsMode</a>
+which maintains a buffer and writes changes to the display when
+<code>flush()</code> is called. This can be slow when there are a lot of changes.</p>
+<h3 id="joystick-axes-inputs-analogue-to-digital-converters-adc">Joystick axes inputs - Analogue to Digital Converters (ADC)</h3>
+<p>With the display communication working, we can move on to the joystick
+inputs. We will start with the axes inputs from moving the joystick,
+before handling the joystick clicking (switch) input. Note that only
+certain GPIO pins can be used with the ADCs- check this for your board.</p>
+<p>One thing to note here is that the KY-023 module has very large dead
+zones, so it can really only be used like a Directional-pad with
+near-discrete directions, as subtle movements are lost.</p>
+<p>For Snake we only need 4 directions - Up, Down, Left, and Right - and
+these correspond the extremes of the URX and URY outputs respectively
+(note these depends on the orientation you use the joystick in).</p>
+<p>These outputs are analogue, so we must use the Analogue to Digital
+Converter (ADC) channels on the ESP32 board to read them. The ADCs have
+a limited voltage range, so in order to keep using the one 5V output we
+can use a voltage divider to reduce the input voltage to the KY-023
+module such that the output voltages are within a usable range.</p>
+<p>This was done using a 2k Ohm resistor connecting to ground, and a 1k Ohm
+resistor connecting to the 5V rail, with input taken in-between them.</p>
+<p>With that done, we can carry out some tests to see the maximum and
+minimum values from the ADC when moving the joystick and use that to set
+the cut-off values for our directions:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">const </span><span style="color:#d08770;">LOW_JOYSTICK</span><span>: </span><span style="color:#b48ead;">u16 </span><span>= </span><span style="color:#d08770;">100</span><span>;
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">MID_JOYSTICK</span><span>: </span><span style="color:#b48ead;">u16 </span><span>= </span><span style="color:#d08770;">1600</span><span>;
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">HIGH_JOYSTICK</span><span>: </span><span style="color:#b48ead;">u16 </span><span>= </span><span style="color:#d08770;">3500</span><span>;
+</span></code></pre>
+<p>With these we can set the direction, but we now need a task to read the
+ADC and update this in the game code.</p>
+<p>This is done with a separate embassy task which we can spawn to run
+concurrently. We use the <a href="https://crates.io/crates/atomic_enum">atomic_enum</a> crate to be able to share and
+update the Direction enum atomically.</p>
+<p>The task - checking the ADC values every 100ms:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">static </span><span style="color:#d08770;">PLAYER_DIRECTION</span><span>: AtomicDirection = AtomicDirection::new(Direction::Right);
+</span><span style="color:#b48ead;">static </span><span style="color:#d08770;">PROCESSED_DIRECTION</span><span>: AtomicDirection = AtomicDirection::new(Direction::Right);
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">embassy_executor</span><span>::</span><span style="color:#bf616a;">task</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">check_joypad</span><span>(</span><span style="color:#bf616a;">urx</span><span>: GpioPin&lt;25&gt;, </span><span style="color:#bf616a;">ury</span><span>: GpioPin&lt;15&gt;, </span><span style="color:#bf616a;">adc_peripheral</span><span>: ADC2) {
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> adc2_config = esp_hal::analog::adc::AdcConfig::new();
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> urx_pin =
+</span><span>        adc2_config.</span><span style="color:#96b5b4;">enable_pin</span><span>(urx, esp_hal::analog::adc::Attenuation::Attenuation0dB);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> ury_pin =
+</span><span>        adc2_config.</span><span style="color:#96b5b4;">enable_pin</span><span>(ury, esp_hal::analog::adc::Attenuation::Attenuation0dB);
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> adc2 = esp_hal::analog::adc::Adc::new(adc_peripheral, adc2_config);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let</span><span> urx_pin_value: </span><span style="color:#b48ead;">u16 </span><span>=
+</span><span>            esp_hal::prelude::nb::block!(adc2.</span><span style="color:#96b5b4;">read_oneshot</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> urx_pin)).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        </span><span style="color:#b48ead;">let</span><span> ury_pin_value: </span><span style="color:#b48ead;">u16 </span><span>=
+</span><span>            esp_hal::prelude::nb::block!(adc2.</span><span style="color:#96b5b4;">read_oneshot</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> ury_pin)).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Some(direction) = Direction::from_urx_ury(urx_pin_value, ury_pin_value) {
+</span><span>            </span><span style="color:#65737e;">// We use processed direction to avoid being able to double back if we change
+</span><span>            </span><span style="color:#65737e;">// direction twice before the next frame
+</span><span>            </span><span style="color:#b48ead;">let</span><span> current_direction = </span><span style="color:#d08770;">PROCESSED_DIRECTION</span><span>.</span><span style="color:#96b5b4;">load</span><span>(Ordering::Relaxed);
+</span><span>            </span><span style="color:#b48ead;">if</span><span> direction != current_direction &amp;&amp; direction != current_direction.</span><span style="color:#96b5b4;">opposite</span><span>() {
+</span><span>                </span><span style="color:#d08770;">PLAYER_DIRECTION</span><span>.</span><span style="color:#96b5b4;">store</span><span>(direction, Ordering::Relaxed);
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        Timer::after(Duration::from_millis(</span><span style="color:#d08770;">100</span><span>)).await;
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Spawning the task and entering the game logic loop:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let</span><span> urx = io.pins.gpio25;
+</span><span style="color:#b48ead;">let</span><span> ury = io.pins.gpio15;
+</span><span style="color:#b48ead;">let</span><span> adc2_peripheral = peripherals.</span><span style="color:#d08770;">ADC2</span><span>;
+</span><span>spawner.</span><span style="color:#96b5b4;">spawn</span><span>(</span><span style="color:#96b5b4;">check_joypad</span><span>(urx, ury, adc2_peripheral)).</span><span style="color:#96b5b4;">ok</span><span>();
+</span><span style="color:#b48ead;">loop </span><span>{
+</span><span>    game.</span><span style="color:#96b5b4;">process_frame</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> display);
+</span><span>    Timer::after(Duration::from_millis(</span><span style="color:#d08770;">300</span><span>)).await;
+</span><span>}
+</span></code></pre>
+<h3 id="joystick-click-switch-interrupts">Joystick click switch - interrupts</h3>
+<p>Now the only remaining part is to handle click inputs from the joystick.
+This is done with interrupts - we configure and enable the interrupt, and
+then bind a handler function to it which will be called when the
+interrupt is triggered.</p>
+<p>This is convenient as we do not need to run our own task to check the
+input, it will be triggered immediately when the condition is met. Note
+we do not do this for the ADC inputs since there we require the ADC to
+run i.e. it is not a raw input.</p>
+<p>Enabling and registering the interrupt:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">let mut</span><span> switch = gpio::Input::new(io.pins.gpio14, esp_hal::gpio::Pull::Up);
+</span><span>
+</span><span>switch.</span><span style="color:#96b5b4;">listen</span><span>(gpio::Event::FallingEdge);
+</span><span>esp_hal::interrupt::enable(Interrupt::</span><span style="color:#d08770;">GPIO</span><span>, Priority::Priority3).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>    </span><span style="color:#65737e;">// Do not enable all interrupts!
+</span><span>    </span><span style="color:#65737e;">// esp_hal::xtensa_lx::interrupt::enable(); https://github.com/esp-rs/esp-hal/discussions/922
+</span><span>    esp_hal::interrupt::bind_interrupt(Interrupt::</span><span style="color:#d08770;">GPIO</span><span>, </span><span style="color:#d08770;">GPIO_HANDLER</span><span>.</span><span style="color:#96b5b4;">handler</span><span>());
+</span><span>}
+</span><span>
+</span><span>critical_section::with(|</span><span style="color:#bf616a;">cs</span><span>| </span><span style="color:#d08770;">G_BUTTON</span><span>.</span><span style="color:#96b5b4;">borrow_ref_mut</span><span>(cs).</span><span style="color:#96b5b4;">replace</span><span>(switch));
+</span></code></pre>
+<p>Note we use the <a href="https://crates.io/crates/critical-section">critical_section</a> crate as a sort of global mutex.
+This is necessary so we can access the switch GPIO input pin to clear
+the interrupt after it is handled.</p>
+<p>Also take care to only enable the interrupt we are using, and not all
+interrupts (see the commented out line above), as that will lead to
+errors due to unhandled interrupts. This can be subtle too as crashes
+may only occur after running for a while e.g. see
+<a href="https://github.com/esp-rs/esp-hal/discussions/922">issue #922 on esp-hal</a>.</p>
+<p>The handler itself:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">static </span><span style="color:#d08770;">CONFIRM_BOOL</span><span>: AtomicBool = AtomicBool::new(</span><span style="color:#d08770;">false</span><span>);
+</span><span style="color:#b48ead;">static </span><span style="color:#d08770;">G_BUTTON</span><span>: Mutex&lt;RefCell&lt;Option&lt;Input&lt;AnyPin&gt;&gt;&gt;&gt; = Mutex::new(RefCell::new(None));
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">handler</span><span>(priority = Priority::Priority3)]
+</span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">GPIO_HANDLER</span><span>() {
+</span><span>    </span><span style="color:#d08770;">CONFIRM_BOOL</span><span>.</span><span style="color:#96b5b4;">store</span><span>(</span><span style="color:#d08770;">true</span><span>, Ordering::Relaxed);
+</span><span>
+</span><span>    critical_section::with(|</span><span style="color:#bf616a;">cs</span><span>| {
+</span><span>        </span><span style="color:#d08770;">G_BUTTON
+</span><span>            .</span><span style="color:#96b5b4;">borrow_ref_mut</span><span>(cs)
+</span><span>            .</span><span style="color:#96b5b4;">as_mut</span><span>()
+</span><span>            .</span><span style="color:#96b5b4;">unwrap</span><span>()
+</span><span>            .</span><span style="color:#96b5b4;">clear_interrupt</span><span>();
+</span><span>    });
+</span><span>}
+</span></code></pre>
+<p>Here we just set <code>CONFIRM_BOOL</code> when interrupt is triggered, which is
+then used in the game loop, e.g.:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">match </span><span style="color:#bf616a;">self</span><span>.state {
+</span><span>    ...
+</span><span>    GameState::GameOver =&gt; {
+</span><span>        </span><span style="color:#b48ead;">if </span><span style="color:#d08770;">CONFIRM_BOOL</span><span>.</span><span style="color:#96b5b4;">swap</span><span>(</span><span style="color:#d08770;">false</span><span>, Ordering::Relaxed) {
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.state = GameState::Playing;
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">reset</span><span>();
+</span><span>            </span><span style="color:#bf616a;">self</span><span>.</span><span style="color:#96b5b4;">start_game</span><span>(display);
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>That covers all of the embassy / esp32 related parts of this project (I
+won't cover programming Snake itself!).</p>
+<p>The hardest parts were:</p>
+<ul>
+<li>Not realising the I2C pins needed pull-up resistors to communicate
+properly.</li>
+<li>Working out the right input input voltage for the KY-023 joystick so
+the output would be in a readable range for the ESP32 ADC.</li>
+</ul>
+<p>This really just scratches the surface of what is possible with embassy
+and Rust on the ESP32 platform. I highly recommend <a href="https://www.youtube.com/watch?v=o8yNNVFzNnM&amp;list=PL0U7YUX2VnBFbwTi96wUB1nZzPVN3HzgS">Floodplain's Rust on ESP32 series on YouTube</a>
+and the associated <a href="https://github.com/flyaruu/rust-on-esp32">rust-on-esp32</a>
+and <a href="https://github.com/flyaruu/esp32-nostd">esp32-nostd</a> Github repos
+for some great examples. The latter has a great example of an async task
+to automatically re-connect to the Wifi for example.</p>
+<p>The following resources were very useful:</p>
+<ul>
+<li><a href="https://lastminuteengineers.com/esp32-basics-adc/">LastMinuteEngineers' ESP32 ADC Basics article</a></li>
+<li><a href="https://docs.esp-rs.org/book/">The Rust on ESP book</a></li>
+<li><a href="https://docs.esp-rs.org/no_std-training/01_intro.html">nostd ESP32 Rust book</a></li>
+<li><a href="https://blog.theembeddedrustacean.com/esp32-embedded-rust-at-the-hal-gpio-interrupts">ESP32 GPIO Interrupts</a></li>
+<li><a href="https://dev.to/theembeddedrustacean/embassy-on-esp-gpio-5594">GPIO usage with Embassy on ESP32</a></li>
+<li><a href="https://dev.to/theembeddedrustacean/esp32-embedded-rust-at-the-hal-i2c-scanner-54mg">I2C Scanner example</a></li>
+<li><a href="https://dev.to/theembeddedrustacean/esp32-embedded-rust-at-the-hal-analog-temperature-sensing-using-the-adc-3106">ADC example</a></li>
+</ul>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/my-first-clippy-lint/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2024 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>
