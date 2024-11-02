@@ -333,6 +333,12 @@ won't cover programming Snake itself!). The source code is available  in the [sn
 The project is also [available on Wokwi](https://wokwi.com/projects/413450202628576257) with the breadboard diagram
 but won't build there at the moment.
 
+While the project is very simple, I think the benefits of using Rust are
+already apparent. For example, we were able to use the Ssd1306 crate to
+safely interact with the OLED display, while having the full expressive
+power of Rust's enums for handling game state, and Embassy for easily
+spawning asynchronous tasks.
+
 The hardest parts were:
 * Not realising the I2C pins needed pull-up resistors to communicate
   properly.
