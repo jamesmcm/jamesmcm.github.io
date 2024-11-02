@@ -18,7 +18,7 @@
       <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
 
       <!-- TODO: Move to config -->
-      <link href="favicon.png" rel="icon">
+      <link href="/favicon.png" rel="icon">
       {% if config.generate_feeds %}
       {% block rss %}
         <link rel="alternate" type={% if config.feed_filenames[0] == "atom.xml" %}"application/atom+xml"{% else %}"application/rss+xml"{% endif %} title="RSS" href="{{ get_url(path=config.feed_filenames[0]) | safe }}">
