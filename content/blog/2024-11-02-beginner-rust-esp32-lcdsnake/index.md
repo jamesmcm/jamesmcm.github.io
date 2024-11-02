@@ -27,10 +27,14 @@ The aim was to get more comfortable with the [esp-hal crate](https://docs.esp-rs
 
 ### Video
 
+<br>
 <video controls>
   <source src="snake_video_smaller.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video> 
+<br>
+<br>
+
 
 ## Hardware
 
@@ -325,7 +329,9 @@ match self.state {
 ## Conclusion
 
 That covers all of the embassy / esp32 related parts of this project (I
-won't cover programming Snake itself!).
+won't cover programming Snake itself!). The source code is available  in the [snake_rust_esp32 repo](https://github.com/jamesmcm/snake_rust_esp32) on Github.
+The project is also [available on Wokwi](https://wokwi.com/projects/413450202628576257) with the breadboard diagram
+but won't build there at the moment.
 
 The hardest parts were:
 * Not realising the I2C pins needed pull-up resistors to communicate
