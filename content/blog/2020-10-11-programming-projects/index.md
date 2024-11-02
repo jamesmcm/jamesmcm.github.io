@@ -55,7 +55,7 @@ Another interesting project using graph search algorithms is [maze solving](http
 
 Writing a TCP client and server, or a TCP proxy server, will force you
 to work with multithreading or asynchronous programming (or both - see
-[my previous post on asynchronous programming](http://jamesmcm.github.io/blog/2020/05/06/a-practical-introduction-to-async-programming-in-rust/#en) 
+[my previous post on asynchronous programming](/blog/a-practical-introduction-to-async-programming-in-rust)
 if you are unsure of the difference).
 
 I recently wrote a [simple synchronous TCP proxy server](https://github.com/jamesmcm/basic_tcp_proxy) in Rust for
@@ -322,7 +322,7 @@ arthritis, etc. that would struggle to use a smartphone or computer.
 
 ## ALMA docker support + ALMA Hub
 
-As [mentioned in a previous blog post](http://jamesmcm.github.io/blog/2020/09/09/alma/#en),
+As [mentioned in a previous blog post](/blog/alma),
 [ALMA](https://github.com/r-darwish/alma) is a tool for
 creating persistent LiveUSB installations of Arch Linux, that can be
 configured with [a collection of preset files](https://github.com/jamesmcm/arch-i3-usb)

@@ -32,16 +32,15 @@
     </div>
 
     <aside class="sidebar">
-    {% for tax in section.taxonomies %}
+    {% set categories = get_taxonomy(kind="categories") %}
     <section>
-	    <h2 class="capitalize">{{ tax.kind.name }}</h2>
+	    <h2 class="capitalize">{{ categories.kind.name }}</h2>
 	    <ul display="block">
-		{% for term in tax.items %}
+		{% for term in categories.items %}
 		<li><a href={{ term.permalink }}>{{ term.name }} ({{term.pages | length}})</a></li>
 		{% endfor %}
 	    </ul>
     </section>
-    {% endfor %}
     </aside>
 
     </div>

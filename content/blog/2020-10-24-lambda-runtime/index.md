@@ -23,8 +23,8 @@ Opinions expressed are solely my own and do not express the views or opinions of
 # AWS Lambda
 
 [AWS Lambda](https://aws.amazon.com/lambda/) is a serverless computing service. I have previously covered
-setting up serverless data pipelines [from Excel files on S3](http://jamesmcm.github.io/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en), and
-[from email attachments with SES and Workmail](http://jamesmcm.github.io/blog/2020/08/29/rust-ses/#en) using Rust and the
+setting up serverless data pipelines [from Excel files on S3](/blog/data-engineering-with-rust-and-aws-lambda), and
+[from email attachments with SES and Workmail](/blog/rust-ses) using Rust and the
 [lambda_runtime crate](https://github.com/awslabs/aws-lambda-rust-runtime).
 
 

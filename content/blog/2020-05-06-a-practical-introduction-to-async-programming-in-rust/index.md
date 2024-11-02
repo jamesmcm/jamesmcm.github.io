@@ -88,7 +88,7 @@ algorithmic improvements might yield a better return than focusing on
 parallelisation in this cases.
 
 It is also not useful if there are no other tasks to do whilst waiting 
-for the IO operations. For example in the [previous blog post](/blog/2020/04/19/data-engineering-with-rust-and-aws-lambda/#en), Rusoto
+for the IO operations. For example in the [previous blog post](/blog/data-engineering-with-rust-and-aws-lambda), Rusoto
 actually returns a `RusotoFuture` object when we request the DB
 credentials from AWS Secrets Manager, however in this case one
 invocation of our Lambda function corresponds to one request - there is

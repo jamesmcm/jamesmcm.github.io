@@ -226,7 +226,14 @@ body > nav form .search {
   margin: 0;
 }
 
-.blog-content { 
+.blog-content {
+  margin-left: 0;
+  margin-right: 0; // for sidebar
+  background: #f8f8f8;
+  border-right: 1px solid #e0e0e0;
+}
+
+.blog-content-page {
   margin-left: 0;
   margin-right: 0; // for sidebar
   background: #f8f8f8;
