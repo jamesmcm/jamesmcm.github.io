@@ -29,7 +29,7 @@ The aim was to get more comfortable with the [esp-hal crate](https://docs.esp-rs
 
 <br>
 <video controls>
-  <source src="snake_video_smaller.mp4" type="video/mp4">
+  <source src="snake_video_smaller.mp4" width="100%" height="100%" type="video/mp4">
 Your browser does not support the video tag.
 </video> 
 <br>
@@ -47,7 +47,7 @@ I used the following hardware:
 * 2x Breadboards (joined together in this case, since the development board
   I used is wide).
 
-Wokwi wiring diagram - [project link](https://wokwi.com/projects/413450202628576257), not it does not build online
+Wokwi wiring diagram - [project link](https://wokwi.com/projects/413450202628576257), note it does not build online
 due to the dependencies:
 ![Wokwi wiring diagram](diagram.png)
 
