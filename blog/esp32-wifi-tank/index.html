@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Building a Wifi-controlled car with Rust and ESP32</title>
+      <meta name="author" content="James McMurray">
+      <meta name="description" content="A technical blog about Rust, Linux and other topics.">
+      <!-- CSS -->
+      <link rel="stylesheet" href="https://jamesmcm.github.io/octozola.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+      <link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+      <link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+      <!-- TODO: Move to config -->
+      <link href="/favicon.png" rel="icon">
+      
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://jamesmcm.github.io/atom.xml">
+      
+      
+
+      
+      
+    </head>
+
+    <body>
+      
+        <header role="banner">
+          <hgroup>
+		  <h1><a href="/">James McMurray&#x27;s Blog</a></h1>
+		  <h2>Rust, Linux and other curiosities</h2>
+          </hgroup>
+        </header>
+      
+
+<nav role="navigation">
+
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+	  <input type="hidden" name="q" value="site:jamesmcm.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search" data-_extension-text-contrast="">
+  </fieldset>
+</form>
+  
+<!-- TODO: Generate from links -->
+<fieldset class="mobile-nav">
+	<select onChange="window.location.href=this.value">
+		<option value="">Navigate…</option>
+		<option value="/">» Home</option>
+		<option value="/blog">» Blog</option>
+		<option disabled>---</option>
+		<option value="/atom.xml">» RSS Feed</option>
+		<option value="https://www.linkedin.com/in/james-mcmurray/">» LinkedIn</option>
+		<option value="https://github.com/jamesmcm">» Github</option>
+	</select>
+</fieldset>
+<ul class="main-navigation">
+  <li><a href="/">Home</a></li>
+  <li><a href="/blog">Blog</a></li>
+</ul>
+<ul class="side-links">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  <li><a href="https://www.linkedin.com/in/james-mcmurray/">LinkedIn</a></li>
+  <li><a href="https://github.com/jamesmcm">Github</a></li>
+</ul>
+</nav>
+
+<div class="content">
+
+<div class="blog-content-page">
+<article>
+  <h1 class="post-title">Building a Wifi-controlled car with Rust and ESP32</h1>
+  <span class="post-date">2024-11-17</span>
+  <hr class="within-post">
+  <p>In this post we will create a basic Wifi-controlled car with an ESP32
+development board and ESP32-CAM camera module, and all of the code
+written in Rust.</p>
+<p>All of the code for this example is available on Github in my <a href="https://github.com/jamesmcm/esp32_wifi_tank">esp32_wifi_tank repo</a>.</p>
+<span id="continue-reading"></span>
+<p>Opinions expressed are solely my own and do not express the views or opinions of my employer.</p>
+<h2 id="overview">Overview</h2>
+<p>The project consists of three crates for the rover control board, a client on the host machine, and the camera board.
+The esp-wifi connection code was adapted from <a href="https://github.com/flyaruu/esp32-nostd">@flyaruu's esp32-nostd crate</a>,
+and the esp32cam code was adapted from <a href="https://github.com/Kezii/esp32cam_rs">@Kezii's esp32cam_rs</a> crate.</p>
+<p><img src="https://jamesmcm.github.io/blog/esp32-wifi-tank/./smallimg.jpg" alt="Photo of rover controlled via Steam Deck" /></p>
+<p>The control board will connect to the given Wifi credentials (at compile
+time) with the <code>wifitank</code> hostname. The ESP32-CAM camera module will do
+the same with the <code>espressif</code> hostname.</p>
+<p>The client code can then be run
+on any machine connect to the same LAN, and will connect to the control
+board and camera module via their fixed hostnames.</p>
+<h3 id="video">Video</h3>
+<br>
+<video controls>
+  <source src="rover_video.mp4" width="100%" height="100%" type="video/mp4">
+Your browser does not support the video tag.
+</video> 
+<br>
+<br>
+<h2 id="hardware">Hardware</h2>
+<ul>
+<li>1x ESP32 Xtensa development board (I used the <a href="https://www.aliexpress.com/item/32883116057.html">Lolin D32 Pro</a> for this
+project). Although I would not recommend this board for this project
+specifically as it has no 5V output pin. It is nice that it is thin
+enough to use access pins on both sides with a standard breadboard
+though.</li>
+<li>1x <a href="https://www.electrokit.com/en/esp32-cam-utvecklingskort-med-wifi-och-kamera">ESP32-CAM board</a> (external antenna is optional)</li>
+<li>1x UART-USB adapter (I used one like <a href="https://www.amazon.se/AZDelivery-USB-CH340G-omvandlare-Jumperkabel-kompatibel/dp/B08T22HC8K?">this one</a> - note we need 5V output
+here for the ESP32-CAM)</li>
+<li>2x <a href="https://www.electrokit.com/en/motordrivare-l298-dubbel-h-brygga-5-35v-2a">L298N motor drivers</a></li>
+<li>4x DC Gearbox motors (I used <a href="https://www.adafruit.com/product/3777">these "TT Motor" ones</a> from the kit)</li>
+<li>1x Robot car chassis (I used the Elegoo one from <a href="https://www.elegoo.com/products/elegoo-smart-robot-car-kit-v-4-0">this kit</a>, but you could also cut
+this from card or 3D print it).</li>
+<li>1x USB power bank for powering the main ESP32 control board</li>
+<li>1x Battery holder module - to power the motors via the motor drivers</li>
+<li>4x AA batteries (I used rechargeable ones)</li>
+<li>4x wheels and tires - in this case I used the ones from the Elegoo
+kit.</li>
+</ul>
+<h2 id="software">Software</h2>
+<p>First install Rust and espup according to the <a href="https://docs.esp-rs.org/book/installation/riscv-and-xtensa.html">Xtensa ESP32 section of the Rust on ESP32 book</a>.</p>
+<p>Most of this project was written without using the standard library, so we use
+the <code>esp-template</code> no_std template for project generation. Note the
+esp32cam part does use the <code>esp-idf-template</code>.</p>
+<p>The code can the be built and flashed with:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> source </span><span style="color:#bf616a;">~</span><span>/export-esp.sh
+</span><span style="color:#bf616a;">$</span><span> cargo run</span><span style="color:#bf616a;"> --release
+</span></code></pre>
+<p>When connected with a data-transfer capable micro-USB cable.</p>
+<h3 id="control-board-code">Control board code</h3>
+<p>The control board will connect to the Wifi credentials given as
+environment variables at compile time (the code does not yet support
+setting credentials at run-time via BLE / Bluetooth), and wait to receive
+commands from the client program over UDP.</p>
+<h4 id="esp-alloc">esp-alloc</h4>
+<p>Since we use no-std here, we need to provide an allocator in order to
+use esp-wifi. This code uses esp-alloc to create a 128KiB static heap -
+this must be initialised before usage so that the memory allocations
+required by esp-wifi will succeed.</p>
+<p>This is called in the initialisation steps at the start of the <code>main</code>
+function:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">init_heap</span><span>() {
+</span><span>    </span><span style="color:#b48ead;">const </span><span style="color:#d08770;">HEAP_SIZE</span><span>: </span><span style="color:#b48ead;">usize </span><span>= </span><span style="color:#d08770;">128 </span><span>* </span><span style="color:#d08770;">1024</span><span>;
+</span><span>    </span><span style="color:#b48ead;">static mut </span><span style="color:#d08770;">HEAP</span><span>: MaybeUninit&lt;[</span><span style="color:#b48ead;">u8</span><span>; </span><span style="color:#bf616a;">HEAP_SIZE</span><span>]&gt; = MaybeUninit::uninit();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">unsafe </span><span>{
+</span><span>        esp_alloc::</span><span style="color:#d08770;">HEAP</span><span>.</span><span style="color:#96b5b4;">add_region</span><span>(esp_alloc::HeapRegion::new(
+</span><span>            </span><span style="color:#d08770;">HEAP</span><span>.</span><span style="color:#96b5b4;">as_mut_ptr</span><span>() as </span><span style="color:#b48ead;">*mut u8</span><span>,
+</span><span>            </span><span style="color:#d08770;">HEAP_SIZE</span><span>,
+</span><span>            esp_alloc::MemoryCapability::Internal.</span><span style="color:#96b5b4;">into</span><span>(),
+</span><span>        ));
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">esp_hal_embassy</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#bf616a;">spawner</span><span>: Spawner) {
+</span><span>    </span><span style="color:#b48ead;">let</span><span> peripherals = esp_hal::init(esp_hal::Config::default());
+</span><span>    </span><span style="color:#b48ead;">let</span><span> io = esp_hal::gpio::Io::new(peripherals.</span><span style="color:#d08770;">GPIO</span><span>, peripherals.</span><span style="color:#d08770;">IO_MUX</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> seed = </span><span style="color:#d08770;">0x0123_4567_89ab_cdef</span><span>;
+</span><span>    </span><span style="color:#96b5b4;">init_heap</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> timg0 = TimerGroup::new(peripherals.</span><span style="color:#d08770;">TIMG0</span><span>);
+</span><span>    esp_hal_embassy::init(timg0.timer0);
+</span><span>    ...
+</span></code></pre>
+<h4 id="wifi-connection">Wifi connection</h4>
+<p>Here we use esp-wifi for the Wifi connection with no-std. One thing to
+note is that the Access Point must support WPA2 Personal authentication,
+and use 2.4Ghz channels - WPA3 and 5G are not supported on the board I
+used.</p>
+<p>At the moment the Wifi credentials are provided as environment variables
+at build time (or in <code>.cargo/config.toml</code>).</p>
+<p>This code is adapted from <a href="https://github.com/flyaruu/esp32-nostd">@flyaruu's esp32-nostd crate</a>
+which is a great resource for using the esp-wifi crate directly. Also
+see his <a href="https://www.youtube.com/watch?v=o8yNNVFzNnM&amp;list=PL0U7YUX2VnBFbwTi96wUB1nZzPVN3HzgS">Rust on ESP32 no_std YouTube series</a>.</p>
+<p>We connect to the Wifi as follows (note the use of the <a href="https://crates.io/crates/heapless">heapless crate</a>
+for no-std Strings):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    ...
+</span><span>    </span><span style="color:#b48ead;">let</span><span> wifi_ssid = heapless::String::&lt;32&gt;::from_str(env!(&quot;</span><span style="color:#a3be8c;">WIFI_SSID</span><span>&quot;)).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> wifi_password = heapless::String::&lt;64&gt;::from_str(env!(&quot;</span><span style="color:#a3be8c;">WIFI_PASSWORD</span><span>&quot;)).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> timg1 = TimerGroup::new(peripherals.</span><span style="color:#d08770;">TIMG1</span><span>);
+</span><span>    </span><span style="color:#b48ead;">let</span><span> wifi_init = esp_wifi::init(
+</span><span>        esp_wifi::EspWifiInitFor::Wifi,
+</span><span>        timg1.timer0,
+</span><span>        rng,
+</span><span>        peripherals.</span><span style="color:#d08770;">RADIO_CLK</span><span>,
+</span><span>    )
+</span><span>    .</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> wifi_config = esp_wifi::wifi::ClientConfiguration {
+</span><span>        ssid: wifi_ssid,
+</span><span>        bssid: None,
+</span><span>        auth_method: AuthMethod::WPA2Personal,
+</span><span>        password: wifi_password,
+</span><span>        channel: None,
+</span><span>    };
+</span><span>
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let </span><span>(wifi_device, </span><span style="color:#b48ead;">mut</span><span> wifi_controller): (WifiDevice&lt;WifiStaDevice&gt;, _) =
+</span><span>        wifi::new_with_config(&amp;wifi_init, peripherals.</span><span style="color:#d08770;">WIFI</span><span>, wifi_config).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    wifi_controller.</span><span style="color:#96b5b4;">start</span><span>().await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    delay.</span><span style="color:#96b5b4;">delay</span><span>(</span><span style="color:#d08770;">1000.</span><span style="color:#96b5b4;">millis</span><span>());
+</span><span>    </span><span style="color:#b48ead;">for</span><span> i in </span><span style="color:#d08770;">0</span><span>..</span><span style="color:#d08770;">20 </span><span>{
+</span><span>        </span><span style="color:#b48ead;">if</span><span> wifi_controller.</span><span style="color:#96b5b4;">connect</span><span>().await.</span><span style="color:#96b5b4;">is_ok</span><span>() {
+</span><span>            </span><span style="color:#b48ead;">break</span><span>;
+</span><span>        }
+</span><span>        log::info!(&quot;</span><span style="color:#a3be8c;">Failed to connect, retrying - try {}...</span><span>&quot;, i);
+</span><span>        delay.</span><span style="color:#96b5b4;">delay</span><span>(</span><span style="color:#d08770;">1000.</span><span style="color:#96b5b4;">millis</span><span>());
+</span><span>    }
+</span></code></pre>
+<p>One thing to note is that we have to deal with retries ourselves (and
+this is absolutely necessary, expect some failures when connecting) -
+there is no retry option in the <code>connect()</code> method and retries are
+expected to be implemented in the application - see
+<a href="https://github.com/esp-rs/esp-wifi-sys/issues/45">issue #45 in esp-wifi-sys</a> for example.</p>
+<p>With the Wifi connected, we can initialise embassy-net and request an IP address to be assigned via
+DHCP.</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">type </span><span>WifiDriver = WifiDevice&lt;</span><span style="color:#b48ead;">&#39;static</span><span>, WifiStaDevice&gt;;
+</span><span style="color:#b48ead;">const </span><span style="color:#d08770;">CLIENT_NAME</span><span>: &amp;</span><span style="color:#b48ead;">str </span><span>= &quot;</span><span style="color:#a3be8c;">wifitank</span><span>&quot;;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">embassy_executor</span><span>::</span><span style="color:#bf616a;">task</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">net_task</span><span>(</span><span style="color:#bf616a;">stack</span><span>: &amp;</span><span style="color:#b48ead;">&#39;static </span><span>Stack&lt;WifiDriver&gt;) -&gt; ! {
+</span><span>    stack.</span><span style="color:#96b5b4;">run</span><span>().await
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">esp_hal_embassy</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>(</span><span style="color:#bf616a;">spawner</span><span>: Spawner) {
+</span><span>    ...
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> dhcp_config = DhcpConfig::default();
+</span><span>    dhcp_config.hostname = Some(heapless::String::from_str(</span><span style="color:#d08770;">CLIENT_NAME</span><span>).</span><span style="color:#96b5b4;">unwrap</span><span>());
+</span><span>    </span><span style="color:#b48ead;">let</span><span> net_config = NetConfig::dhcpv4(dhcp_config);
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">static </span><span style="color:#d08770;">STACK</span><span>: StaticCell&lt;Stack&lt;WifiDriver&gt;&gt; = StaticCell::new();
+</span><span>    </span><span style="color:#b48ead;">static </span><span style="color:#d08770;">RESOURCES</span><span>: StaticCell&lt;StackResources&lt;4&gt;&gt; = StaticCell::new();
+</span><span>    </span><span style="color:#b48ead;">let</span><span> stack = &amp;*</span><span style="color:#d08770;">STACK</span><span>.</span><span style="color:#96b5b4;">init</span><span>(Stack::new(
+</span><span>        wifi_device,
+</span><span>        net_config,
+</span><span>        </span><span style="color:#d08770;">RESOURCES</span><span>.</span><span style="color:#96b5b4;">init</span><span>(StackResources::&lt;4&gt;::new()),
+</span><span>        seed,
+</span><span>    ));
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let</span><span> mac_addr = stack.</span><span style="color:#96b5b4;">hardware_address</span><span>();
+</span><span>    spawner.</span><span style="color:#96b5b4;">spawn</span><span>(</span><span style="color:#96b5b4;">net_task</span><span>(stack)).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    stack.</span><span style="color:#96b5b4;">wait_config_up</span><span>().await;
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">match</span><span> stack.</span><span style="color:#96b5b4;">config_v4</span><span>() {
+</span><span>        Some(a) =&gt; log::info!(&quot;</span><span style="color:#a3be8c;">IP Address appears to be: {}</span><span>&quot;, a.address),
+</span><span>        None =&gt; core::panic!(&quot;</span><span style="color:#a3be8c;">DHCP completed but no IP address was assigned!</span><span>&quot;),
+</span><span>    }
+</span></code></pre>
+<p>Note at the moment we only use a separate task for running the network
+stack, but the Wifi connection code could also be put in its own task
+for automatic reconnection like in <a href="https://github.com/flyaruu/esp32-nostd/blob/main/src/main.rs#L74-L108">@flyaruu's esp32-nostd crate</a>.</p>
+<p>This ease of writing async checks like that is a great example of the
+benefits of using embassy.</p>
+<p>Finally we create the UDP socket and start parsing the received
+datagrams from the client:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    ...
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> udp_rx_meta = [PacketMetadata::</span><span style="color:#d08770;">EMPTY</span><span>; </span><span style="color:#d08770;">16</span><span>];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> udp_rx_buffer = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">1024</span><span>];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> udp_tx_meta = [PacketMetadata::</span><span style="color:#d08770;">EMPTY</span><span>; </span><span style="color:#d08770;">16</span><span>];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> udp_tx_buffer = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">1024</span><span>];
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> msg_buffer = [</span><span style="color:#d08770;">0</span><span>; </span><span style="color:#d08770;">128</span><span>];
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> udp_socket = UdpSocket::new(
+</span><span>        stack,
+</span><span>        &amp;</span><span style="color:#b48ead;">mut</span><span> udp_rx_meta,
+</span><span>        &amp;</span><span style="color:#b48ead;">mut</span><span> udp_rx_buffer,
+</span><span>        &amp;</span><span style="color:#b48ead;">mut</span><span> udp_tx_meta,
+</span><span>        &amp;</span><span style="color:#b48ead;">mut</span><span> udp_tx_buffer,
+</span><span>    );
+</span><span>
+</span><span>    udp_socket.</span><span style="color:#96b5b4;">bind</span><span>(</span><span style="color:#d08770;">8080</span><span>).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#b48ead;">let </span><span>(rx_size, from_addr) = udp_socket.</span><span style="color:#96b5b4;">recv_from</span><span>(&amp;</span><span style="color:#b48ead;">mut</span><span> msg_buffer).await.</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>        </span><span style="color:#b48ead;">if</span><span> rx_size == </span><span style="color:#d08770;">0 </span><span>{
+</span><span>            </span><span style="color:#b48ead;">continue</span><span>;
+</span><span>        }
+</span><span>        </span><span style="color:#b48ead;">let</span><span> response = msg_buffer[rx_size - </span><span style="color:#d08770;">1</span><span>] as </span><span style="color:#b48ead;">char</span><span>;
+</span><span>        </span><span style="color:#b48ead;">match</span><span> response {
+</span><span>            &#39;</span><span style="color:#a3be8c;">F</span><span>&#39; =&gt; motors.</span><span style="color:#96b5b4;">forward</span><span>(),
+</span><span>            ...
+</span></code></pre>
+<h4 id="motor-drivers">Motor drivers</h4>
+<p>The two L298N motor drivers drive the motors on the left and right side of the
+car separately. There is no steering, but we can drive each wheel
+independently, so the car is turned like a tank -
+driving the motors on one side forwards, and backwards on the other
+side.</p>
+<p>The <a href="https://lastminuteengineers.com/l298n-dc-stepper-driver-arduino-tutorial/">LastMinuteEngineers' Interface L298N DC Motor Driver Module with Arduino article</a>
+is very useful for understanding the wiring of the motor driver pins.</p>
+<p>I wired the GPIO pins as follows:</p>
+<p>Left motor driver:</p>
+<ul>
+<li>Pin 13 to EN1</li>
+<li>Pin 12 to EN2</li>
+<li>Pin 26 to EN3</li>
+<li>Pin 25 to EN4</li>
+</ul>
+<p>Right motor driver:</p>
+<ul>
+<li>Pin 21 to EN1</li>
+<li>Pin 19 to EN2</li>
+<li>Pin 22 to EN3</li>
+<li>Pin 23 to EN4</li>
+</ul>
+<p>As noted in the article setting both inputs to high or low will disable
+the motor, whilst one high and one low will turn it either forwards or
+backwards.</p>
+<p>This is handled in the <a href="https://github.com/jamesmcm/esp32_wifi_tank/blob/master/wifi_tank/src/motors.rs">motors.rs</a> code.
+Note the two motors on the same side are always driven in the same
+direction - e.g. both forwards or both backwards.</p>
+<p>Here we can see the benefits of Rust's rich type system making it easy
+to encapsulate this logic outside of the main control code:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">enum </span><span>MotorDriverState {
+</span><span>    Stopped,
+</span><span>    Forward,
+</span><span>    Reverse,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub struct </span><span>MotorDriver&lt;</span><span style="color:#b48ead;">&#39;a</span><span>&gt; {
+</span><span>    </span><span style="color:#bf616a;">v_a_pin</span><span>: Output&lt;</span><span style="color:#b48ead;">&#39;a</span><span>, esp_hal::gpio::AnyPin&gt;,
+</span><span>    </span><span style="color:#bf616a;">v_b_pin</span><span>: Output&lt;</span><span style="color:#b48ead;">&#39;a</span><span>, esp_hal::gpio::AnyPin&gt;,
+</span><span>    </span><span style="color:#bf616a;">g_a_pin</span><span>: Output&lt;</span><span style="color:#b48ead;">&#39;a</span><span>, esp_hal::gpio::AnyPin&gt;,
+</span><span>    </span><span style="color:#bf616a;">g_b_pin</span><span>: Output&lt;</span><span style="color:#b48ead;">&#39;a</span><span>, esp_hal::gpio::AnyPin&gt;,
+</span><span>    </span><span style="color:#bf616a;">state</span><span>: MotorDriverState,
+</span><span>}
+</span><span>
+</span><span>...
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">derive</span><span>(Debug, PartialEq)]
+</span><span style="color:#b48ead;">enum </span><span>MotorsState {
+</span><span>    Stopped,
+</span><span>    Forward,
+</span><span>    Reverse,
+</span><span>    Left,
+</span><span>    Right,
+</span><span>}
+</span><span>
+</span><span style="color:#b48ead;">pub struct </span><span>Motors&lt;</span><span style="color:#b48ead;">&#39;a</span><span>&gt; {
+</span><span>    </span><span style="color:#bf616a;">left_motor</span><span>: MotorDriver&lt;</span><span style="color:#b48ead;">&#39;a</span><span>&gt;,
+</span><span>    </span><span style="color:#bf616a;">right_motor</span><span>: MotorDriver&lt;</span><span style="color:#b48ead;">&#39;a</span><span>&gt;,
+</span><span>    </span><span style="color:#bf616a;">state</span><span>: MotorsState,
+</span><span>}
+</span></code></pre>
+<p>This completes the code for the control board.</p>
+<h3 id="camera-module-code">Camera module code</h3>
+<p>The esp32cam code is used to connect the ESP32-CAM module to the Wifi,
+and host a web server where the video can be streamed in the web browser (as a series of
+JPGs). This code is a modified version of <a href="https://github.com/Kezii/esp32cam_rs">@Kezii's esp32cam_rs</a>
+crate - note this uses esp-idf so it is not no-std. This code requires SPI RAM to be enabled - <code>CONFIG_ESP32_SPIRAM_SUPPORT=y</code> in sdkconfig.defaults.</p>
+<p>Omitting the code for the Wifi connection and camera initialisation, the camera stream is served as a multipart stream of jpegs:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    server.</span><span style="color:#96b5b4;">fn_handler</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">/camera</span><span>&quot;,
+</span><span>        Method::Get,
+</span><span>        </span><span style="color:#b48ead;">move </span><span>|request| -&gt; Result&lt;(), anyhow::Error&gt; {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> part_boundary = &quot;</span><span style="color:#a3be8c;">123456789000000000000987654321</span><span>&quot;;
+</span><span>            </span><span style="color:#b48ead;">let</span><span> frame_boundary = format!(&quot;</span><span style="color:#96b5b4;">\r\n</span><span style="color:#a3be8c;">--</span><span style="color:#d08770;">{}</span><span style="color:#96b5b4;">\r\n</span><span>&quot;, part_boundary);
+</span><span>
+</span><span>            </span><span style="color:#b48ead;">let</span><span> content_type = format!(&quot;</span><span style="color:#a3be8c;">multipart/x-mixed-replace;boundary=</span><span style="color:#d08770;">{}</span><span>&quot;, part_boundary);
+</span><span>            </span><span style="color:#b48ead;">let</span><span> headers = [(&quot;</span><span style="color:#a3be8c;">Content-Type</span><span>&quot;, content_type.</span><span style="color:#96b5b4;">as_str</span><span>())];
+</span><span>            </span><span style="color:#b48ead;">let mut</span><span> response = request.</span><span style="color:#96b5b4;">into_response</span><span>(</span><span style="color:#d08770;">200</span><span>, Some(&quot;</span><span style="color:#a3be8c;">OK</span><span>&quot;), &amp;headers).</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>            </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>                </span><span style="color:#b48ead;">if let </span><span>Some(fb) = cam_arc_clone.</span><span style="color:#96b5b4;">get_framebuffer</span><span>() {
+</span><span>                    </span><span style="color:#b48ead;">let</span><span> data = fb.</span><span style="color:#96b5b4;">data</span><span>();
+</span><span>                    </span><span style="color:#b48ead;">let</span><span> frame_part = format!(
+</span><span>                        &quot;</span><span style="color:#a3be8c;">Content-Type: image/jpeg</span><span style="color:#96b5b4;">\r\n</span><span style="color:#a3be8c;">Content-Length: </span><span style="color:#d08770;">{}</span><span style="color:#96b5b4;">\r\n\r\n</span><span>&quot;,
+</span><span>                        data.</span><span style="color:#96b5b4;">len</span><span>()
+</span><span>                    );
+</span><span>                    response.</span><span style="color:#96b5b4;">write_all</span><span>(frame_part.</span><span style="color:#96b5b4;">as_bytes</span><span>())?;
+</span><span>                    response.</span><span style="color:#96b5b4;">write_all</span><span>(data)?;
+</span><span>                    response.</span><span style="color:#96b5b4;">write_all</span><span>(frame_boundary.</span><span style="color:#96b5b4;">as_bytes</span><span>())?;
+</span><span>                    response.</span><span style="color:#96b5b4;">flush</span><span>()?;
+</span><span>                }
+</span><span>            }
+</span><span>
+</span><span>            Ok(())
+</span><span>        },
+</span><span>    )?;
+</span></code></pre>
+<p>The home page displays this stream at full-screen, rotated 180-degrees
+(since the camera is mounted upside-down):</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    server.</span><span style="color:#96b5b4;">fn_handler</span><span>(&quot;</span><span style="color:#a3be8c;">/</span><span>&quot;, Method::Get, |</span><span style="color:#bf616a;">request</span><span>| -&gt; Result&lt;(), anyhow::Error&gt; {
+</span><span>        </span><span style="color:#b48ead;">let</span><span> data = &quot;</span><span style="color:#a3be8c;">&lt;html&gt;&lt;head&gt;&lt;meta name=</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">viewport</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;"> content=</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">width=device-width; height=device-height;</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">&gt;&lt;title&gt;esp32cam&lt;/title&gt;&lt;/head&gt;&lt;body&gt;&lt;img src=</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">camera</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;"> alt=</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">Failed to load image</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;"> style=</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">height: 100%;width: 100%; transform: rotate(180deg);</span><span style="color:#96b5b4;">\&quot;</span><span style="color:#a3be8c;">&gt;&lt;/body&gt;&lt;/html&gt;</span><span>&quot;;
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">let</span><span> headers = [
+</span><span>            (&quot;</span><span style="color:#a3be8c;">Content-Type</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">text/html</span><span>&quot;),
+</span><span>            (&quot;</span><span style="color:#a3be8c;">Content-Length</span><span>&quot;, &amp;data.</span><span style="color:#96b5b4;">len</span><span>().</span><span style="color:#96b5b4;">to_string</span><span>()),
+</span><span>        ];
+</span><span>        </span><span style="color:#b48ead;">let mut</span><span> response = request.</span><span style="color:#96b5b4;">into_response</span><span>(</span><span style="color:#d08770;">200</span><span>, Some(&quot;</span><span style="color:#a3be8c;">OK</span><span>&quot;), &amp;headers)?;
+</span><span>        response.</span><span style="color:#96b5b4;">write_all</span><span>(data.</span><span style="color:#96b5b4;">as_bytes</span><span>())?;
+</span><span>        Ok(())
+</span><span>    })?;
+</span></code></pre>
+<p>So far I did not use an external antenna with the ESP32-CAM module as it
+is difficult to solder, although this is recommended. I had many issues with peaks in latency
+from the camera, although it's not certain that this is the issue.</p>
+<p>Also note I used a 5V input from the UART adapter (via the USB power bank)
+to power the ESP32-CAM module as a 5V input is highly recommended for
+stability (although a 3.3V input exists too).</p>
+<h4 id="flashing-the-esp32-cam-module">Flashing the ESP32-CAM module</h4>
+<p>A major issue I had was being able to flash the ESP32-CAM module with
+the code above. I did not buy the <a href="https://sizable.se/P.SJERR/ESP32-CAM-MB-CH340-programmerade-for-ESP32-CAM">ESP32-CAM-MB</a> module for flashing
+it, so I had to use a USB-UART adapter. See the <a href="https://lastminuteengineers.com/getting-started-with-esp32-cam/">LastMinuteEngineers' ESP32-CAM article</a> for a guide on that too.</p>
+<p>In order to flash it correctly I had to do the following:</p>
+<ul>
+<li>Use the 5V input from the USB-UART adapter</li>
+<li>Add a jumper cable between the IO0 pin and the adjacent GND pin on the
+ESP32-CAM board to put it in flashing mode.</li>
+<li>Reset the board with the reset button immediately before flashing (and
+starting the flashing process within 2 seconds of the reset).</li>
+</ul>
+<p>The last point is important, otherwise it would just fail to connect
+after some time.</p>
+<h3 id="client-code">Client code</h3>
+<p>The controller client uses the <a href="https://crates.io/crates/gilrs">gilrs crate</a> to detect a USB-gamepad,
+and then connects to the rover via its fixed hostname: <code>wifitank</code>, and
+sends the commands from the D-pad as UDP datagrams.</p>
+<p>We set the active gamepad by waiting for the user to press a button:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+</span><span>    </span><span style="color:#b48ead;">use </span><span>gilrs::{Button, Event, Gilrs};
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> gilrs = Gilrs::new().</span><span style="color:#96b5b4;">unwrap</span><span>();
+</span><span>    </span><span style="color:#b48ead;">let mut</span><span> active_gamepad = None;
+</span><span>
+</span><span>    println!(&quot;</span><span style="color:#a3be8c;">Push button on gamepad!</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">while</span><span> active_gamepad.</span><span style="color:#96b5b4;">is_none</span><span>() {
+</span><span>        </span><span style="color:#65737e;">// Examine new events
+</span><span>        </span><span style="color:#b48ead;">while let </span><span>Some(Event {
+</span><span>            id, event, time, ..
+</span><span>        }) = gilrs.</span><span style="color:#96b5b4;">next_event</span><span>()
+</span><span>        {
+</span><span>            println!(&quot;</span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> New event from </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">: </span><span style="color:#d08770;">{:?}</span><span>&quot;, time, id, event);
+</span><span>            active_gamepad = Some(id);
+</span><span>        }
+</span><span>    }
+</span></code></pre>
+<p>Then we get the IP address for the wifitank:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#b48ead;">const </span><span style="color:#d08770;">TARGET_HOSTNAME</span><span>: &amp;</span><span style="color:#b48ead;">str </span><span>= &quot;</span><span style="color:#a3be8c;">wifitank:8080</span><span>&quot;;
+</span><span>
+</span><span>#[</span><span style="color:#bf616a;">tokio</span><span>::</span><span style="color:#bf616a;">main</span><span>]
+</span><span>async </span><span style="color:#b48ead;">fn </span><span style="color:#8fa1b3;">main</span><span>() -&gt; Result&lt;(), Box&lt;dyn Error&gt;&gt; {
+</span><span>    ...
+</span><span>    </span><span style="color:#b48ead;">let</span><span> addr = env::args()
+</span><span>        .</span><span style="color:#96b5b4;">nth</span><span>(</span><span style="color:#d08770;">1</span><span>)
+</span><span>        .</span><span style="color:#96b5b4;">unwrap_or_else</span><span>(|| &quot;</span><span style="color:#a3be8c;">0.0.0.0:8080</span><span>&quot;.</span><span style="color:#96b5b4;">to_string</span><span>());
+</span><span>    </span><span style="color:#b48ead;">let</span><span> socket = UdpSocket::bind(&amp;addr).await?;
+</span><span>    </span><span style="color:#b48ead;">let</span><span> peer = </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#b48ead;">if let </span><span>Ok(p) = tokio::net::lookup_host(</span><span style="color:#d08770;">TARGET_HOSTNAME</span><span>).await {
+</span><span>            </span><span style="color:#b48ead;">if let </span><span>Some(pi) = p.</span><span style="color:#96b5b4;">into_iter</span><span>().</span><span style="color:#96b5b4;">next</span><span>() {
+</span><span>                </span><span style="color:#b48ead;">break</span><span> pi;
+</span><span>            }
+</span><span>        }
+</span><span>        tokio::time::sleep(tokio::time::Duration::from_millis(</span><span style="color:#d08770;">500</span><span>)).await;
+</span><span>    };
+</span></code></pre>
+<p>Then we loop and check for gamepad input events, and send them to the
+rover:</p>
+<pre data-lang="rust" style="background-color:#2b303b;color:#c0c5ce;" class="language-rust "><code class="language-rust" data-lang="rust"><span>    ...
+</span><span>    </span><span style="color:#b48ead;">loop </span><span>{
+</span><span>        </span><span style="color:#b48ead;">while let </span><span>Some(Event {
+</span><span>            id, event, time, ..
+</span><span>        }) = gilrs.</span><span style="color:#96b5b4;">next_event</span><span>()
+</span><span>        {
+</span><span>            println!(&quot;</span><span style="color:#d08770;">{:?}</span><span style="color:#a3be8c;"> New event from </span><span style="color:#d08770;">{}</span><span style="color:#a3be8c;">: </span><span style="color:#d08770;">{:?}</span><span>&quot;, time, id, event);
+</span><span>        }
+</span><span>        {
+</span><span>            </span><span style="color:#b48ead;">let</span><span> gamepad = gilrs.</span><span style="color:#96b5b4;">gamepad</span><span>(active_gamepad.</span><span style="color:#96b5b4;">expect</span><span>(&quot;</span><span style="color:#a3be8c;">Gamepad not found!</span><span>&quot;));
+</span><span>            </span><span style="color:#b48ead;">if</span><span> gamepad.</span><span style="color:#96b5b4;">is_pressed</span><span>(Button::DPadUp) {
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">F</span><span>&quot;, &amp;peer).await?;
+</span><span>            } </span><span style="color:#b48ead;">else if</span><span> gamepad.</span><span style="color:#96b5b4;">is_pressed</span><span>(Button::DPadDown) {
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">B</span><span>&quot;, &amp;peer).await?;
+</span><span>            } </span><span style="color:#b48ead;">else if</span><span> gamepad.</span><span style="color:#96b5b4;">is_pressed</span><span>(Button::DPadLeft) {
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">L</span><span>&quot;, &amp;peer).await?;
+</span><span>            } </span><span style="color:#b48ead;">else if</span><span> gamepad.</span><span style="color:#96b5b4;">is_pressed</span><span>(Button::DPadRight) {
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">R</span><span>&quot;, &amp;peer).await?;
+</span><span>            } </span><span style="color:#b48ead;">else if</span><span> gamepad.</span><span style="color:#96b5b4;">is_pressed</span><span>(Button::Select) {
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">Q</span><span>&quot;, &amp;peer).await?;
+</span><span>                </span><span style="color:#b48ead;">break</span><span>;
+</span><span>            } </span><span style="color:#b48ead;">else </span><span>{
+</span><span>                socket.</span><span style="color:#96b5b4;">send_to</span><span>(</span><span style="color:#b48ead;">b</span><span>&quot;</span><span style="color:#a3be8c;">N</span><span>&quot;, &amp;peer).await?;
+</span><span>            }
+</span><span>        }
+</span><span>
+</span><span>        tokio::time::sleep(tokio::time::Duration::from_millis(</span><span style="color:#d08770;">50</span><span>)).await;
+</span><span>    }
+</span></code></pre>
+<p>Despite the 50ms sleeping, this feels very responsive when in use.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>With all of the above, I was able to connect the rover to the Steam Deck
+and drive it around the apartment from another room using just the
+camera.</p>
+<p>In terms of development, the biggest issues were getting esp-wifi to
+connect correctly from the control board (the AP had to be 2.4GHz and WPA2),
+and working out how to flash the ESP32-CAM module (it had to be set in
+flashing mode and immediately reset before flashing).</p>
+<p>The biggest issue in usage however, is the latency spikes in the video
+stream. I'm not sure what the best solution is here (perhaps a stream of
+JPEGs just isn't practical for low latency despite the simplicity), or
+maybe the external antenna is necessary to avoid connection issues as it moves
+around the apartment.</p>
+<p>Fixing that and provisioning the Wifi credentials via BLE would be the
+main things to improve soon.</p>
+<h3 id="possible-improvements">Possible improvements</h3>
+<p>There's a number of improvements left to make in this project:</p>
+<ul>
+<li>Support ESP BLE Provisioning for setting the Wifi credentials via BLE for both
+boards.</li>
+<li>Create a nostd version of the esp32cam crate.</li>
+<li>Motor speed control (use ENA and ENB pins with PWM).</li>
+<li>Test external antenna for ESP32-CAM.</li>
+<li>Test higher input voltage to the motors.</li>
+<li>Add ultrasonic sensors for collision prevention / maze solving.</li>
+<li>Use a development board with 5V out so the motor driver logic can be
+powered from the board.</li>
+<li>Add a voltage regulator and buck converter so the battery pack could
+power the development board too, so the heavy power bank would not be
+needed.</li>
+</ul>
+<h3 id="future-projects">Future projects</h3>
+<p>I'd also like to try some of these more complicated projects in the
+future:</p>
+<ul>
+<li>Car with separate steering and drive wheels - like an RC car, so it
+can turn while moving.</li>
+<li>Rover with independent steering on all 4 wheels - see <a href="https://www.youtube.com/watch?v=IoCaTgmUSvc">Lukas Deem's rover project</a></li>
+<li>ESP-NOW controller - build a controller and communicate with <a href="https://www.espressif.com/en/solutions/low-power-solutions/esp-now">ESP-NOW</a>
+instead of Wifi.</li>
+<li>RC controller - build a controller to communicate via radio, although
+the Hexapod project below had a lot of issues with this.</li>
+<li>Hexapod - see <a href="https://www.youtube.com/watch?v=TNHBwUZyafo">Tazer's Hexapod project</a></li>
+<li>Robot arm - there are a lot of examples of 6 Degrees of Freedom
+robot arms.</li>
+</ul>
+<h2 id="resources">Resources</h2>
+<ul>
+<li><a href="https://github.com/flyaruu/esp32-nostd">@flyaruu's esp32-nostd crate</a> - the best reference for nostd esp_wifi usage.</li>
+<li><a href="https://www.youtube.com/watch?v=o8yNNVFzNnM&amp;list=PL0U7YUX2VnBFbwTi96wUB1nZzPVN3HzgS">Floodplain's Rust on ESP32 no_std YouTube series</a></li>
+<li><a href="https://dev.to/theembeddedrustacean/embassy-on-esp-gpio-5594">Embassy on ESP blog series</a></li>
+<li><a href="https://blog.theembeddedrustacean.com/esp32-embedded-rust-at-the-hal-gpio-interrupts">ESP32 Embedded Rust at the HAL blog series</a></li>
+<li><a href="https://lastminuteengineers.com/l298n-dc-stepper-driver-arduino-tutorial/">LastMinuteEngineers' in-depth L298N motor driver tutorial</a></li>
+<li><a href="https://murraytodd.medium.com/rust-networking-with-the-raspberry-pi-pico-w-002384a5954b">Rust Networking with the Raspberry Pi Pico</a></li>
+<li><a href="https://murraytodd.medium.com/client-server-comms-on-the-raspberry-pi-pico-w-b0767ecfb4dc">Rust Client/Server Comms on the Raspberry Pi Pico</a></li>
+<li><a href="https://dev.to/theembeddedrustacean/iot-with-rust-on-esp-connecting-wifi-4be6">IoT with Rust on ESP</a></li>
+<li><a href="https://medium.com/@rajeshpachaikani/connect-esp32-to-wifi-with-rust-7d12532f539b">Connect ESP32 to Wifi with Rust</a></li>
+<li><a href="https://lastminuteengineers.com/getting-started-with-esp32-cam/">LastMinuteEngineers' Getting Started with ESP32 CAM</a></li>
+<li><a href="https://www.youtube.com/@joethieman9400">Joe Thieman's robotics channel</a></li>
+</ul>
+
+</article>
+<hr class="end-post">
+<nav class="pagination">
+    
+    <a class="top" href="#top">Back to top</a>
+    
+    <a class="next" href="https://jamesmcm.github.io/blog/beginner-rust-esp32-lcdsnake/">Older Post ›</a>
+    
+</nav>
+</div>
+
+</div>
+
+
+<footer role="contentinfo">
+
+<p>
+Copyright © 2024 - James McMurray -
+  <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
+</p>
+
+</footer>
+</body>
+
+</html>

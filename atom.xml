@@ -5,8 +5,31 @@
     <link rel="self" type="application/atom+xml" href="https://jamesmcm.github.io/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://jamesmcm.github.io"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2024-11-02T00:00:00+00:00</updated>
+    <updated>2024-11-17T00:00:00+00:00</updated>
     <id>https://jamesmcm.github.io/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Building a Wifi-controlled car with Rust and ESP32</title>
+        <published>2024-11-17T00:00:00+00:00</published>
+        <updated>2024-11-17T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              James McMurray
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/esp32-wifi-tank/"/>
+        <id>https://jamesmcm.github.io/blog/esp32-wifi-tank/</id>
+        
+        <summary type="html">&lt;p&gt;In this post we will create a basic Wifi-controlled car with an ESP32
+development board and ESP32-CAM camera module, and all of the code
+written in Rust.&lt;&#x2F;p&gt;
+&lt;p&gt;All of the code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;esp32_wifi_tank&quot;&gt;esp32_wifi_tank repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
     <entry xml:lang="en">
         <title>Beginner Rust ESP32 development - Snake</title>
         <published>2024-11-02T00:00:00+00:00</published>
