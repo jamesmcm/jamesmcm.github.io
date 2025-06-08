@@ -5,8 +5,7 @@ date = 2020-07-25
 categories = ["Rust"]
 +++
 
-In the post we will investigate the main concepts of [Data-oriented
-Design](https://en.wikipedia.org/wiki/Data-oriented_design) using Rust.
+In the post we will investigate the main concepts of [Data-oriented Design](https://en.wikipedia.org/wiki/Data-oriented_design) using Rust.
 
 The source code for this example is [available on Github](https://github.com/jamesmcm/data-oriented-example).
 
