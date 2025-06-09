@@ -7,19 +7,21 @@ categories = ["AI"]
 
 In this post we will use agentic AI (with Cursor and Claude 4 Sonnet) with two MCP servers to complete an old Data Engineering take-home assignment.
 
+The Docker environment and notebook used is available in my [dataeng_assessment_mcp repo](https://github.com/jamesmcm/dataeng_assessment_mcp).
+
 <!-- more -->
 
 Opinions expressed are solely my own and do not express the views or opinions of my employer.
 
 ## Background
 
-While migrating some stuff to my Steam Deck to use while travelling, I came across an old Data Engineering assessment I'd originally written for use at a startup many years ago. It is not longer used, as we phased it out for more standardised Leetcode-style assessments while I was there.
+While migrating some stuff to my Steam Deck to use while travelling, I came across an old and deprecated Data Engineering assessment I'd originally written for use at a startup many years ago. It is not longer used, as we phased it out for more standardised Leetcode-style assessments while I was there.
 
 But it contains a Docker setup for a Jupyter notebook and postgres database - with some questions being aimed purely at Python, some purely SQL (using psycopg2 to run queries from within the notebook), and some a mix of both.
 
-Having recently been investigating different use-cases for MCP servers, this made me wonder - could I use agentic AI (e.g. with Cursor or Claude Code)
+Having recently been investigating different use-cases for MCP servers, this made me wonder - could I use agentic AI (e.g. with Cursor or Claude Code) to solve the assessment? Ideally watching the agent complete it in real-time.
 
-The assessment used docker-compose to launch a postgres image, and a customised python-alpine image to add psycopg2 and jupyter.
+The assessment used docker-compose to launch a postgres image filled with test data, and a customised python-alpine image to add psycopg2 and jupyter.
 
 ## MCP Servers
 
@@ -70,7 +72,7 @@ And just like that the Cursor Chat could query the database (the assessment Dock
 
 Datalayer's [jupyter-mcp-server](https://github.com/datalayer/jupyter-mcp-server) is an MCP server for interacting with collaborative Jupyter notebooks in real-time (changes are reflected on the open notebook immediately) with the magic of jupyter-collaboration, Yjs and pycrdt.
 
-However, at the time of writing the only tools provided were to add and execute new cells, not to read, modify, and execute existing ones.
+However, at the time of writing the only tools provided were to add and execute new cells, not to read, modify, and execute existing ones. (Note I since discovered there was already a fork called [jupyter-mcp-extended](https://github.com/itisaevalex/jupyter-mcp-extended) with extra endpoints!)
 
 Fortunately, it wasn't too complicated to add the new ones we need, and I created [PR #22 with the changes](https://github.com/datalayer/jupyter-mcp-server/pull/22):
 
@@ -165,15 +167,15 @@ async def read_cell(cell_index: int) -> dict[str, Union[str, int, list[str]]]:
 
 ### Debugging issues
 
-But initially I hit a lot of issues in being able to debug the MCP server quickly, and also an issue around the installation requirements of jupyter-mcp-server.
+Initially I hit a lot of issues in being able to debug the MCP server quickly, and also an issue around the installation requirements of jupyter-mcp-server.
 
 #### Debugging the MCP server
 
-The best solution I found for debugging MCP requests was [MCP Inspector](https://github.com/modelcontextprotocol/inspector) - although it's not perfect since you only see the server's stderr output in the log, and it's crammed in to a small box on the side. But the ability to quickly restart the server and list tools, etc. was great.
+The best solution I found for debugging MCP requests was [MCP Inspector](https://github.com/modelcontextprotocol/inspector) - although it's not perfect since you only see the server's stderr output in the log, and it's crammed into a small box on the side. But the ability to quickly restart the server and list tools, etc. was great.
 
 This was executed as follows:
 ```sh
-$ npx @modelcontextprotocol/inspector -e SERVER_URL="http://localhost:80" -e TOKEN="token" -e NOTEBOOK_PATH="python_assessment.ipynb" uv run --project /home/archie/repos/github/jupyter-mcp-server/ python -m jupyter_mcp_server.server
+$ npx @modelcontextprotocol/inspector -e SERVER_URL="http://localhost:8080" -e TOKEN="token" -e NOTEBOOK_PATH="python_assessment.ipynb" uv run --project /home/archie/repos/github/jupyter-mcp-server/ python -m jupyter_mcp_server.server
 ```
 
 #### jupyter-mcp-server's pycrdt version
@@ -205,25 +207,34 @@ alwaysApply: true
 Use only MCP servers, do not search local files or read or write anything to the local disk. All reads and modifications should be made by MCP server requests.
 ```
 
+(Note it seems you can control the search tools etc. in Cursor via [Custom Modes](https://docs.cursor.com/chat/custom-modes) now!)
+
 I then used the following prompt:
 
-> Go through each of the cells in the python_assessment.ipynb notebook and compete each problem (Q1...) in each section  - use overwrite_cell_source to put your Python solutions following the "### YOUR CODE HERE" comment in each answer cell, and your Postgres queries following the "-- YOUR QUERY HERE" in each answer cell.
-> You can execute SQL queries with the execute_sql call, and you can execute the code cells with execute_cell, you can set their source with overwrite_cell_source and read their source and existing output with read_cell. Only modify the answer cells (the code ones) do not modify the question cells.
-> Call any of the MCP tools available and run your queries first to check they work as expected.
-> Try to put only the code/query required into the answer box and the final answer (e.g. expected output) - but stick to what is asked for.
-> Check your Python answers by using execute_cell - you can re-modify the cell with overwrite_cell_source and execute_cell repeatedly to iterate until the output looks good. Likewise, check your SQL answers with execute_sql.
-> Add some reasoning / working to the solutions as comments.
-> Only use MCP calls, do not access the local disk whatsoever.
+> Go through each of the cells in the python_assessment.ipynb notebook and compete each problem (Q1...) in each section  - use overwrite_cell_source to put your Python solutions following the "### YOUR CODE HERE" comment in each answer cell, and your Postgres queries following the "-- YOUR QUERY HERE" in each answer cell.  
+> You can execute SQL queries with the execute_sql call, and you can execute the code cells with execute_cell, you can set their source with overwrite_cell_source and read their source and existing output with read_cell. Only modify the answer cells (the code ones) do not modify the question cells.  
+> Call any of the MCP tools available and run your queries first to check they work as expected.  
+> Try to put only the code/query required into the answer box and the final answer (e.g. expected output) - but stick to what is asked for.  
+> Check your Python answers by using execute_cell - you can re-modify the cell with overwrite_cell_source and execute_cell repeatedly to iterate until the output looks good. Likewise, check your SQL answers with execute_sql.  
+> Add some reasoning / working to the solutions as comments.  
+> Only use MCP calls, do not access the local disk whatsoever.  
 
-Watching it complete each problem and fill in each answer cell was mind-blowing, this would have been magic less than 5 years ago.
+Watching it complete each problem and fill in each answer cell was mind-blowing, this would have been magic less than 5 years ago:
+
+Starting the claude-sonnet-4 agent via the chat in Cursor:
+![Starting the Cursor chat](./cursor_log_start.png)
+
+A Jupyter notebook cell completed and executed by the agent (note the changes were visible in real-time, cell-by-cell with each MCP call) - it has modified the answer code cell to insert its query after the `-- YOUR QUERY HERE` comment as requested:
+![Cursor/Claude filling in a code cell](./cursor_filled_cell_example.png)
 
 ## Evaluation
 
-In the main run, with the ability to execute the cells it had modified (i.e. to re-evaluate its own answers), Claude got all but one of the twelve questions correct.
+In the main run, with the ability to execute the cells it had modified (i.e. to re-evaluate its own answers), Claude got all but one of the twelve questions correct - 92% gets an A\* in my book!
 
 Interestingly when I did a test run before I had the ability to execute the cells working properly, it got another two wrong. So there is a big benefit to letting the agent review and reconsider its own responses.
 
-Claude's solutions are available at [TODO](TODO).
+The Docker environment and notebook used is available at [jamesmcm/dataeng_assessment_mcp](https://github.com/jamesmcm/dataeng_assessment_mcp).
+Claude's solutions are also available at [TODO](TODO). TODO - notebookviewer
 
 ### What it got wrong
 
@@ -313,7 +324,77 @@ NOMAD_CPC_BCN_20191121(BCN), BCN, 20191121
 
 As is, that cell got the correct answer by luck. The issue is the naive approach of just checking `in` the string for each city - that should be solved with a regex as it would fail on the case "NOMAD_CPC_BCN_20191121(BCN)" if it happened to check `MAD` before `BCN`.
 
-TODO: Check when asking to write extra tests and cover edge cases
+Interestingly, when given a more detailed prompt pushing it to add extra tests and re-review its own solution it does get to the correct implementation (after 3 cycles of iteration):
+
+New prompt:
+> Solve Python Q2. ### Q2. Regex: Extract the city code and start date from the campaign names in the python_assessment.ipynb notebook.  
+> Use the MCP server to read the cells with read_all_cells and read_cell, modify the answer cell with overwrite_cell_source (putting your code after ### YOUR CODE HERE) and execute the cell with execute_cell to check your solution.  
+> Only modify the answer cell for that Python Q2 question and no other cells.  
+> Also try to add extra test cases in your answer, and make sure to check edge cases for each of the requirements - the final output of your code cell should be the solution but you can test your own extra test cases before printing it.  
+> Remember you can modify and execute the cell repeatedly, so re-review your own answer and the question after modifying it - consider carefully whether your solution would cover all edge cases and work consistently.  
+
+```python
+def extract_city_and_date(campaign_name, cityset):
+    """
+    Extract city code and start date from campaign name.
+    
+    Args:
+        campaign_name: String containing campaign name
+        cityset: Set of valid city codes
+    
+    Returns:
+        tuple: (campaign_name, city_code, start_date) or (campaign_name, None, None) if not found
+    """
+    
+    # Find all valid city codes in the campaign name
+    # Use negative lookbehind/lookahead to ensure city codes are not part of larger words
+    found_cities = []
+    for city in cityset:
+        pattern = r'(?<![A-Z])' + re.escape(city) + r'(?![A-Z])'
+        matches = list(re.finditer(pattern, campaign_name))
+        for match in matches:
+            found_cities.append((city, match.start()))
+    
+    # If no city found, return None
+    if not found_cities:
+        return (campaign_name, None, None)
+    
+    # If multiple cities found, use the first one that appears
+    found_cities.sort(key=lambda x: x[1])
+    city_code = found_cities[0][0]
+    
+    # Find date pattern YYYYMMDD (2017-2030)
+    date_pattern = r'(20[1-3][0-9][0-1][0-9][0-3][0-9])'
+    date_matches = re.findall(date_pattern, campaign_name)
+    
+    if not date_matches:
+        return (campaign_name, city_code, None)
+    
+    # Validate date format
+    valid_dates = []
+    for date_str in date_matches:
+        year = int(date_str[:4])
+        month = int(date_str[4:6])
+        day = int(date_str[6:8])
+        
+        # Check if it's a valid date
+        if (2017 <= year <= 2030 and 
+            1 <= month <= 12 and 
+            1 <= day <= 31):
+            valid_dates.append(date_str)
+    
+    if not valid_dates:
+        return (campaign_name, city_code, None)
+    
+    # Return the first valid date found
+    start_date = valid_dates[0]
+    
+    return (campaign_name, city_code, start_date)
+```
+
+Although note even here the date regex `(20[1-3][0-9][0-1][0-9][0-3][0-9])` could validate non-date numbers as dates even though they are invalid e.g. the 31st February.
+
+This really shows the value of setting up a tight iterative loop for the LLM to re-analyse and evaluate its own solutions.
 
 ### What it got right - with cell execution
 
@@ -529,14 +610,18 @@ WHERE s.courier_id IN (SELECT DISTINCT courier_id FROM enabling_log)
 
 ## Conclusion
 
-Overall Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about two minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 29 of my 500 monthly Cursor requests - I literally could have done it on the free tier!
+Overall, Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about two minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 28 of my 500 monthly Cursor requests. This would even be possible on the free tier (although I don't think claude-sonnet-4 is available there yet at the moment).
 
-It's worth noting that it wasn't completely necessary to use MCP servers in this assessment case - i.e. you could just provide the entire notebook and a database dump to a model with a large context window like Gemini Pro 2.5 in Google AI Studio. However, a big advantage of the MCP approach is that it can slot seamlessly into existing systems, including ones which humans are also using - there is no need to manually decide the context that the LLM should have, it can manage its own context to some extent through the tools it chooses to use.
+It's worth noting that it wasn't completely necessary to use MCP servers in this assessment case - i.e. you could just provide the entire notebook and a database dump to a model with a large context window like Gemini Pro 2.5 in Google AI Studio. However, a big advantage of the MCP approach is that it can slot seamlessly into existing systems, including ones which humans are also using - there is no need to manually decide the context that the LLM should have, it can manage its own context to some extent through the tools it chooses to use and what it sends to them.
 
 While the results here were great, there is still the need to learn how to best apply LLMs like Claude in practice (especially when the problems aren't so cleanly laid out) - for example, fixing the MCP server so the agent could see the output of its own solutions helped to improve the responses considerably. It might be best to tailor the prompt to the expected context size, e.g. letting the model iterate and test its own responses more if it is not near the context window limit (and split up problems to avoid that too).
 
+There is also no guarantee that the above questions did not end up in the training data for Claude somehow. While in theory they haven't been public, they could definitely be in some private repos, or leaked elsewhere. But seeing the code produced and the iteration that the model makes, I have little doubt that it could generalise to at least these classes of problems.
+
+But note when using Cursor day-to-day at work, I often get far less fantastic results, usually due to the huge amount of semi-relevant context due to code being abstract or having lots of dependencies - which can lead the LLM to get caught on a red herring and not find the root cause of an issue. In these assessment questions, all of that is stripped away and all of the context required is in the concise problem definitions.
+
 Likewise when I was investigating the pycrdt related issues for jupyter-mcp-server, both Claude and Gemini would repeatedly go down rabbit holes e.g. around async I/O or the use of Yjs types (understandably given they couldn't see the full context of the entire jupyter-mcp-server Github repo, and all of the upstream dependencies like pycrdt, jupyter-server-ydoc, jupyter-nbmodel-client, jupyter-kernel-client, etc.). In the end I had to take a step back, and go carefully through the installation and environment set up process again - where I noticed the discrepancy.
 
-But it is clear that agentic AI will revolutionise the future of computing. Even just as a very advanced form of rubber-duck debugging - an agent with read-only access to relevant databases, documentation search, project / code search, etc. would be a huge asset - especially if it could execute and iterate on its proposed solutions - perhaps even requesting test cases and reviews from other LLMs!
+Another interesting area of investigation would be trying smaller models, but letting them call a larger model sparingly via MCP to verify some of their responses if they are less certain. Note above how having the ability to execute answer cells and check the result, and being instructed to write and check test cases, both improved the results significantly for the same model (albeit with more iteration). But running a smaller model for more tokens so that it can iterate on its results and perhaps occasionally request verification from a larger model might still be a lot more cost-effective than just using a larger model all the time.
 
-I hope to set up something like this for PagerDuty, GCP logs, BigQuery, and Github Enterprise code search - that could be used to provide some debugging for incidents as they occur.
+Overall it is clear that agentic AI will revolutionise the future of computing. Even just as a very advanced form of rubber-duck debugging - an agent with read-only access to relevant databases, documentation search, project / code search, etc. would be a huge asset - especially if it could execute and iterate on its proposed solutions - perhaps even requesting test cases and reviews from other LLMs!
