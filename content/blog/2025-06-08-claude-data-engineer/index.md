@@ -1,11 +1,11 @@
 +++
-title = "Would you hire Claude as a Data Engineer?"
-date = 2025-06-08
+title = "I made an AI Agent take an old Data Engineering test - it scored 92%!"
+date = 2025-06-12
 [taxonomies]
 categories = ["AI"]
 +++
 
-In this post we will use agentic AI (with Cursor and Claude 4 Sonnet) with two MCP servers to complete an old Data Engineering take-home assignment.
+In this post we will use agentic AI (with Cursor and Claude 4 Sonnet) with two MCP servers to complete an old Data Engineering take-home assignment. It's time to put Claude to the test!
 
 The Docker environment and notebook used is available in my [dataeng_assessment_mcp repo](https://github.com/jamesmcm/dataeng_assessment_mcp).
 
@@ -15,17 +15,23 @@ Opinions expressed are solely my own and do not express the views or opinions of
 
 ## Background
 
-While migrating some stuff to my Steam Deck to use while travelling, I came across an old and deprecated Data Engineering assessment I'd originally written for use at a startup many years ago. It is not longer used, as we phased it out for more standardised Leetcode-style assessments while I was there.
+While migrating some stuff to my Steam Deck to use while travelling (Nix works great on the Steam Deck btw!), I came across an old and deprecated Data Engineering assessment I'd originally written for use at a startup many years ago. It is no longer used, as we phased it out for more standardised Leetcode-style assessments while I was there. With all of the recent excitement around AI agents and MCP servers, this seemed like the perfect test case.
 
-But it contains a Docker setup for a Jupyter notebook and postgres database - with some questions being aimed purely at Python, some purely SQL (using psycopg2 to run queries from within the notebook), and some a mix of both.
-
-Having recently been investigating different use-cases for MCP servers, this made me wonder - could I use agentic AI (e.g. with Cursor or Claude Code) to solve the assessment? Ideally watching the agent complete it in real-time.
+It contains a Docker setup for a Jupyter notebook and postgres database - with some questions being aimed purely at Python, some purely SQL (using psycopg2 to run queries from within the notebook), and some a mix of both.
 
 The assessment used docker-compose to launch a postgres image filled with test data, and a customised python-alpine image to add psycopg2 and jupyter.
 
+With MCP servers readily available for both this seemed like a straightforward endeavour: Will Claude be able to solve the assignment successfully? Would you hire Claude as a Data Engineer?
+
 ## MCP Servers
 
-[Model Context Protocol (MCP) servers](https://modelcontextprotocol.io/introduction) allow an LLM agent to make requests to the server e.g. to call a tool or access a resource. In our case we will use two servers, providing several tools to our agent.
+Tool usage allows Large Language Models (LLMs) to interact with the environment and modify it. Essentially the LLM is expected to output a special token when it wants to use a tool, along with the arguments to that tool. The client running the LLM will then pause LLM inference, run the tool, and insert the output into the context of the LLM. When the LLM resumes inference it now has access to the output of the tool it requested.
+
+[Model Context Protocol (MCP) servers](https://modelcontextprotocol.io/introduction) support tool usage by providing a common API for LLMs to list available tools, so the LLM itself can choose which one it wants to use. This means the LLM can just be trained on working with the MCP API and some example tools, but can then use any tool which implements an MCP server following the protocol (this was inspired by the success of the [Language Server Protocol](https://en.wikipedia.org/wiki/Language_Server_Protocol) - also in implementation: it is also JSON-RPC based).
+
+This is an exciting development in the practical application of LLMs - where hitherto existing LLMs could only observe the enviroment from their prompts, LLMs with tool usage can actually change it.
+
+In our case we will use two MCP servers, providing several tools to our agent.
 
 We need at least the following tools:
 
@@ -37,6 +43,10 @@ We need at least the following tools:
 - Tool to read the value of a cell
 - Tool to modify the value of a cell
 - Tool to execute a cell and view the result
+
+Here is an overview of the architecture - note that the MCP servers are both launched by Cursor:
+
+![Architecture Overview](./architecture.png)
 
 ### Postgres MCP Pro
 
@@ -219,13 +229,31 @@ I then used the following prompt:
 > Add some reasoning / working to the solutions as comments.  
 > Only use MCP calls, do not access the local disk whatsoever.  
 
-Watching it complete each problem and fill in each answer cell was mind-blowing, this would have been magic less than 5 years ago:
+Watching it complete each problem and fill in each answer cell was mind-blowing, this would have been magic less than 5 years ago. The whole assessment which would take a skilled human about 2 hours, was completed in under 3 minutes!
 
-Starting the claude-sonnet-4 agent via the chat in Cursor:
+<!--
+ Starting the claude-sonnet-4 agent via the chat in Cursor:
 ![Starting the Cursor chat](./cursor_log_start.png)
 
 A Jupyter notebook cell completed and executed by the agent (note the changes were visible in real-time, cell-by-cell with each MCP call) - it has modified the answer code cell to insert its query after the `-- YOUR QUERY HERE` comment as requested:
 ![Cursor/Claude filling in a code cell](./cursor_filled_cell_example.png)
+-->
+
+### Video example
+
+This video shows the agent being asked to solve Question 2 of the SQL section.
+
+Note it takes longer here than per question for the whole assessment since it has to find the question first and initialise the psycopg2 cursor in the notebook (both of which are only done once for the full assignment).
+
+<br>
+<video controls>
+  <source src="sqlq2.mp4" width="100%" height="100%" type="video/mp4">
+Your browser does not support the video tag.
+</video> 
+<br>
+<br>
+
+The agent's reasoning and solution is correct.
 
 ## Evaluation
 
@@ -234,7 +262,7 @@ In the main run, with the ability to execute the cells it had modified (i.e. to 
 Interestingly when I did a test run before I had the ability to execute the cells working properly, it got another two wrong. So there is a big benefit to letting the agent review and reconsider its own responses.
 
 The Docker environment and notebook used is available at [jamesmcm/dataeng_assessment_mcp](https://github.com/jamesmcm/dataeng_assessment_mcp).
-Claude's solutions are also available at [TODO](TODO). TODO - notebookviewer
+Claude's solutions are also available [in this notebook](https://nbviewer.org/github/jamesmcm/dataeng_assessment_mcp/blob/master/notebooks/python_assessment_cursor_agent_final.ipynb).
 
 ### What it got wrong
 
@@ -398,7 +426,7 @@ This really shows the value of setting up a tight iterative loop for the LLM to 
 
 ### What it got right - with cell execution
 
-There were two questions it got wrong when it was unable to execute the cells and review its own code (as well as some syntax errors on indexing the results from psycopg2).
+There were two questions it got wrong when it was unable to execute the cells and review its own code (as well as some syntax errors on indexing the results from psycopg2). It's impressive that it still got the majority correct without being able to check its own answer in the context of the notebook.
 
 #### Q1. Courier arrivals
 
@@ -610,7 +638,7 @@ WHERE s.courier_id IN (SELECT DISTINCT courier_id FROM enabling_log)
 
 ## Conclusion
 
-Overall, Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about two minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 28 of my 500 monthly Cursor requests. This would even be possible on the free tier (although I don't think claude-sonnet-4 is available there yet at the moment).
+Overall, Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about three minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 28 of my 500 monthly Cursor requests. This would even be possible on the free tier (although I don't think claude-sonnet-4 is available there yet at the moment).
 
 It's worth noting that it wasn't completely necessary to use MCP servers in this assessment case - i.e. you could just provide the entire notebook and a database dump to a model with a large context window like Gemini Pro 2.5 in Google AI Studio. However, a big advantage of the MCP approach is that it can slot seamlessly into existing systems, including ones which humans are also using - there is no need to manually decide the context that the LLM should have, it can manage its own context to some extent through the tools it chooses to use and what it sends to them.
 
@@ -622,6 +650,20 @@ But note when using Cursor day-to-day at work, I often get far less fantastic re
 
 Likewise when I was investigating the pycrdt related issues for jupyter-mcp-server, both Claude and Gemini would repeatedly go down rabbit holes e.g. around async I/O or the use of Yjs types (understandably given they couldn't see the full context of the entire jupyter-mcp-server Github repo, and all of the upstream dependencies like pycrdt, jupyter-server-ydoc, jupyter-nbmodel-client, jupyter-kernel-client, etc.). In the end I had to take a step back, and go carefully through the installation and environment set up process again - where I noticed the discrepancy.
 
+This issue of keeping a clean and relevant context definitely feels like the biggest challenge when using AI agents in practice, alongside practical issues of tool usage - it's hard to let the model iterate a lot if the codebase takes 20 minutes to compile for example.
+
 Another interesting area of investigation would be trying smaller models, but letting them call a larger model sparingly via MCP to verify some of their responses if they are less certain. Note above how having the ability to execute answer cells and check the result, and being instructed to write and check test cases, both improved the results significantly for the same model (albeit with more iteration). But running a smaller model for more tokens so that it can iterate on its results and perhaps occasionally request verification from a larger model might still be a lot more cost-effective than just using a larger model all the time.
 
 Overall it is clear that agentic AI will revolutionise the future of computing. Even just as a very advanced form of rubber-duck debugging - an agent with read-only access to relevant databases, documentation search, project / code search, etc. would be a huge asset - especially if it could execute and iterate on its proposed solutions - perhaps even requesting test cases and reviews from other LLMs!
+
+### Would you hire Claude?
+
+So, would I hire Claude? Well it can definitely fill the role of support on the implementation of simpler tasks to help provide more capacity. But overall, I think we shouldn't look at it as a matter of replacement, but rather enhancement - [like an exoskeleton](https://matthewsinclair.com/blog/0178-why-llm-powered-programming-is-more-mech-suit-than-artificial-human). At least for now, a human with domain knowledge is very much required to keep AI agents on track, and prevent them getting stuck going down rabbit holes or producing over-engineered and unmaintainable solutions.
+
+But the productivity boost for engineers alone is profound. In the real world it's unlikely to be as remarkable as in this test case, but 2 hours to 3 minutes is a whole order of magnitude, and the cost and speed of such agents will only improve in the future.
+
+As productivity improves, more projects become viable where they may not have been in the past. The barrier to entry is lowered dramatically as more people can create prototypes without needing to learn to code, and can use generative AI to produce high-quality videos and music where needed. This all allows more experimentation and innovation, and as AI becomes cheaper and more powerful, the usage of AI will increase dramatically.
+
+But there is no reason to worry ([even if you are nuts](https://fly.io/blog/youre-all-nuts/)) - the [lump of labour fallacy](https://en.wikipedia.org/wiki/Lump_of_labour_fallacy) has proven fallacious with every advancement in labour-saving technology. Just as the [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox) suggests, as labour becomes more efficient, the demand for labour actually increases as more projects and startups are viable.
+
+The nature of our work will change, but there will be more interesting work than ever, as the boilerplate wrangling of the past is left to LLMs.

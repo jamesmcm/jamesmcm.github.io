@@ -128,7 +128,7 @@ We carry out these updates alternately until the log-likelihood converges.
 
 Slide the slider to change the iteration number (shown in the title).
 
-The full code is available in [an IPython notebook here](http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM1Dfinal.ipynb).
+The full code is available in [an IPython notebook here](https://nbviewer.org/github/jamesmcm/jamesmcm.github.io/blob/master/notebooks/EM1Dfinal.ipynb).
 
 ## Extension
 This example  can also be extended to larger numbers of dimensions (though using a Gaussian Mixture Model directly in a high dimensional space is unadvisable), and to any number of Gaussians. In this case the variances become covariance matrices and linear algebra is necessary, but the changes are straightforward.
@@ -139,7 +139,7 @@ Here is an example for a mixture of 4 Gaussians in 2D:
 
 Slide the slider to change the iteration number (shown in the title).
 
-The code is available in an [IPython notebook here](http://nbviewer.ipython.org/github/jamesmcm/jamesmcm.github.io/blob/source/source/notebooks/EM2dGMMfinal.ipynb).
+The code is available in an [IPython notebook here](https://nbviewer.org/github/jamesmcm/jamesmcm.github.io/blob/master/notebooks/EM2dGMMfinal.ipynb).
 
 ## Conclusion
 
