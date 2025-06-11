@@ -15,7 +15,7 @@ Opinions expressed are solely my own and do not express the views or opinions of
 
 ## Background
 
-While migrating some stuff to my Steam Deck to use while travelling (Nix works great on the Steam Deck btw!), I came across an old and deprecated Data Engineering assessment I'd originally written for use at a startup many years ago. It is no longer used, as we phased it out for more standardised Leetcode-style assessments while I was there. With all of the recent excitement around AI agents and MCP servers, this seemed like the perfect test case.
+While migrating some repos and dev tools to my Steam Deck to use while travelling (Nix works great on the Steam Deck btw!), I came across an old, deprecated Data Engineering assessment I'd originally written for use at a startup many years ago. It is no longer used, as we phased it out for more standardised Leetcode-style assessments while I was there. With all of the recent excitement around AI agents and MCP servers, this seemed like the perfect test case.
 
 It contains a Docker setup for a Jupyter notebook and postgres database - with some questions being aimed purely at Python, some purely SQL (using psycopg2 to run queries from within the notebook), and some a mix of both.
 
@@ -25,11 +25,11 @@ With MCP servers readily available for both this seemed like a straightforward e
 
 ## MCP Servers
 
-Tool usage allows Large Language Models (LLMs) to interact with the environment and modify it. Essentially the LLM is expected to output a special token when it wants to use a tool, along with the arguments to that tool. The client running the LLM will then pause LLM inference, run the tool, and insert the output into the context of the LLM. When the LLM resumes inference it now has access to the output of the tool it requested.
+Tool usage allows Large Language Models (LLMs) to interact with the environment and modify it. Essentially the LLM is expected to output a special token when it wants to use a tool, along with the arguments to that tool. The client running the LLM will then pause LLM inference, run the tool, and insert the output into the context of the LLM. When the LLM resumes inference it now has access to the output of the tool it requested. This transforms the LLM from a passive text generator into an active agent that can perceive and act upon a live environment.
 
-[Model Context Protocol (MCP) servers](https://modelcontextprotocol.io/introduction) support tool usage by providing a common API for LLMs to list available tools, so the LLM itself can choose which one it wants to use. This means the LLM can just be trained on working with the MCP API and some example tools, but can then use any tool which implements an MCP server following the protocol (this was inspired by the success of the [Language Server Protocol](https://en.wikipedia.org/wiki/Language_Server_Protocol) - also in implementation: it is also JSON-RPC based).
+[Model Context Protocol (MCP) servers](https://modelcontextprotocol.io/introduction) support tool usage by providing a common API for LLMs to list available tools, so the LLM itself can choose which one it wants to use. This means the LLM can just be fine-tuned on working with the MCP API and some example tools, but can then use any tool which implements an MCP server following the protocol (this was inspired by the success of the [Language Server Protocol](https://en.wikipedia.org/wiki/Language_Server_Protocol) - also in implementation: it is also JSON-RPC based).
 
-This is an exciting development in the practical application of LLMs - where hitherto existing LLMs could only observe the enviroment from their prompts, LLMs with tool usage can actually change it.
+This is an exciting development in the practical application of LLMs - where hitherto existing LLMs could only observe the environment from their prompts, LLMs with tool usage can actually change it.
 
 In our case we will use two MCP servers, providing several tools to our agent.
 
@@ -221,7 +221,7 @@ Use only MCP servers, do not search local files or read or write anything to the
 
 I then used the following prompt:
 
-> Go through each of the cells in the python_assessment.ipynb notebook and compete each problem (Q1...) in each section  - use overwrite_cell_source to put your Python solutions following the "### YOUR CODE HERE" comment in each answer cell, and your Postgres queries following the "-- YOUR QUERY HERE" in each answer cell.  
+> Go through each of the cells in the python_assessment.ipynb notebook and complete each problem (Q1...) in each section  - use overwrite_cell_source to put your Python solutions following the "### YOUR CODE HERE" comment in each answer cell, and your Postgres queries following the "-- YOUR QUERY HERE" in each answer cell.
 > You can execute SQL queries with the execute_sql call, and you can execute the code cells with execute_cell, you can set their source with overwrite_cell_source and read their source and existing output with read_cell. Only modify the answer cells (the code ones) do not modify the question cells.  
 > Call any of the MCP tools available and run your queries first to check they work as expected.  
 > Try to put only the code/query required into the answer box and the final answer (e.g. expected output) - but stick to what is asked for.  
@@ -229,7 +229,9 @@ I then used the following prompt:
 > Add some reasoning / working to the solutions as comments.  
 > Only use MCP calls, do not access the local disk whatsoever.  
 
-Watching it complete each problem and fill in each answer cell was mind-blowing, this would have been magic less than 5 years ago. The whole assessment which would take a skilled human about 2 hours, was completed in under 3 minutes!
+Finally, the big moment had arrived. I hit enter and watched the agent start to "think". It rapidly solved the first few simple questions and continued at a blistering pace.
+
+Watching it complete each problem and fill in each answer cell in real-time was mind-blowing, this would have been magic less than 5 years ago. The whole assessment which would take a skilled human about 2 hours, was completed in under 3 minutes!
 
 <!--
  Starting the claude-sonnet-4 agent via the chat in Cursor:
@@ -257,7 +259,7 @@ The agent's reasoning and solution is correct.
 
 ## Evaluation
 
-In the main run, with the ability to execute the cells it had modified (i.e. to re-evaluate its own answers), Claude got all but one of the twelve questions correct - 92% gets an A\* in my book!
+In the main run, with the ability to execute the cells it had modified (i.e. to re-evaluate its own answers), Claude answered all but one of the twelve questions correctly - 92% gets an A\* in my book!
 
 Interestingly when I did a test run before I had the ability to execute the cells working properly, it got another two wrong. So there is a big benefit to letting the agent review and reconsider its own responses.
 
@@ -350,7 +352,9 @@ INSTA_ACT_20188823_BCN_20191121, BCN, 20191121
 NOMAD_CPC_BCN_20191121(BCN), BCN, 20191121
 ```
 
-As is, that cell got the correct answer by luck. The issue is the naive approach of just checking `in` the string for each city - that should be solved with a regex as it would fail on the case "NOMAD_CPC_BCN_20191121(BCN)" if it happened to check `MAD` before `BCN`.
+As is, that cell got the correct answer by luck: the order of iteration over a set is not guaranteed in Python, and it happened to check `BCN` before `MAD` here. The issue is the naive approach of just checking `in` the string for each city - that should be solved with a regex as it would fail on the case "NOMAD_CPC_BCN_20191121(BCN)" if it happened to check `MAD` before `BCN`.
+
+This does show some weakness of LLMs even with agentic feedback - there's a chance it can write flaky code which might pass its own check, but be unreliable in production. Here this was from iterating over an unordered set, but the same thing could happen for any code with non-deterministic behaviour, and there's no guarantee that a few unit tests will catch it either.
 
 Interestingly, when given a more detailed prompt pushing it to add extra tests and re-review its own solution it does get to the correct implementation (after 3 cycles of iteration):
 
@@ -628,7 +632,7 @@ Correct output:
 
 Here when run without cell execution, Claude took the `LAG()` of the enabled status, which led to an off-by-one error on every single entry leading to an incorrect result.
 
-It's surprising that just the cell execution helped lead to a correct result, as there's nothing obviously wrong with the output of an off-by-one error like that.
+It's surprising that just the cell execution helped lead to a correct result, as there's nothing obviously wrong with the output of an off-by-one error like that. Nevertheless, it's a sobering example which shows that LLMs are perfectly capable of producing something that looks completely reasonable but contains subtle logic errors.
 
 Also note even here the final query is a bit strange, with this redundant condition at the end:
 ```sql
@@ -638,15 +642,17 @@ WHERE s.courier_id IN (SELECT DISTINCT courier_id FROM enabling_log)
 
 ## Conclusion
 
-Overall, Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about three minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 28 of my 500 monthly Cursor requests. This would even be possible on the free tier (although I don't think claude-sonnet-4 is available there yet at the moment).
+Overall, Claude did incredibly well on the assessment questions. Being able to watch it complete all the questions in real-time at an incredible pace (the entire document took about three minutes) was the most mind-blowing outcome. All of this (including a lot of MCP server debugging and some environment set up) took only 28 of my 500 monthly Cursor requests. This would even be possible on the free tier (although I don't think claude-sonnet-4 is available there yet at the moment). At the time of writing, both Cursor and Claude Pro (to use Claude Code instead) cost only $20 per month each.
 
-It's worth noting that it wasn't completely necessary to use MCP servers in this assessment case - i.e. you could just provide the entire notebook and a database dump to a model with a large context window like Gemini Pro 2.5 in Google AI Studio. However, a big advantage of the MCP approach is that it can slot seamlessly into existing systems, including ones which humans are also using - there is no need to manually decide the context that the LLM should have, it can manage its own context to some extent through the tools it chooses to use and what it sends to them.
+It's worth noting that it wasn't completely necessary to use MCP servers in this assessment case - i.e. you could just provide the entire notebook and a database dump to a model with a large context window like Gemini Pro 2.5 in Google AI Studio. However, a big advantage of the MCP approach is that it can slot seamlessly into existing systems, including ones which humans are also using - there is no need to manually decide the context that the LLM should have, it can manage its own context to some extent through the tools it chooses to use and what it sends to them (although the operator must decide which tools to make available). Essentially, tool usage should be used for processes that need to query or modify external state.
 
-While the results here were great, there is still the need to learn how to best apply LLMs like Claude in practice (especially when the problems aren't so cleanly laid out) - for example, fixing the MCP server so the agent could see the output of its own solutions helped to improve the responses considerably. It might be best to tailor the prompt to the expected context size, e.g. letting the model iterate and test its own responses more if it is not near the context window limit (and split up problems to avoid that too).
+While the results here were great, there is still the need to learn how to best apply LLMs like Claude in practice (especially when the problems aren't so cleanly laid out) - for example, fixing the MCP server so the agent could see the output of its own solutions helped to improve the responses considerably. It might be best to tailor the prompt to the expected context size, e.g. letting the agent iterate and test its own responses more if it is not near the context window limit (and split up problems to avoid that too). There is also a need to constrain the MCP tools available or the agent may become confused and call irrelevant tools - all of this must be managed by the operator.
+
+The errors made by the agent are also perfect examples of the risks of relying on AI agents without human validation. In the Regex question it got wrong with full cell execution - it had produced a non-deterministic solution which happened to pass when the agent evaluated it. For the further two errors when it could not execute cells - both solutions and results look plausible to a non-expert, but contain subtle logic errors which meant they were completely incorrect.
 
 There is also no guarantee that the above questions did not end up in the training data for Claude somehow. While in theory they haven't been public, they could definitely be in some private repos, or leaked elsewhere. But seeing the code produced and the iteration that the model makes, I have little doubt that it could generalise to at least these classes of problems.
 
-But note when using Cursor day-to-day at work, I often get far less fantastic results, usually due to the huge amount of semi-relevant context due to code being abstract or having lots of dependencies - which can lead the LLM to get caught on a red herring and not find the root cause of an issue. In these assessment questions, all of that is stripped away and all of the context required is in the concise problem definitions.
+Note when using Cursor day-to-day at work, I often get far less fantastic results, usually due to the huge amount of semi-relevant context due to code being abstract or having lots of dependencies - which can lead the LLM to get caught on a red herring and not find the root cause of an issue. In these assessment questions, all of that is stripped away and all of the context required is in the concise problem definitions.
 
 Likewise when I was investigating the pycrdt related issues for jupyter-mcp-server, both Claude and Gemini would repeatedly go down rabbit holes e.g. around async I/O or the use of Yjs types (understandably given they couldn't see the full context of the entire jupyter-mcp-server Github repo, and all of the upstream dependencies like pycrdt, jupyter-server-ydoc, jupyter-nbmodel-client, jupyter-kernel-client, etc.). In the end I had to take a step back, and go carefully through the installation and environment set up process again - where I noticed the discrepancy.
 
@@ -658,7 +664,7 @@ Overall it is clear that agentic AI will revolutionise the future of computing. 
 
 ### Would you hire Claude?
 
-So, would I hire Claude? Well it can definitely fill the role of support on the implementation of simpler tasks to help provide more capacity. But overall, I think we shouldn't look at it as a matter of replacement, but rather enhancement - [like an exoskeleton](https://matthewsinclair.com/blog/0178-why-llm-powered-programming-is-more-mech-suit-than-artificial-human). At least for now, a human with domain knowledge is very much required to keep AI agents on track, and prevent them getting stuck going down rabbit holes or producing over-engineered and unmaintainable solutions.
+So, would I hire Claude? Well it can definitely fill the role of support on the implementation of simpler tasks to help provide more capacity. But overall, I think we shouldn't look at it as a matter of replacement, but rather enhancement - [like a "mech suit"](https://matthewsinclair.com/blog/0178-why-llm-powered-programming-is-more-mech-suit-than-artificial-human). At least for now, a human with domain knowledge is very much required to keep AI agents on track, and prevent them getting stuck going down rabbit holes or producing over-engineered and unmaintainable solutions.
 
 But the productivity boost for engineers alone is profound. In the real world it's unlikely to be as remarkable as in this test case, but 2 hours to 3 minutes is a whole order of magnitude, and the cost and speed of such agents will only improve in the future.
 
@@ -666,4 +672,6 @@ As productivity improves, more projects become viable where they may not have be
 
 But there is no reason to worry ([even if you are nuts](https://fly.io/blog/youre-all-nuts/)) - the [lump of labour fallacy](https://en.wikipedia.org/wiki/Lump_of_labour_fallacy) has proven fallacious with every advancement in labour-saving technology. Just as the [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox) suggests, as labour becomes more efficient, the demand for labour actually increases as more projects and startups are viable.
 
-The nature of our work will change, but there will be more interesting work than ever, as the boilerplate wrangling of the past is left to LLMs.
+If a 2-hour data engineering task can now be prototyped in 3 minutes, it doesn't mean the data engineer is obsolete. It means we can now tackle ten such problems in a morning. The nature of our work will shift from granular implementations, such as crafting the perfect regex, to defining and constraining problems, validating results, and guiding the powerful but sometimes naive intelligence of our new "mech suit". The boilerplate is gone, yet the more interesting work of architecture and analysis remains.
+
+The real story here isn't "AI can do data engineering tasks" but rather that we're approaching a world where the speed of technical implementation is no longer a constraint on innovation.
