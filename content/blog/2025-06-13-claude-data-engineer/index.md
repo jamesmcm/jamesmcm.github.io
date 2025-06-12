@@ -1,6 +1,6 @@
 +++
 title = "I made an AI Agent take an old Data Engineering test - it scored 92%!"
-date = 2025-06-12
+date = 2025-06-13
 [taxonomies]
 categories = ["AI"]
 +++
@@ -673,5 +673,3 @@ As productivity improves, more projects become viable where they may not have be
 But there is no reason to worry ([even if you are nuts](https://fly.io/blog/youre-all-nuts/)) - the [lump of labour fallacy](https://en.wikipedia.org/wiki/Lump_of_labour_fallacy) has proven fallacious with every advancement in labour-saving technology. Just as the [Jevons paradox](https://en.wikipedia.org/wiki/Jevons_paradox) suggests, as labour becomes more efficient, the demand for labour actually increases as more projects and startups are viable.
 
 If a 2-hour data engineering task can now be prototyped in 3 minutes, it doesn't mean the data engineer is obsolete. It means we can now tackle ten such problems in a morning. The nature of our work will shift from granular implementations, such as crafting the perfect regex, to defining and constraining problems, validating results, and guiding the powerful but sometimes naive intelligence of our new "mech suit". The boilerplate is gone, yet the more interesting work of architecture and analysis remains.
-
-The real story here isn't "AI can do data engineering tasks" but rather that we're approaching a world where the speed of technical implementation is no longer a constraint on innovation.
