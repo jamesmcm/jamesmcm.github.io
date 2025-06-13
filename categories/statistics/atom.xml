@@ -24,8 +24,7 @@
         <id>https://jamesmcm.github.io/blog/em1/</id>
         
         <summary type="html">&lt;p&gt;In this post I will briefly introduce the EM algorithm with two simple examples. The EM algorithm uses an iterative approach to find the Maximum Likelihood estimate for a model with latent variables.&lt;&#x2F;p&gt;
-&lt;p&gt;Note I will not provide a thorough coverage of the mathematics but rather focus on two examples of Gaussian Mixture Models.&lt;&#x2F;p&gt;
-</summary>
+&lt;p&gt;Note I will not provide a thorough coverage of the mathematics but rather focus on two examples of Gaussian Mixture Models.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -45,8 +44,7 @@
         <id>https://jamesmcm.github.io/blog/mendelian/</id>
         
         <summary type="html">&lt;p&gt;Mendelian Randomization is an approach to test for a &lt;strong&gt;causal&lt;&#x2F;strong&gt; effect from &lt;strong&gt;observational&lt;&#x2F;strong&gt; data in the presence of certain &lt;strong&gt;confounding&lt;&#x2F;strong&gt; factors.
-It uses the measured variation of genes (of known function) to &lt;strong&gt;bound&lt;&#x2F;strong&gt; the causal effect of a modifiable exposure (environment) on a phenotype (disease). The fundamental idea is that the genotypes are &lt;strong&gt;randomly assigned&lt;&#x2F;strong&gt; (due to recombination in meiosis under certain assumptions), and this allows them to be used as an &lt;strong&gt;instrumental variable&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
-</summary>
+It uses the measured variation of genes (of known function) to &lt;strong&gt;bound&lt;&#x2F;strong&gt; the causal effect of a modifiable exposure (environment) on a phenotype (disease). The fundamental idea is that the genotypes are &lt;strong&gt;randomly assigned&lt;&#x2F;strong&gt; (due to recombination in meiosis under certain assumptions), and this allows them to be used as an &lt;strong&gt;instrumental variable&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
 </feed>

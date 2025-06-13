@@ -79,6 +79,30 @@
         
           <article>
             <h1 class="post-title">
+              <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;vopono&#x2F;">Retrospective of my first useful Rust project</a>
+            </h1>
+            <span class="post-date">2020-09-05</span>
+            <div class="post__summary">
+                <p>This post is a retrospective of my first "useful" Rust project. <a href="https://github.com/jamesmcm/vopono">vopono</a>
+is a Linux program to launch applications in temporary network
+namespaces (managed by vopono), in order to run specific applications
+through VPN connections, without affecting the rest of your system.</p>
+<p>vopono is <a href="https://github.com/jamesmcm/vopono">available on Github</a> (and in the <a href="https://aur.archlinux.org/packages/vopono/">AUR on Arch Linux</a>) and
+licensed under the GPLv3 license (<a href="https://www.gnu.org/philosophy/pragmatic.html">see reasoning here</a>).</p>
+<p>We'll consider the motivation and background to creating vopono, the
+upsides and downsides of writing it in Rust (and existing issues), and
+some points about starting new side projects in general. I hope this
+helps new Rust programmers starting their own first projects, or for
+other programmers to consider using Rust.</p>
+            </div>
+            <div class="read-more">
+                <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;vopono&#x2F;">Read on →</a>
+            </div>
+          </article>
+	  <hr>
+        
+          <article>
+            <h1 class="post-title">
               <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust-ses&#x2F;">Serverless Data Ingestion with Rust and AWS SES</a>
             </h1>
             <span class="post-date">2020-08-29</span>
@@ -89,7 +113,6 @@ AWS Lambda and AWS SES with Workmail.</p>
 AWS events with one Lambda function, parse received emails
 with the mailparse crate, and send email with SES and the lettre crate.</p>
 <p>The complete code for this example is <a href="https://github.com/jamesmcm/rust_ses_example">available on GitHub here</a>.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;rust-ses&#x2F;">Read on →</a>
@@ -103,10 +126,8 @@ with the mailparse crate, and send email with SES and the lettre crate.</p>
             </h1>
             <span class="post-date">2020-07-25</span>
             <div class="post__summary">
-                <p>In the post we will investigate the main concepts of <a href="https://en.wikipedia.org/wiki/Data-oriented_design">Data-oriented
-Design</a> using Rust.</p>
+                <p>In the post we will investigate the main concepts of <a href="https://en.wikipedia.org/wiki/Data-oriented_design">Data-oriented Design</a> using Rust.</p>
 <p>The source code for this example is <a href="https://github.com/jamesmcm/data-oriented-example">available on Github</a>.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;intro-dod&#x2F;">Read on →</a>
@@ -126,7 +147,6 @@ at beginners to asynchronous programming.</p>
 <p>The source code for this example is <a href="https://github.com/jamesmcm/async-rust-example">available on Github</a>.
 A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch</a> using the async-std runtime is also available (contributed by
 <a href="https://github.com/BartMassey">@BartMassey</a>).</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;a-practical-introduction-to-async-programming-in-rust&#x2F;">Read on →</a>
@@ -142,7 +162,6 @@ A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch
             <div class="post__summary">
                 <p>In this post we will set up a very simple data ingestion process with Rust and AWS Lambda.</p>
 <p>The complete code for this example is <a href="https://github.com/jamesmcm/rust-lambda-test">available on GitHub here</a>.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;data-engineering-with-rust-and-aws-lambda&#x2F;">Read on →</a>
@@ -158,7 +177,6 @@ A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch
             <div class="post__summary">
                 <p>In this post I will briefly introduce the EM algorithm with two simple examples. The EM algorithm uses an iterative approach to find the Maximum Likelihood estimate for a model with latent variables.</p>
 <p>Note I will not provide a thorough coverage of the mathematics but rather focus on two examples of Gaussian Mixture Models.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;em1&#x2F;">Read on →</a>
@@ -174,7 +192,6 @@ A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch
             <div class="post__summary">
                 <p>In this post I list some resources which have helped me to learn Spanish, I hope that they will help you too!</p>
 <p>All of the listed resources are (mostly) free, except News In Slow Spanish (and the Latino version), and clearly the textbooks, TV series and films.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;spresource&#x2F;">Read on →</a>
@@ -190,7 +207,6 @@ A <a href="https://github.com/jamesmcm/async-rust-example/tree/async-std">branch
             <div class="post__summary">
                 <p>Mendelian Randomization is an approach to test for a <strong>causal</strong> effect from <strong>observational</strong> data in the presence of certain <strong>confounding</strong> factors.
 It uses the measured variation of genes (of known function) to <strong>bound</strong> the causal effect of a modifiable exposure (environment) on a phenotype (disease). The fundamental idea is that the genotypes are <strong>randomly assigned</strong> (due to recombination in meiosis under certain assumptions), and this allows them to be used as an <strong>instrumental variable</strong>.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;mendelian&#x2F;">Read on →</a>
@@ -205,7 +221,6 @@ It uses the measured variation of genes (of known function) to <strong>bound</st
             <span class="post-date">2014-08-04</span>
             <div class="post__summary">
                 <p>I've started this blog to save resources which have helped me in learning languages, concepts in statistics, and anything else which I think might help others too.</p>
-
             </div>
             <div class="read-more">
                 <a href="https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;blog&#x2F;first&#x2F;">Read on →</a>
@@ -228,6 +243,8 @@ It uses the measured variation of genes (of known function) to <strong>bound</st
     <section>
 	    <h2 class="capitalize">categories</h2>
 	    <ul display="block">
+		
+		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;ai&#x2F;>AI (1)</a></li>
 		
 		<li><a href=https:&#x2F;&#x2F;jamesmcm.github.io&#x2F;categories&#x2F;general&#x2F;>General (4)</a></li>
 		
@@ -252,7 +269,7 @@ It uses the measured variation of genes (of known function) to <strong>bound</st
 <footer role="contentinfo">
 
 <p>
-Copyright © 2024 - James McMurray -
+Copyright © 2025 - James McMurray -
   <span class="credit">Powered by <a href="https://www.getzola.org/">Zola</a></span>
 </p>
 

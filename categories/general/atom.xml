@@ -37,8 +37,7 @@ and &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;aceking007&#x2F;100Projec
 but these often lack a real description and justification of the
 projects. In this article I will go more in-depth with the different project ideas.&lt;&#x2F;p&gt;
 &lt;p&gt;Within each section the projects are ordered in ascending difficulty &#x2F;
-time investment.&lt;&#x2F;p&gt;
-</summary>
+time investment.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -59,8 +58,7 @@ time investment.&lt;&#x2F;p&gt;
         
         <summary type="html">&lt;p&gt;I recently had an ongoing issue with the &lt;code&gt;deleted&lt;&#x2F;code&gt; CacheDelete daemon
 using huge amounts of CPU time almost constantly. This post covers how I
-fixed it and a few tips for OS X recovery and performance improvements.&lt;&#x2F;p&gt;
-</summary>
+fixed it and a few tips for OS X recovery and performance improvements.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -84,8 +82,7 @@ in Rust with the Tokio runtime, demonstrating different execution scenarios. Thi
 at beginners to asynchronous programming.&lt;&#x2F;p&gt;
 &lt;p&gt;The source code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&quot;&gt;available on Github&lt;&#x2F;a&gt;.
 A &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-example&#x2F;tree&#x2F;async-std&quot;&gt;branch&lt;&#x2F;a&gt; using the async-std runtime is also available (contributed by
-&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BartMassey&quot;&gt;@BartMassey&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
-</summary>
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;BartMassey&quot;&gt;@BartMassey&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -104,8 +101,7 @@ A &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;async-rust-ex
         <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/first/"/>
         <id>https://jamesmcm.github.io/blog/first/</id>
         
-        <summary type="html">&lt;p&gt;I&#x27;ve started this blog to save resources which have helped me in learning languages, concepts in statistics, and anything else which I think might help others too.&lt;&#x2F;p&gt;
-</summary>
+        <summary type="html">&lt;p&gt;I&#x27;ve started this blog to save resources which have helped me in learning languages, concepts in statistics, and anything else which I think might help others too.&lt;&#x2F;p&gt;</summary>
         
     </entry>
 </feed>

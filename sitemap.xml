@@ -23,6 +23,10 @@
         <lastmod>2020-09-20</lastmod>
     </url>
     <url>
+        <loc>https://jamesmcm.github.io/blog/claude-data-engineer/</loc>
+        <lastmod>2025-06-13</lastmod>
+    </url>
+    <url>
         <loc>https://jamesmcm.github.io/blog/data-engineering-with-rust-and-aws-lambda/</loc>
         <lastmod>2020-04-19</lastmod>
     </url>
@@ -86,6 +90,9 @@
     </url>
     <url>
         <loc>https://jamesmcm.github.io/categories/</loc>
+    </url>
+    <url>
+        <loc>https://jamesmcm.github.io/categories/ai/</loc>
     </url>
     <url>
         <loc>https://jamesmcm.github.io/categories/general/</loc>

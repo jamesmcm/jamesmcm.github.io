@@ -26,8 +26,7 @@
         <summary type="html">&lt;p&gt;In this post we will create a basic Wifi-controlled car with an ESP32
 development board and ESP32-CAM camera module, and all of the code
 written in Rust.&lt;&#x2F;p&gt;
-&lt;p&gt;All of the code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;esp32_wifi_tank&quot;&gt;esp32_wifi_tank repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+&lt;p&gt;All of the code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;esp32_wifi_tank&quot;&gt;esp32_wifi_tank repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -49,8 +48,7 @@ written in Rust.&lt;&#x2F;p&gt;
         <summary type="html">&lt;p&gt;In this post we will create a basic ESP32 project using Rust and espup.&lt;&#x2F;p&gt;
 &lt;p&gt;We will write a Snake game to run on an ESP32 development board with a
 connected OLED display and controlled with a joystick.&lt;&#x2F;p&gt;
-&lt;p&gt;The code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;snake_rust_esp32&quot;&gt;snake_rust_esp32 repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+&lt;p&gt;The code for this example is available on Github in my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;snake_rust_esp32&quot;&gt;snake_rust_esp32 repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -72,8 +70,7 @@ connected OLED display and controlled with a joystick.&lt;&#x2F;p&gt;
         <summary type="html">&lt;p&gt;Recently I wrote my first &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rust-lang&#x2F;rust-clippy&quot;&gt;Clippy&lt;&#x2F;a&gt; lint. It was much easier to
 implement and test than I had expected. In this post I&#x27;ll review the
 process of creating or contributing to a Clippy lint, the implementation itself and
-how this reflects Rust&#x27;s values of empowerment.&lt;&#x2F;p&gt;
-</summary>
+how this reflects Rust&#x27;s values of empowerment.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -99,8 +96,7 @@ misleading and cause problems if used naively.&lt;&#x2F;p&gt;
 &lt;p&gt;In this post we will implement our own simple custom runtime for
 AWS Lambda in Rust, and understand the reasons behind this issue.&lt;&#x2F;p&gt;
 &lt;p&gt;The code used in this blog post is available on Github in
-my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;micro_lambda&quot;&gt;micro_lambda repository&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;micro_lambda&quot;&gt;micro_lambda repository&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -122,8 +118,7 @@ my &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;micro_lambda
         <summary type="html">&lt;p&gt;The Rust core team recently released a &lt;a href=&quot;https:&#x2F;&#x2F;blog.rust-lang.org&#x2F;2020&#x2F;09&#x2F;03&#x2F;Planning-2021-Roadmap.html&quot;&gt;call for blog posts&lt;&#x2F;a&gt; as part of
 the 2021 roadmap for Rust. In this post I will detail my own experience
 with Rust, and areas I&#x27;d like to
-see improved during 2021.&lt;&#x2F;p&gt;
-</summary>
+see improved during 2021.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -152,8 +147,7 @@ licensed under the GPLv3 license (&lt;a href=&quot;https:&#x2F;&#x2F;www.gnu.org
 upsides and downsides of writing it in Rust (and existing issues), and
 some points about starting new side projects in general. I hope this
 helps new Rust programmers starting their own first projects, or for
-other programmers to consider using Rust.&lt;&#x2F;p&gt;
-</summary>
+other programmers to consider using Rust.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -177,8 +171,7 @@ AWS Lambda and AWS SES with Workmail.&lt;&#x2F;p&gt;
 &lt;p&gt;We will handle multiple types of
 AWS events with one Lambda function, parse received emails
 with the mailparse crate, and send email with SES and the lettre crate.&lt;&#x2F;p&gt;
-&lt;p&gt;The complete code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;rust_ses_example&quot;&gt;available on GitHub here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+&lt;p&gt;The complete code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;rust_ses_example&quot;&gt;available on GitHub here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -197,10 +190,8 @@ with the mailparse crate, and send email with SES and the lettre crate.&lt;&#x2F
         <link rel="alternate" type="text/html" href="https://jamesmcm.github.io/blog/intro-dod/"/>
         <id>https://jamesmcm.github.io/blog/intro-dod/</id>
         
-        <summary type="html">&lt;p&gt;In the post we will investigate the main concepts of &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Data-oriented_design&quot;&gt;Data-oriented
-Design&lt;&#x2F;a&gt; using Rust.&lt;&#x2F;p&gt;
-&lt;p&gt;The source code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;data-oriented-example&quot;&gt;available on Github&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+        <summary type="html">&lt;p&gt;In the post we will investigate the main concepts of &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Data-oriented_design&quot;&gt;Data-oriented Design&lt;&#x2F;a&gt; using Rust.&lt;&#x2F;p&gt;
+&lt;p&gt;The source code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;data-oriented-example&quot;&gt;available on Github&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -220,8 +211,7 @@ Design&lt;&#x2F;a&gt; using Rust.&lt;&#x2F;p&gt;
         <id>https://jamesmcm.github.io/blog/data-engineering-with-rust-and-aws-lambda/</id>
         
         <summary type="html">&lt;p&gt;In this post we will set up a very simple data ingestion process with Rust and AWS Lambda.&lt;&#x2F;p&gt;
-&lt;p&gt;The complete code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;rust-lambda-test&quot;&gt;available on GitHub here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
-</summary>
+&lt;p&gt;The complete code for this example is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jamesmcm&#x2F;rust-lambda-test&quot;&gt;available on GitHub here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;</summary>
         
     </entry>
 </feed>
