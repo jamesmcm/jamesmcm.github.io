@@ -1,6 +1,6 @@
 +++
 title = "Using the Internet without IPv4 connectivity"
-date = 2025-06-25
+date = 2025-06-27
 [taxonomies]
 categories = ["Linux"]
 +++
@@ -33,7 +33,7 @@ and this is why only IPv4 was affected.
 
 Unfortunately, the ISP said they might need to send someone and it would
 take several days, after the weekend too. Meanwhile I needed to be able
-to access work and my wife needed to finish her thesis, so just leaving
+to access work, and my wife needed to finish her thesis, so just leaving
 it broken wasn't an option.
 
 Fortunately, I remembered I had a Hetzner VPS server with both static
@@ -67,13 +67,14 @@ IP address of your device - 192.168.1.xxx) with its public one.
 The router's connection tracking (conntrack) system records the original source IP and port.
 When it forwards a packet, it replaces the source with its own public IP and a unique port, storing this mapping.
 When a reply arrives at that unique port, conntrack uses the mapping to rewrite the destination back to the original device's internal IP and port.
-On Linux you can see the stored mappings with `conntrack -L`.
+On Linux you can see the stored mappings with `conntrack -L` from
+`conntrack-tools`.
 
 This is a bit like sending a letter to an office with just the name of
 the employee you want to send it to, and their office building. The secretary (NAT) can then handle
 getting it to the employee and getting their reply - without you knowing
 the exact desk and location of the recipient. You only ever see the
-address of the office building (the NATting router).
+address of the office building (the NATing router).
 
 Incidentally this also acts as an implicit firewall, since any services
 on the local devices behind the router will need to be explicitly port
@@ -85,8 +86,8 @@ But at just the home router level this is still not enough given the
 scarcity of IPv4 addresses. So many Internet Service Providers (ISPs)
 will apply this again internally - this is called Carrier Grade NAT
 (CG-NAT). The concept is identical, only instead of it being a home
-router NATting many local devices, it is instead an ISP router NATting many
-home routers (which themselves still have their own NATting of local
+router NATing many local devices, it is instead an ISP router NATing many
+home routers (which themselves still have their own NATing of local
 devices).
 
 Depending on how many IPv4 addresses an ISP owns and is willing to
@@ -96,7 +97,7 @@ that the ISP covers.
 
 It is this process which caused the outage to only affect IPv4 -
 somewhere inside the Carrier Grade NAT hierarchy, the packets were not
-being NATted correctly, leading to the packets being dropped and a
+being NATed correctly, leading to the packets being dropped and a
 complete loss of IPv4 traffic.
 
 Note this can also be a hassle if you want to forward services from your
@@ -137,10 +138,11 @@ was necessary to tunnel traffic over IPv6 to restore IPv4 functionality.
 
 ## The WireGuard tunnel
 
-The plan was simple: set up WireGuard on the VPS, and then use the IPv6
+The plan was simple: set up WireGuard on the VPS (installing
+wireguard-tools), and then use the IPv6
 address as the endpoint in the client-side on my machine. Once the
 tunnel is established, IPv4 traffic should then work as normal (albeit with higher latency
-via the VPS) - effectively running our own
+via the VPS) - sort of like running our own
 [Dual-Stack Lite](https://en.wikipedia.org/wiki/IPv6_transition_mechanism#Dual-Stack_Lite_\(DS-Lite\))
 (DS Lite - but not the Nintendo console!).
 
@@ -160,7 +162,7 @@ but adding IPv6 traffic):
 
 ### Server-side
 
-The server-side config:
+The server-side config (demonstrating both NATed and direct IPv6 peers):
 
 ```ini
 # This is the server config
@@ -177,24 +179,34 @@ The server-side config:
 # Do this once for the server pair, and once for each client pair
 
 [Interface]
-Address = 10.200.200.1/24, fd42:42:42::1/64
+Address = 10.200.200.1/24, fd42:42:42::1/64, 2001:db8:abcd:1234::1/64
 ListenPort = 51820
 PrivateKey = serverprivatekey # CHANGEME: Set server private key here
 
 # Note here we assume the network device interface is eth0 - remember to check this!
+# IPv4 forwarding with NAT - note it'd be better to use SNAT here
+# if the public IPv4 is static, but this is left as an example of MASQUERADE
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-PostUp = ip6tables -A FORWARD -i %i -j ACCEPT; ip6tables -A FORWARD -o %i -j ACCEPT; ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+# IPv6 NAT for ULAs only (not GUAs)
+# Here we use SNAT instead of MASQUERADE as an example (assume the server IPv6 GUA is static)
+PostUp = ip6tables -t nat -A POSTROUTING -s fd42:42:42::/64 -o eth0 -j SNAT --to-source 2001:db8:abcd:1234::1
+# IPv6 forwarding (for NATed ULAs and GUAs too)
+PostUp = ip6tables -A FORWARD -i %i -j ACCEPT; ip6tables -A FORWARD -o %i -j ACCEPT
 PostUp = echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 PostUp = echo 1 > /proc/sys/net/ipv4/conf/all/forwarding
 
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
-PostDown = ip6tables -D FORWARD -i %i -j ACCEPT; ip6tables -D FORWARD -o %i -j ACCEPT; ip6tables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+PostDown = ip6tables -t nat -D POSTROUTING -s fd42:42:42::/64 -o eth0 -j SNAT --to-source 2001:db8:abcd:1234::1
+PostDown = ip6tables -D FORWARD -i %i -j ACCEPT; ip6tables -D FORWARD -o %i -j ACCEPT
 
+# This peer has a direct IPv6 Global Unicast Address (no IPv6 NAT)
 [Peer]
 # foo
 PublicKey = clientpublickey # CHANGEME: Set client public key here
-AllowedIPs = 10.200.200.2/32, fd42:42:42::2/128
+AllowedIPs = 10.200.200.2/32, 2001:db8:abcd:1234::2/128
 
+
+# This peer uses NATed IPv6 and is assigned a Unique Local Address
 [Peer]
 # bar
 PublicKey = client2publickey # CHANGEME: Set client2 public key here
@@ -207,41 +219,45 @@ in order. See the [source for the bash script here](https://git.zx2c4.com/wiregu
 
 #### IPv6 NAT via MASQUERADE
 
-Also note here I am also using NAT with IPv6 (not only IPv4, where it is
-necessary), this was just because I
-had some problems at first getting direct routing to work, but in theory if you
+Also note here I originally used NAT with IPv6 (not only IPv4, where it is
+necessary) as in the "bar" config above. But if you
 have a block of addresses for your VPS (e.g. Hetzner gives you a /64 block
-for IPv6) you can avoid NAT and make the Wireguard peers directly
+for IPv6) you can avoid NAT and make the WireGuard peers directly
 addressable via IPv6 Global Unicast Addresses (GUAs) as mentioned
-in the NAT section above.
+in the NAT section above - this is shown in the "foo" config.
 
-Simply change the Unique Local Addresses (ULAs)
+We simply change the Unique Local Addresses (ULAs)
 of the peers and interface to the public IPv6 addresses directly and
 then remove the ip6tables MASQUERADE rule. Now each of the peers will be
 directly addressable from the Internet with their allocated IPv6 address.
 
 If you want to forward
-several devices with their own services this would definitely be the way
+several devices with their own services this is definitely the way
 to go (but you also need to be sure the firewall rules on the VPS
 correctly handle incoming traffic).
 
-#### IPv4 SNAT
+#### SNAT rule
 
 Finally note you could also use SNAT instead of MASQUERADE if you have a
-static IPv4 address on the VPS and are certain it won't
-change. This will be slightly more efficient, but didn't seem worth the
-effort vs. having a portable config.
+static IP address on the VPS and are certain it won't
+change. This will be slightly more efficient as with the MASQUERADE rule
+the IP address for the interface has to be looked up at runtime, whereas
+in the SNAT rule it will be set directly.
+
+This is demonstrated in the config for the IPv6 NATing, using SNAT with
+`--to-source` instead of MASQUERADE.
 
 ### Client-side
 
 The client-side config:
 
+Peer "foo" with direct IPv6:
 ```ini
 # This is the client config, run on the client machine with:
 # sudo wg-quick up ./foo.conf
 # from wireguard-tools
 [Interface]
-Address = 10.200.200.2/32, fd42:42:42::2/128
+Address = 10.200.200.2/32, 2001:db8:abcd:1234::2/128
 PrivateKey = clientprivatekey # CHANGEME: Set client private key here
 # Google DNS
 DNS = 8.8.8.8
@@ -251,7 +267,27 @@ MTU = 1280 # This was not in the initial config - see later in the post
 [Peer]
 PublicKey = serverpublickey # CHANGEME: Set server public key here
 # Note the square brackets needed for IPv6
-Endpoint = [serveripv6]:51820 # CHANGEME: Change serveripv6 here! If IPv4 do not need square brackets
+Endpoint = [2001:db8:abcd:1234::1]:51820 # CHANGEME: Change serveripv6 here! If IPv4 do not need square brackets
+AllowedIPs = 0.0.0.0/0, ::/0
+```
+
+Peer "bar" with NATed IPv6:
+```ini
+# This is the client config, run on the client machine with:
+# sudo wg-quick up ./bar.conf
+# from wireguard-tools
+[Interface]
+Address = 10.200.200.3/32, fd42:42:42::3/128
+PrivateKey = clientprivatekey # CHANGEME: Set client private key here
+# Google DNS
+DNS = 8.8.8.8
+DNS = 2001:4860:4860::8888
+MTU = 1280 # This was not in the initial config - see later in the post
+
+[Peer]
+PublicKey = serverpublickey # CHANGEME: Set server public key here
+# Note the square brackets needed for IPv6
+Endpoint = [2001:db8:abcd:1234::1]:51820 # CHANGEME: Change serveripv6 here! If IPv4 do not need square brackets
 AllowedIPs = 0.0.0.0/0, ::/0
 ```
 
@@ -271,7 +307,7 @@ As the creator of [vopono](https://github.com/jamesmcm/vopono), my
 plan was to run the work VPN and any
 necessary applications in a network namespace. The trick is to set the
 MASQUERADE rule so that it forwards the traffic to the WireGuard
-interface (foo above), instead of directly to the actual network
+interface ("foo" or "bar" above), instead of directly to the actual network
 interface (enpXsY).
 
 This way the traffic inside the network namespace is oblivious to the
@@ -282,15 +318,17 @@ It's also worth noting that despite wg-quick
 [preferring to use nftables over iptables](https://git.zx2c4.com/wireguard-tools/tree/src/wg-quick/linux.bash#n242) when available,
 it manages to avoid conflicts with Docker's standard iptables rules.
 
-
+Here is a diagram for the NATed case (the "bar" config above) with the
+network namespace (vo_none_none):
 ![Architecture Overview](./netns_diag.png)
 
 
 We can do this with vopono by specifying the running WireGuard interface
+("bar" in this example)
 with the `-i` argument. All together it looks like this:
 
 ```sh
-$ vopono -v exec --create-netns-only --provider None --protocol None -i foo bash
+$ vopono -v exec --create-netns-only --provider None --protocol None -i bar bash
 $ sudo ip netns exec vo_none_none bash
 $ (inside netns) ./vpn.sh  # Script to run the work VPN
 ```
@@ -331,7 +369,7 @@ We can then run applications as our normal user in the network namespace
 another session):
 
 ```sh
-$ vopono -v exec -i foo --provider None --protocol None google-chrome-stable
+$ vopono -v exec -i bar --provider None --protocol None google-chrome-stable
 ```
 But there's still one remaining issue to be able to run everything
 needed via the VPN: Docker.
@@ -360,10 +398,10 @@ We can hack around this with the following commands:
 
 ```sh
 $ (on host) sudo systemctl stop docker && sudo systemctl stop docker.socket
-$ (on host) sudo -E unshare -m sh -c 'mount --bind /sys /sys; exec ip netns exec vo_none_none sudo --user archie --preserve-env bash'
+$ (on host) sudo -E unshare -m sh -c 'mount --bind /sys /sys; exec ip netns exec vo_none_none sudo --user youruser --preserve-env bash'
 $ (in netns) sudo umount /sys
-$ (in netns) sudo dockerd --host=unix:///var/run/docker-netns.sock --data-root=/var/lib/docker-netns --default-runtime=runc
-$ (in netns) DOCKER_OPTS="--dns=YOURDNSHERE" DOCKER_HOST=unix:///var/run/docker-netns.sock sudo --user archie --preserve-env docker ... # your docker command here
+$ (in netns) sudo dockerd --host=unix:///var/run/docker-netns.sock --data-root=/var/lib/docker-netns
+$ (in netns) DOCKER_OPTS="--dns=YOURDNSHERE" DOCKER_HOST=unix:///var/run/docker-netns.sock sudo --user youruser --preserve-env docker ... # your docker command here
 ```
 
 This was adapted from [this Unix StackExchange post](https://unix.stackexchange.com/questions/686155/how-can-i-use-a-bind-mount-in-a-network-namespace).
@@ -411,8 +449,18 @@ By setting a lower MTU on our local WireGuard interface, we instruct our kernel'
 This ensures that after WireGuard adds its own encapsulation overhead, the final UDP packet sent over the internet is small enough to avoid being dropped by any link along the path with a smaller MTU.
 
 When we send a packet to a remote server, the packet hops through
-many routers (and undersea cables!) on the way there. Each of these will
+many routers (and undersea cables!) on the way there. Much like how when
+you send a letter abroad, it doesn't just immediately arrive at the
+recipient, but has to pass through several handling centres, each one
+sending it on to the next appropriate centre. Each of these
+routers will
 have their own MTU and will drop packets larger than that.
+
+You can think of this like the weight limit that a postal service has. If
+you want to send a 20kg package to a friend in another country, it's not
+just enough that your local postal service will accept such a heavy
+package, the international airmail service and your friend's local
+postal service must also accept it - or it won't arrive.
 
 So If our MTU is set too high for the route then our packets will be
 dropped when they exceed the minimum MTU of the route (i.e. the smallest
@@ -422,18 +470,12 @@ be unaffected the MTU anyway, but larger packets being dropped forces
 the connection to fail when you actually try to connect with HTTPS for
 example.
 
-You can think of this like the weight limit that a postal service has. If
-you want to send a 20kg package to a friend in another country, it's not
-just enough that your local postal service will accept such a heavy
-package, the international airmail service and your friend's local
-postal service must also accept it - or it won't arrive.
-
-Note this is a bigger issue for tunnelled traffic like Wireguard since
-we are adding ~32 bytes of overhead from the encapsulation (heavy double-packaging in the above
+Note this is a bigger issue for tunnelled traffic like WireGuard since
+we are adding ~32 bytes of overhead from the extra encapsulation (heavy double-packaging in the above
 analogy) and are also unlikely to receive any Path MTU Discovery (PMTUD)
 messages from intermediate routers, which would inform us of MTU issues
 and let us adjust it automatically, since these Internet Control Message
-Protocol (ICMP) messages will not be routed back through the tunnel.
+Protocol (ICMP) messages are often dropped by firewalls.
 
 The minimum MTU fixed in the specification of IPv6 is 1280, so this
 should always work for a tunnel over IPv6.
@@ -442,10 +484,12 @@ should always work for a tunnel over IPv6.
 
 In summary, we've covered:
 
-- Creating a WireGuard VPN server on a VPS with IPv4 and IPv6 traffic.
+- Creating a WireGuard VPN server on a VPS with IPv4 and IPv6 (direct
+  and NATed) traffic.
 - Using a network namespace to run another VPN over this WireGuard
   interface.
 - Using `unshare` tricks to run Docker inside that network namespace.
+- Debugging MTU issues when using WireGuard.
 
 Internet connectivity issues are always a risk when working remotely,
 fortunately in this case Linux was able to save the day and save me from
@@ -456,7 +500,7 @@ I hope this is useful to others (and perhaps even myself again in the
 future!). It has really demonstrated the benefits of Linux's "fix it
 yourself" approach. While Macs are tempting with their great M4
 processors, I'd have no idea how to manage all of the above on macOS
-(and [my last MacOS experience wasn't great!](@/blog/2020-09-20-catalina-cachedelete.md)).
+(and [my last macOS experience wasn't great!](@/blog/2020-09-20-catalina-cachedelete.md)).
 
 I highly recommend Hetzner for a VPS, they have great prices and
 fully support running WireGuard tunnels and pretty much all legitimate
@@ -470,7 +514,7 @@ It has also made me consider getting an OpenWRT router for the same
 reason. I used to think that managing your own router is unnecessary
 extra work (ironically how a lot of people probably think about
 GNU/Linux), but being able to debug more on the router side would be
-great for problems like this, or even just running Wireguard on it
+great for problems like this, or even just running WireGuard on it
 directly for this work-around without having to configure it on every
 device separately.
 
