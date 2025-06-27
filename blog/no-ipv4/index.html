@@ -180,7 +180,9 @@ on the Internet.</p>
 thankfully unaffected by the incident.</p>
 <p>Unfortunately a lot of web servers are still not accessible over IPv6
 (at the time of writing, the most prominent was GitHub!). This meant it
-was necessary to tunnel traffic over IPv6 to restore IPv4 functionality.</p>
+was necessary to tunnel traffic over IPv6 to restore IPv4 functionality -
+since with only an IPv6 address, we can only directly communicate with servers
+that also have IPv6 addresses.</p>
 <h2 id="the-wireguard-tunnel">The WireGuard tunnel</h2>
 <p>The plan was simple: set up WireGuard on the VPS (installing
 wireguard-tools), and then use the IPv6
