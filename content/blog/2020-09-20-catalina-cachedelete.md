@@ -19,8 +19,8 @@ The problem I had was that the `deleted` daemon was often taking 90%+ of
 CPU usage on my 2017 Macbook Pro, resulting in massive stuttering when trying to use the
 system.
 
-Looking up details for the process, I found that [the daemon is
-responsible for purging caches](https://apple.stackexchange.com/questions/254810/what-is-the-deleted-daemon-in-macos)
+Looking up details for the process, I found that
+[the daemon is responsible for purging caches](https://apple.stackexchange.com/questions/254810/what-is-the-deleted-daemon-in-macos)
 and had caused issues for others. Unfortunately, on Catalina it is not
 trivial to disable due to the read-only System volume and the built-in
 [System Integrity Protection](https://support.apple.com/en-us/HT204899)

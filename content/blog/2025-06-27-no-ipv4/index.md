@@ -134,7 +134,9 @@ thankfully unaffected by the incident.
 
 Unfortunately a lot of web servers are still not accessible over IPv6
 (at the time of writing, the most prominent was GitHub!). This meant it
-was necessary to tunnel traffic over IPv6 to restore IPv4 functionality.
+was necessary to tunnel traffic over IPv6 to restore IPv4 functionality -
+since with only an IPv6 address, we can only directly communicate with servers
+that also have IPv6 addresses.
 
 ## The WireGuard tunnel
 
